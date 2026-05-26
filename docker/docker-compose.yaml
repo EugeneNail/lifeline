@@ -1,14 +1,26 @@
 services:
+  lifeline-app:
+    container_name: lifeline-app
+    image: lifeline-app-image
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    networks:
+      - lifeline
+
   lifeline-react-dev:
     container_name: lifeline-react-dev
+    image: lifeline-react-dev-image
     build:
       context: ..
       dockerfile: docker/react-dev.dockerfile
+    networks:
+      - lifeline
     working_dir: /app
     command:
       - sh
       - -lc
-      - npm install && npm run dev -- --host 0.0.0.0 --port 5173 --strictPort
+      - npm run dev -- --host 0.0.0.0 --port 5173 --strictPort
     environment:
       CHOKIDAR_USEPOLLING: "false"
     ports:
@@ -19,3 +31,8 @@ services:
 
 volumes:
   lifeline-react-dev-node-modules:
+
+networks:
+  lifeline:
+    external: true
+    name: lifeline

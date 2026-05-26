@@ -1,11 +1,12 @@
 COMPOSE_FILE := docker/docker-compose.yaml
 ENV_FILE := docker/.env
 ENV_EXAMPLE_FILE := docker/.env.example
+NETWORK_NAME := lifeline
 SHELL_TARGET := $(word 2,$(MAKECMDGOALS))
 
-.PHONY: up down shell env
+.PHONY: up down shell env network
 
-up:
+up: network
 	docker compose -f $(COMPOSE_FILE) up -d --build
 
 down:
@@ -30,6 +31,9 @@ env:
 			fi; \
 		done < "$(ENV_EXAMPLE_FILE)"; \
 	fi
+
+network:
+	@docker network inspect "$(NETWORK_NAME)" >/dev/null 2>&1 || docker network create "$(NETWORK_NAME)"
 
 %:
 	@:
