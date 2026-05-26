@@ -31,6 +31,7 @@ Key business concepts:
 
 - Each use case must live in its own Go package.
 - A use case handler is a struct created through a constructor and exposing a single `Handle` method.
+- Every method must have a Go-conventional comment that explains what the method does and what it returns, including alternative outcomes and `error` when relevant.
 - Return simple types unless a dedicated result type provides real value.
 - Keep error handling and guard clauses before the happy path.
 - Wrap errors with method and layer context instead of returning bare `err`.
