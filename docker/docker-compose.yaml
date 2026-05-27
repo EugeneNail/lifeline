@@ -1,4 +1,18 @@
 services:
+  lifeline-db:
+    container_name: lifeline-db
+    image: postgres:18.4
+    environment:
+      POSTGRES_DB: ${DATABASE_POSTGRES_NAME}
+      POSTGRES_USER: ${DATABASE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DATABASE_POSTGRES_PASSWORD}
+    ports:
+      - 30001:${DATABASE_POSTGRES_PORT}
+    networks:
+      - lifeline
+    volumes:
+      - lifeline-postgres-data:/var/lib/postgresql
+
   lifeline-app:
     container_name: lifeline-app
     image: lifeline-app-image
@@ -30,6 +44,7 @@ services:
       - lifeline-react-dev-node-modules:/app/node_modules
 
 volumes:
+  lifeline-postgres-data:
   lifeline-react-dev-node-modules:
 
 networks:
