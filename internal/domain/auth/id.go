@@ -1,4 +1,4 @@
-package user
+package auth
 
 import (
 	"github.com/google/uuid"
@@ -17,7 +17,7 @@ func NewID() ID {
 }
 
 // ID returns the user identifier.
-func (user *User) ID() ID {
+func (user *Account) ID() ID {
 	return user.id
 }
 

@@ -1,4 +1,4 @@
-package user
+package auth
 
 // HashedPassword represents a password hashed by the configured password hasher.
 type HashedPassword string

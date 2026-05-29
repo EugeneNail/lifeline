@@ -1,4 +1,4 @@
-package user
+package auth
 
 import (
 	"net/mail"
@@ -11,12 +11,12 @@ import (
 type Email string
 
 // Email returns the user's email address.
-func (user *User) Email() Email {
+func (user *Account) Email() Email {
 	return user.email
 }
 
 // ChangeEmail updates the user's email address.
-func (user *User) ChangeEmail(email Email) {
+func (user *Account) ChangeEmail(email Email) {
 	user.email = email
 }
 

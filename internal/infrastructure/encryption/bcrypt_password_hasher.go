@@ -3,7 +3,7 @@ package encryption
 import (
 	"fmt"
 
-	"github.com/EugeneNail/lifeline/internal/domain/user"
+	"github.com/EugeneNail/lifeline/internal/domain/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,11 +19,11 @@ func NewBcryptPasswordHasher() *BcryptPasswordHasher {
 }
 
 // Hash returns a bcrypt hash for the provided password.
-func (hasher *BcryptPasswordHasher) Hash(password user.Password) (user.HashedPassword, error) {
+func (hasher *BcryptPasswordHasher) Hash(password auth.Password) (auth.HashedPassword, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), hasher.cost)
 	if err != nil {
 		return "", fmt.Errorf("generating bcrypt hash: %w", err)
 	}
 
-	return user.HashedPassword(hashedPassword), nil
+	return auth.HashedPassword(hashedPassword), nil
 }
