@@ -25,6 +25,7 @@ Key business concepts:
 - Use Conventional Commits, for example: `feat(habits): add habit completion tracking`.
 - Do not use imperative-style commit messages.
 - Split changes into semantic groups and create a separate commit for each feature or concern.
+- When multiple git changes depend on each other, commit the dependency first and the dependent change only after it.
 - Do not commit local IDE files such as `dataSources.xml`.
 
 ## Application And Use Case Rules
