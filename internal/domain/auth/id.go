@@ -17,11 +17,16 @@ func NewID() ID {
 }
 
 // ID returns the user identifier.
-func (user *Account) ID() ID {
-	return user.id
+func (account *Account) ID() ID {
+	return account.id
 }
 
-// ToString returns the UUID string representation of the identifier.
-func (id ID) ToString() string {
+// String returns the UUID string representation of the identifier.
+func (id ID) String() string {
 	return uuid.UUID(id).String()
+}
+
+// Uuid returns the UUID value of the identifier.
+func (id ID) Uuid() uuid.UUID {
+	return uuid.UUID(id)
 }

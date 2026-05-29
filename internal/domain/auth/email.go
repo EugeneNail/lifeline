@@ -11,13 +11,18 @@ import (
 type Email string
 
 // Email returns the user's email address.
-func (user *Account) Email() Email {
-	return user.email
+func (account *Account) Email() Email {
+	return account.email
+}
+
+// String returns the string representation of the email address.
+func (email Email) String() string {
+	return string(email)
 }
 
 // ChangeEmail updates the user's email address.
-func (user *Account) ChangeEmail(email Email) {
-	user.email = email
+func (account *Account) ChangeEmail(email Email) {
+	account.email = email
 }
 
 // NewEmail validates, normalizes, and returns a domain email value.

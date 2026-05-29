@@ -11,8 +11,9 @@ import (
 // Password represents a validated raw user password.
 type Password string
 
-func (password Password) ToString() string {
-	return string(password)
+// Password returns the account password hash.
+func (account *Account) Password() HashedPassword {
+	return account.password
 }
 
 // NewPassword validates and returns a password value when it satisfies the domain password policy.
