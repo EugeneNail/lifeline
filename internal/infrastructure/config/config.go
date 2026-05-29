@@ -6,20 +6,24 @@ import (
 	"strconv"
 )
 
+// Config groups application and infrastructure configuration values loaded from the environment.
 type Config struct {
 	App      App
 	Database Database
 }
 
+// App stores application-level runtime settings.
 type App struct {
 	Name string
 	Port int
 }
 
+// Database stores database configuration groups.
 type Database struct {
 	Postgres Postgres
 }
 
+// Postgres stores the PostgreSQL connection settings.
 type Postgres struct {
 	Name     string
 	Port     int
