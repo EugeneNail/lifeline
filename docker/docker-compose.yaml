@@ -16,9 +16,13 @@ services:
   lifeline-app:
     container_name: lifeline-app
     image: lifeline-app-image
+    env_file:
+      - .env
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    ports:
+      - "30000:30000"
     networks:
       - lifeline
 
