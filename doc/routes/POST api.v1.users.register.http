@@ -2,5 +2,6 @@ POST localhost:30000/api/v1/users/register
 
 {
     "email":"blank@mail.com",
-    "password":"Strong123"
+    "password":"Strong123!",
+    "passwordConfirmation":"Strong123!"
 }

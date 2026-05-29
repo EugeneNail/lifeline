@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/EugeneNail/lifeline/internal/application"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/register_user"
+	"github.com/EugeneNail/lifeline/internal/domain/auth"
 	"net/http"
 )
 
@@ -30,7 +31,7 @@ type RegisterUserPayload struct {
 func (handler *Handler) Handle(request *http.Request) (int, any) {
 	var payload RegisterUserPayload
 	if err := json.NewDecoder(request.Body).Decode(&payload); err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("decoding request body: %w", err)
+		return http.StatusBadRequest, fmt.Errorf("decoding request body: %w", err)
 	}
 
 	id, err := handler.usecase.Handle(request.Context(), register_user.RegisterUserCommand{
@@ -44,8 +45,12 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 			return http.StatusUnprocessableEntity, fieldErrors.Errors()
 		}
 
+		if errors.Is(err, auth.EmailAlreadyTaken) {
+			return http.StatusConflict, auth.EmailAlreadyTaken
+		}
+
 		return http.StatusInternalServerError, fmt.Errorf("handling RegisterUser command: %w", err)
 	}
 
-	return http.StatusCreated, id.ToString()
+	return http.StatusCreated, id.String()
 }
