@@ -2,14 +2,18 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/EugeneNail/lifeline/internal/application/usecases/authenticate"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/register_user"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/config"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/encryption"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/postgres"
+	"github.com/EugeneNail/lifeline/internal/infrastructure/tokens"
+	transportAuthenticate "github.com/EugeneNail/lifeline/internal/presentation/http/api/authenticate"
 	transportRegister_user "github.com/EugeneNail/lifeline/internal/presentation/http/api/register_user"
 	"github.com/EugeneNail/lifeline/internal/presentation/http/middleware"
-	"log"
-	"net/http"
 )
 
 func main() {
@@ -25,16 +29,38 @@ func main() {
 		log.Fatalf("connecting to the database: %v", err)
 	}
 
-	// --- Section: Usecase handlers ---
+	jwtProvider, err := tokens.NewJWTProvider(configuration.JWT.Secret)
+	if err != nil {
+		log.Fatalf("creating a JWT provider: %v", err)
+	}
+
 	bcryptPasswordHasher := encryption.NewBcryptPasswordHasher()
-	//TODO handle the errors
+	bcryptPasswordVerifier := encryption.NewBcryptPasswordVerifier()
+
+	// --- Section: Usecase handlers ---
 	accountRepository, err := postgres.NewAccountRepository(db)
+	if err != nil {
+		log.Fatalf("creating an account repository: %v", err)
+	}
+
 	registerUserUsecase, err := register_user.NewHandler(bcryptPasswordHasher, accountRepository)
+	if err != nil {
+		log.Fatalf("creating a register-user usecase: %v", err)
+	}
+
+	authenticateUsecase, err := authenticate.NewHandler(accountRepository, bcryptPasswordVerifier, jwtProvider)
+	if err != nil {
+		log.Fatalf("creating an authenticate usecase: %v", err)
+	}
+
+	// --- Section: HTTP endpoint handlers ---
 	registerUserEndpoint := transportRegister_user.NewHandler(registerUserUsecase)
+	authenticateEndpoint := transportAuthenticate.NewHandler(authenticateUsecase)
 
 	// --- Section: HTTP server ---
 	server := http.NewServeMux()
 	server.Handle("POST /api/v1/users/register", middleware.WriteJSONResponse(registerUserEndpoint))
+	server.Handle("POST /api/v1/users/login", middleware.WriteJSONResponse(authenticateEndpoint))
 	// TODO handle the error
 	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", configuration.App.Port), server)
 }
