@@ -46,7 +46,7 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		}
 
 		if errors.Is(err, auth.EmailAlreadyTaken) {
-			return http.StatusConflict, auth.EmailAlreadyTaken
+			return http.StatusConflict, auth.EmailAlreadyTaken.Error()
 		}
 
 		return http.StatusInternalServerError, fmt.Errorf("handling RegisterUser command: %w", err)
