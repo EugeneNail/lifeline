@@ -71,3 +71,32 @@ func (repository *AccountRepository) FindByEmail(ctx context.Context, email auth
 
 	return account, nil
 }
+
+// FindByID returns the account with the provided identifier or nil when no row exists.
+func (repository *AccountRepository) FindByID(ctx context.Context, id auth.ID) (*auth.Account, error) {
+	row := repository.db.QueryRowContext(
+		ctx,
+		`SELECT id, email, password, created_at, updated_at FROM accounts WHERE id = $1`,
+		id.Uuid(),
+	)
+
+	var (
+		accountID   uuid.UUID
+		storedEmail string
+		password    string
+		createdAt   time.Time
+		updatedAt   time.Time
+	)
+
+	if err := row.Scan(&accountID, &storedEmail, &password, &createdAt, &updatedAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("executing a SELECT sql query: %w", err)
+	}
+
+	account := auth.RestoreAccount(accountID, storedEmail, password, createdAt, updatedAt)
+
+	return account, nil
+}

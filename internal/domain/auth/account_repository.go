@@ -6,4 +6,5 @@ import "context"
 type AccountRepository interface {
 	Add(ctx context.Context, account *Account) error
 	FindByEmail(ctx context.Context, email Email) (*Account, error)
+	FindByID(ctx context.Context, id ID) (*Account, error)
 }
