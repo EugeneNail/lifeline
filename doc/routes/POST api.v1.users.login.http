@@ -1,0 +1,6 @@
+POST localhost:30000/api/v1/users/login
+
+{
+    "email":"blank@mail.com",
+    "password":"Strong123!"
+}
