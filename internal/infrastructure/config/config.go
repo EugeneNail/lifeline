@@ -10,6 +10,7 @@ import (
 type Config struct {
 	App      App
 	Database Database
+	JWT      JWT
 }
 
 // App stores application-level runtime settings.
@@ -30,6 +31,11 @@ type Postgres struct {
 	Host     string
 	User     string
 	Password string
+}
+
+// JWT stores authentication token configuration values loaded from the environment.
+type JWT struct {
+	Secret string
 }
 
 // Load builds Config from environment variables and returns an error when a required value is missing or invalid.
@@ -69,6 +75,11 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("loading config.database.postgres.password: %w", err)
 	}
 
+	jwtSecret, err := readString("JWT_SECRET")
+	if err != nil {
+		return Config{}, fmt.Errorf("loading config.jwt.secret: %w", err)
+	}
+
 	return Config{
 		App: App{
 			Name: appName,
@@ -82,6 +93,9 @@ func Load() (Config, error) {
 				User:     postgresUser,
 				Password: postgresPassword,
 			},
+		},
+		JWT: JWT{
+			Secret: jwtSecret,
 		},
 	}, nil
 }
