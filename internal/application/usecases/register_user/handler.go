@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/EugeneNail/lifeline/internal/application"
-	"log"
 	"time"
 
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
