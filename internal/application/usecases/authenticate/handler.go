@@ -15,8 +15,8 @@ type Handler struct {
 	tokenProvider    auth.TokenProvider
 }
 
-// Command carries the data required to authenticate a user.
-type Command struct {
+// Query carries the data required to authenticate a user.
+type Query struct {
 	Email    string
 	Password string
 }
@@ -49,7 +49,7 @@ func NewHandler(accounts auth.AccountRepository, passwordVerifier auth.PasswordV
 }
 
 // Handle validates the credentials, checks the password against the stored hash, and returns login and refresh tokens or field validation errors.
-func (h *Handler) Handle(ctx context.Context, command Command) (Result, error) {
+func (h *Handler) Handle(ctx context.Context, command Query) (Result, error) {
 	errs := application.NewFieldErrors()
 
 	email, err := auth.NewEmail(command.Email)

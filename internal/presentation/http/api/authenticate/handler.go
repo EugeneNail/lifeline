@@ -39,7 +39,7 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		return http.StatusBadRequest, fmt.Errorf("decoding request body: %w", err)
 	}
 
-	result, err := handler.usecase.Handle(request.Context(), authenticate.Command{
+	result, err := handler.usecase.Handle(request.Context(), authenticate.Query{
 		Email:    payload.Email,
 		Password: payload.Password,
 	})
