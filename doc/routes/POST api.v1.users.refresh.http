@@ -1,0 +1,5 @@
+POST localhost:30000/api/v1/users/refresh
+
+{
+    "refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ.eyJ1aWQiOiIwMTllNzYyYy1mZmU4LTczODEtOWJjZC00YjgyZmM3MjVkOWYiLCJsaWZlY3ljbGUiOjE3MjgwMCwic3ViIjoiMDE5ZTc2MmMtZmZlOC03MzgxLTliY2QtNGI4MmZjNzI1ZDlmIiwiZXhwIjoxNzgwNDQwMzA1LCJpYXQiOjE3ODAyNjc1MDV9.zwaEoqbesdMAPjtcVQ71X0r1CKa28WHcWHYK95F6mUk"
+}
