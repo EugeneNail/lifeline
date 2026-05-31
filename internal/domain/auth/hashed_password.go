@@ -8,6 +8,11 @@ type PasswordHasher interface {
 	Hash(password Password) (HashedPassword, error)
 }
 
+// PasswordVerifier compares a raw password against a stored hash.
+type PasswordVerifier interface {
+	Verify(password Password, hashedPassword HashedPassword) error
+}
+
 // String returns the string representation of the hashed password.
 func (password HashedPassword) String() string {
 	return string(password)

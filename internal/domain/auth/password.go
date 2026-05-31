@@ -104,3 +104,16 @@ func (password Password) Hash(hasher PasswordHasher) (HashedPassword, error) {
 
 	return hashedPassword, nil
 }
+
+// Verify delegates password verification to the provided verifier and returns an error when the passwords do not match.
+func (password Password) Verify(hashedPassword HashedPassword, verifier PasswordVerifier) error {
+	if verifier == nil {
+		return fmt.Errorf("password verifier is nil")
+	}
+
+	if err := verifier.Verify(password, hashedPassword); err != nil {
+		return fmt.Errorf("verifying password: %w", err)
+	}
+
+	return nil
+}
