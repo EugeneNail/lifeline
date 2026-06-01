@@ -1,0 +1,56 @@
+.home-page
+    min-height: 100svh
+    display: grid
+    place-items: center
+    padding: 32px
+
+.home-card
+    width: min(720px, 100%)
+    border: 1px solid rgba(31, 41, 55, 0.08)
+    border-radius: 28px
+    background: rgba(255, 255, 255, 0.78)
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08)
+    backdrop-filter: blur(14px)
+    padding: 48px
+    display: grid
+    gap: 18px
+
+.home-kicker
+    margin: 0
+    font-size: 0.875rem
+    letter-spacing: 0.24em
+    text-transform: uppercase
+    color: #6b7280
+
+.home-card h1
+    margin: 0
+    font-size: clamp(2.25rem, 5vw, 4rem)
+    line-height: 1.02
+    letter-spacing: -0.04em
+    color: #111827
+
+.home-lead
+    margin: 0
+    max-width: 44ch
+    color: #4b5563
+    font-size: 1.0625rem
+
+.home-actions
+    display: flex
+    gap: 12px
+    flex-wrap: wrap
+
+.home-actions a
+    border-radius: 16px
+    padding: 12px 16px
+    background: #111827
+    color: #f9fafb
+    text-decoration: none
+    font-weight: 600
+
+@media (max-width: 520px)
+    .home-page
+        padding: 16px
+
+    .home-card
+        padding: 24px
