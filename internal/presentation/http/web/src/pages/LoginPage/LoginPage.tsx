@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { setAuthTokens } from '../../api/auth-tokens'
 import { useApiClient } from '../../hooks/useApiClient'
 import './LoginPage.sass'
 
@@ -14,11 +15,10 @@ type LoginFieldErrors = Partial<Record<'email' | 'password', string>>
 
 export function LoginPage() {
     const apiClient = useApiClient()
+    const navigate = useNavigate()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [loginToken, setLoginToken] = useState('')
-    const [refreshToken, setRefreshToken] = useState('')
     const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({})
 
     function setLoginFieldErrors(error: unknown) {
@@ -41,8 +41,6 @@ export function LoginPage() {
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         setIsSubmitting(true)
-        setLoginToken('')
-        setRefreshToken('')
         setFieldErrors({})
 
         try {
@@ -51,8 +49,8 @@ export function LoginPage() {
                 password,
             })
 
-            setLoginToken(response.data.loginToken)
-            setRefreshToken(response.data.refreshToken)
+            setAuthTokens(response.data.loginToken, response.data.refreshToken)
+            navigate('/')
         } catch (error) {
             setLoginFieldErrors(error)
         } finally {
@@ -111,15 +109,6 @@ export function LoginPage() {
                     <p className="login-switch">
                         No account yet? <Link to="/signup">Create one</Link>
                     </p>
-
-                    {loginToken ? (
-                        <div className="login-success">
-                            <p>Login token</p>
-                            <code>{loginToken}</code>
-                            <p>Refresh token</p>
-                            <code>{refreshToken}</code>
-                        </div>
-                    ) : null}
                 </form>
             </section>
         </main>

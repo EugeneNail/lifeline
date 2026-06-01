@@ -1,21 +1,26 @@
 import axios from 'axios'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { setAuthTokens } from '../../api/auth-tokens'
 import { useApiClient } from '../../hooks/useApiClient'
 import './SignupPage.sass'
 
 type SignupResponse = string
+type LoginResponse = {
+    loginToken: string
+    refreshToken: string
+}
 
 type SignupFieldErrors = Partial<Record<'email' | 'password' | 'passwordConfirmation', string>>
 
 export function SignupPage() {
     const apiClient = useApiClient()
+    const navigate = useNavigate()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [accountId, setAccountId] = useState('')
     const [fieldErrors, setFieldErrors] = useState<SignupFieldErrors>({})
 
     function setRegistrationFieldErrors(error: unknown) {
@@ -46,17 +51,22 @@ export function SignupPage() {
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         setIsSubmitting(true)
-        setAccountId('')
         setFieldErrors({})
 
         try {
-            const response = await apiClient.post<SignupResponse>('users/register', {
+            await apiClient.post<SignupResponse>('users/register', {
                 email,
                 password,
                 passwordConfirmation,
             })
 
-            setAccountId(response.data)
+            const loginResponse = await apiClient.post<LoginResponse>('users/login', {
+                email,
+                password,
+            })
+
+            setAuthTokens(loginResponse.data.loginToken, loginResponse.data.refreshToken)
+            navigate('/')
         } catch (error) {
             setRegistrationFieldErrors(error)
         } finally {
@@ -132,8 +142,6 @@ export function SignupPage() {
                     <p className="signup-switch">
                         Already have an account? <Link to="/login">Sign in</Link>
                     </p>
-
-                    {accountId ? <p className="signup-success">User ID: {accountId}</p> : null}
                 </form>
             </section>
         </main>
