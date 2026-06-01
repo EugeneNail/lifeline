@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { useApiClient } from '../../hooks/useApiClient'
 import './SignupPage.sass'
 
@@ -127,6 +128,10 @@ export function SignupPage() {
                     <button className="signup-button" type="submit" disabled={isSubmitting}>
                         {isSubmitting ? 'Signing up...' : 'Sign up'}
                     </button>
+
+                    <p className="signup-switch">
+                        Already have an account? <Link to="/login">Sign in</Link>
+                    </p>
 
                     {accountId ? <p className="signup-success">User ID: {accountId}</p> : null}
                 </form>
