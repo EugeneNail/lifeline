@@ -25,6 +25,8 @@ services:
       - "30000:30000"
     networks:
       - lifeline
+    depends_on:
+      - lifeline-db
 
   lifeline-react-dev:
     container_name: lifeline-react-dev
