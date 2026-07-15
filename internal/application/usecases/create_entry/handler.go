@@ -53,7 +53,7 @@ func (handler *Handler) Handle(ctx context.Context, command Command) (entries.ID
 		return entries.NilID, fmt.Errorf("creating an entry: %w", err)
 	}
 
-	if err := handler.entryCreationPolicy.EnsureCanAddEntry(ctx, command.AccountID, command.Date); err != nil {
+	if err := handler.entryCreationPolicy.EnsureCanAdd(ctx, command.AccountID, command.Date); err != nil {
 		if errors.Is(err, entries.ErrDateIsOccupied) {
 			return entries.NilID, err
 		}

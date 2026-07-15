@@ -18,8 +18,8 @@ func NewEntryCreationPolicy(repository EntryRepository) *EntryCreationPolicy {
 	return &EntryCreationPolicy{entries: repository}
 }
 
-// EnsureCanAddEntry returns nil when the account has no entry for the date, ErrDateIsOccupied when one exists, or an error when the entries lookup fails.
-func (policy *EntryCreationPolicy) EnsureCanAddEntry(ctx context.Context, accountID auth.ID, date time.Time) error {
+// EnsureCanAdd returns nil when the account has no entry for the date, ErrDateIsOccupied when one exists, or an error when the entries lookup fails.
+func (policy *EntryCreationPolicy) EnsureCanAdd(ctx context.Context, accountID auth.ID, date time.Time) error {
 	date = date.Truncate(time.Hour * 24)
 	filter := NewEntryFilter().
 		WithAccountIds(accountID).
