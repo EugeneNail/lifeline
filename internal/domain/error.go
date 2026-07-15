@@ -1,5 +1,7 @@
 package domain
 
+import "fmt"
+
 // Error represents a domain-level validation or business-rule violation.
 type Error struct {
 	message string
@@ -13,4 +15,9 @@ func (error Error) Error() string {
 // NewError returns a domain error with the provided message.
 func NewError(message string) Error {
 	return Error{message: message}
+}
+
+// NewErrorf returns a domain error with a formatted message.
+func NewErrorf(format string, a ...any) Error {
+	return Error{message: fmt.Sprintf(format, a)}
 }
