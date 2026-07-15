@@ -50,7 +50,7 @@ func main() {
 		log.Fatalf("creating a register-user usecase: %v", err)
 	}
 
-	authenticateUsecase, err := authenticate.NewHandler(accountRepository, bcryptPasswordVerifier, jwtProvider)
+	authenticateUsecase, err := authenticate.NewHandler(accountRepository, bcryptPasswordVerifier, jwtProvider, configuration.App.Environment)
 	if err != nil {
 		log.Fatalf("creating an authenticate usecase: %v", err)
 	}

@@ -3,9 +3,9 @@ package authenticate
 import (
 	"context"
 	"fmt"
-
 	"github.com/EugeneNail/lifeline/internal/application"
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
+	"github.com/EugeneNail/lifeline/internal/infrastructure/config"
 )
 
 // Handler executes the authenticate use case.
@@ -13,12 +13,14 @@ type Handler struct {
 	accounts         auth.AccountRepository
 	passwordVerifier auth.PasswordVerifier
 	tokenProvider    auth.TokenProvider
+	environment      config.Environment
 }
 
 // Query carries the data required to authenticate a user.
 type Query struct {
-	Email    string
-	Password string
+	Email       string
+	Password    string
+	Environment string
 }
 
 // Result contains the issued login and refresh tokens.
@@ -28,7 +30,7 @@ type Result struct {
 }
 
 // NewHandler returns an authentication handler configured with the account repository and token provider or an error when a dependency is missing.
-func NewHandler(accounts auth.AccountRepository, passwordVerifier auth.PasswordVerifier, tokenProvider auth.TokenProvider) (*Handler, error) {
+func NewHandler(accounts auth.AccountRepository, passwordVerifier auth.PasswordVerifier, tokenProvider auth.TokenProvider, environment config.Environment) (*Handler, error) {
 	if accounts == nil {
 		return nil, fmt.Errorf("authenticate handler requires an account repository")
 	}
@@ -45,6 +47,7 @@ func NewHandler(accounts auth.AccountRepository, passwordVerifier auth.PasswordV
 		accounts:         accounts,
 		passwordVerifier: passwordVerifier,
 		tokenProvider:    tokenProvider,
+		environment:      environment,
 	}, nil
 }
 
@@ -79,7 +82,7 @@ func (h *Handler) Handle(ctx context.Context, command Query) (Result, error) {
 		return Result{}, invalidCredentialsErrors()
 	}
 
-	loginToken, err := h.tokenProvider.Provide(account, auth.TokenLifecycleLogin)
+	loginToken, err := h.tokenProvider.Provide(account, selectTokenLifecycle(h.environment))
 	if err != nil {
 		return Result{}, fmt.Errorf("creating login token: %w", err)
 	}
@@ -101,4 +104,16 @@ func invalidCredentialsErrors() application.FieldErrors {
 	errs.Add("email", "Invalid email or password")
 	errs.Add("password", "Invalid email or password")
 	return errs
+}
+
+// selectTokenLifecycle returns a 1-hour login token lifecycle for development or the default login token lifecycle for production and unknown environments.
+func selectTokenLifecycle(environment config.Environment) auth.TokenLifecycle {
+	switch environment {
+	case config.EnvironmentDevelopment:
+		return 60 * 60
+	case config.EnvironmentProduction:
+		return auth.TokenLifecycleLogin
+	default:
+		return auth.TokenLifecycleLogin
+	}
 }

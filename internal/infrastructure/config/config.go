@@ -15,8 +15,9 @@ type Config struct {
 
 // App stores application-level runtime settings.
 type App struct {
-	Name string
-	Port int
+	Name        string
+	Port        int
+	Environment Environment
 }
 
 // Database stores database configuration groups.
@@ -48,6 +49,22 @@ func Load() (Config, error) {
 	appPort, err := readInt("APP_PORT")
 	if err != nil {
 		return Config{}, fmt.Errorf("loading config.app.port: %w", err)
+	}
+
+	// TODO: add allowed values check ("development" / "production")
+	appEnvironmentRaw, err := readString("APP_ENVIRONMENT")
+	if err != nil {
+		return Config{}, fmt.Errorf("loading config.app.environment: %w", err)
+	}
+
+	appEnvironment := Environment(appEnvironmentRaw)
+	if appEnvironment != EnvironmentDevelopment && appEnvironment != EnvironmentProduction {
+		return Config{}, fmt.Errorf(
+			"unknown environment %q, allowed: %q, %q",
+			appEnvironment,
+			EnvironmentDevelopment,
+			EnvironmentProduction,
+		)
 	}
 
 	postgresName, err := readString("DATABASE_POSTGRES_NAME")
@@ -82,8 +99,9 @@ func Load() (Config, error) {
 
 	return Config{
 		App: App{
-			Name: appName,
-			Port: appPort,
+			Name:        appName,
+			Port:        appPort,
+			Environment: appEnvironment,
 		},
 		Database: Database{
 			Postgres: Postgres{
