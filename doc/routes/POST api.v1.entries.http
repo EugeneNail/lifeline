@@ -1,0 +1,23 @@
+### Create a valid daily entry
+
+POST localhost:30000/api/v1/entries
+Authorization: Bearer {{loginToken}}
+
+{
+    "date":"2026-07-15",
+    "mood":3,
+    "note":"Productive day"
+}
+
+###
+
+### Reject an entry with domain validation errors
+
+POST localhost:30000/api/v1/entries
+Authorization: Bearer {{loginToken}}
+
+{
+    "date":"1999-12-31",
+    "mood":6,
+    "note":"Invalid\u0008note"
+}
