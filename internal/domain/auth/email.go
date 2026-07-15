@@ -32,6 +32,7 @@ func NewEmail(rawEmail string) (Email, error) {
 		return "", domain.NewError("email is empty")
 	}
 
+	// TODO extract into a constant and add as a placeholder into the error message
 	if len(normalizedEmail) > 200 {
 		return "", domain.NewError("email length exceeds 200 characters")
 	}

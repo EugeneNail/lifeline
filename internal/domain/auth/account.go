@@ -16,6 +16,7 @@ type Account struct {
 
 // NewAccount returns an account with the provided identifier, email, and password.
 func NewAccount(id ID, email Email, password HashedPassword, createdAt time.Time) *Account {
+	// TODO move field creation from usecases into the constructor
 	return &Account{id: id, email: email, password: password, CreatedAt: createdAt}
 }
 
