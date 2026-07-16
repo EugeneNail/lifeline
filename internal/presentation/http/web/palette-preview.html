@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Palette Preview</title>
+
+  <style>
+    :root {
+      /* Core surfaces */
+      --background: #F7F7FA;
+      --surface: #FFFFFF;
+      --surface-secondary: #F0F0F5;
+      --surface-selected: #E8E8FF;
+
+      /* Text */
+      --text-primary: #19191F;
+      --text-secondary: #65656F;
+      --text-disabled: #9696A0;
+      --text-on-primary: #FFFFFF;
+
+      /* Primary accent */
+      --primary: #5556D8;
+      --primary-hover: #4849C2;
+      --primary-container: #E8E8FF;
+      --on-primary-container: #25256F;
+
+      /* Borders and dividers */
+      --divider: #E1E1E8;
+      --outline: #C7C7D0;
+      --outline-focused: #5556D8;
+
+      /* States */
+      --success: #1B7F4B;
+      --success-container: #DDF5E7;
+
+      --warning: #9A6700;
+      --warning-container: #FFF0C2;
+
+      --error: #B42318;
+      --error-container: #FDE3E0;
+
+      --info: #2764C7;
+      --info-container: #E1ECFF;
+
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 14px 40px rgba(25, 25, 31, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--background);
+      color: var(--text-primary);
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 64px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+      font-size: clamp(32px, 6vw, 56px);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .subtitle {
+      margin-bottom: 0;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 750;
+      transition: 150ms ease;
+    }
+
+    .button-primary {
+      background: var(--primary);
+      color: var(--text-on-primary);
+    }
+
+    .button-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .button-secondary {
+      background: var(--surface-secondary);
+      color: var(--text-primary);
+    }
+
+    .button-danger {
+      background: var(--error-container);
+      color: var(--error);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--divider);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-body {
+      padding: 24px;
+    }
+
+    .section + .section {
+      margin-top: 28px;
+      padding-top: 28px;
+      border-top: 1px solid var(--divider);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-meta {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .habit-list,
+    .payment-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .habit,
+    .payment {
+      display: grid;
+      align-items: center;
+      min-height: 68px;
+      border-radius: var(--radius-md);
+      background: var(--surface-secondary);
+    }
+
+    .habit {
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      padding: 12px 14px;
+    }
+
+    .habit.selected {
+      background: var(--surface-selected);
+      color: var(--on-primary-container);
+    }
+
+    .habit-icon,
+    .payment-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--primary-container);
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .habit-name,
+    .payment-name {
+      margin-bottom: 4px;
+      font-weight: 750;
+    }
+
+    .habit-note,
+    .payment-note {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .habit-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-button {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--surface);
+      color: var(--primary);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .habit-value {
+      min-width: 52px;
+      text-align: center;
+      font-weight: 850;
+    }
+
+    .check {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--text-on-primary);
+      font-weight: 900;
+    }
+
+    .payment {
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--divider);
+    }
+
+    .payment-icon {
+      background: var(--info-container);
+      color: var(--info);
+    }
+
+    .payment-amount {
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .metric {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: var(--surface-secondary);
+    }
+
+    .metric-value {
+      margin-bottom: 4px;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .metric-label {
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .field {
+      width: 100%;
+      border: 1px solid var(--outline);
+      border-radius: 14px;
+      background: var(--surface);
+      color: var(--text-primary);
+      padding: 13px 14px;
+      outline: none;
+    }
+
+    .field:focus {
+      border-color: var(--outline-focused);
+      box-shadow: 0 0 0 4px var(--primary-container);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .message-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .message {
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      line-height: 1.45;
+    }
+
+    .message strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .message.success {
+      background: var(--success-container);
+      color: var(--success);
+    }
+
+    .message.warning {
+      background: var(--warning-container);
+      color: var(--warning);
+    }
+
+    .message.error {
+      background: var(--error-container);
+      color: var(--error);
+    }
+
+    .message.info {
+      background: var(--info-container);
+      color: var(--info);
+    }
+
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .swatch {
+      overflow: hidden;
+      border: 1px solid var(--divider);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .swatch-color {
+      height: 64px;
+    }
+
+    .swatch-meta {
+      padding: 10px 12px;
+    }
+
+    .swatch-name {
+      margin-bottom: 3px;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .swatch-value {
+      color: var(--text-secondary);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+    }
+
+    .navigation {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 24px;
+      padding: 10px;
+      border-top: 1px solid var(--divider);
+      background: var(--surface);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    .nav-item {
+      display: grid;
+      place-items: center;
+      gap: 5px;
+      min-height: 58px;
+      border-radius: 14px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .nav-item.active {
+      background: var(--primary-container);
+      color: var(--primary);
+    }
+
+    .nav-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .disabled {
+      color: var(--text-disabled);
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .page-header {
+        align-items: start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        width: min(100% - 20px, 1180px);
+        padding-top: 20px;
+      }
+
+      .panel-body {
+        padding: 18px;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .swatches {
+        grid-template-columns: 1fr;
+      }
+
+      .habit {
+        grid-template-columns: auto 1fr;
+      }
+
+      .habit-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Palette preview</p>
+        <h1>Today</h1>
+        <p class="subtitle">
+          Example of how the palette looks on a habit and expense tracker screen.
+        </p>
+      </div>
+
+      <button class="button button-primary">+ Add entry</button>
+    </header>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="panel-body">
+          <div class="section">
+            <div class="section-header">
+              <h2 class="section-title">Habits</h2>
+              <span class="section-meta">3 of 5 completed</span>
+            </div>
+
+            <div class="habit-list">
+              <article class="habit selected">
+                <div class="habit-icon">✓</div>
+                <div>
+                  <div class="habit-name">Project work</div>
+                  <p class="habit-note">Completed today</p>
+                </div>
+                <div class="check">✓</div>
+              </article>
+
+              <article class="habit">
+                <div class="habit-icon">H₂O</div>
+                <div>
+                  <div class="habit-name">Drink water</div>
+                  <p class="habit-note">Goal: 2000 ml</p>
+                </div>
+                <div class="habit-actions">
+                  <button class="icon-button">−</button>
+                  <span class="habit-value">1250</span>
+                  <button class="icon-button">+</button>
+                </div>
+              </article>
+
+              <article class="habit">
+                <div class="habit-icon">◷</div>
+                <div>
+                  <div class="habit-name">Go to bed</div>
+                  <p class="habit-note">Time marker</p>
+                </div>
+                <div class="habit-actions">
+                  <span class="habit-value">00:30</span>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2 class="section-title">Expenses</h2>
+              <span class="section-meta">Today: $18.70</span>
+            </div>
+
+            <div class="payment-list">
+              <article class="payment">
+                <div class="payment-icon">🛒</div>
+                <div>
+                  <div class="payment-name">Groceries</div>
+                  <p class="payment-note">Today, 18:42</p>
+                </div>
+                <div class="payment-amount">$12.00</div>
+              </article>
+
+              <article class="payment">
+                <div class="payment-icon">🚕</div>
+                <div>
+                  <div class="payment-name">Transport</div>
+                  <p class="payment-note">Today, 12:10</p>
+                </div>
+                <div class="payment-amount">$6.70</div>
+              </article>
+            </div>
+
+            <div class="summary">
+              <div class="metric">
+                <div class="metric-value">$124.80</div>
+                <div class="metric-label">This week</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">73%</div>
+                <div class="metric-label">Habits completed</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">8 days</div>
+                <div class="metric-label">Current streak</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2 class="section-title">Form</h2>
+              <span class="section-meta disabled">State examples</span>
+            </div>
+
+            <label class="field-label" for="habit-name">Habit name</label>
+            <input
+              class="field"
+              id="habit-name"
+              value="Read a book"
+              placeholder="Enter a name"
+            />
+
+            <div class="button-row">
+              <button class="button button-primary">Save</button>
+              <button class="button button-secondary">Cancel</button>
+              <button class="button button-danger">Delete</button>
+            </div>
+          </div>
+        </div>
+
+        <nav class="navigation">
+          <div class="nav-item active">
+            <span class="nav-icon">●</span>
+            Today
+          </div>
+          <div class="nav-item">
+            <span class="nav-icon">▤</span>
+            Journal
+          </div>
+          <div class="nav-item">
+            <span class="nav-icon">₽</span>
+            Expenses
+          </div>
+          <div class="nav-item">
+            <span class="nav-icon">⌁</span>
+            Stats
+          </div>
+        </nav>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-body">
+          <div class="section">
+            <div class="section-header">
+              <h2 class="section-title">States</h2>
+            </div>
+
+            <div class="message-list">
+              <div class="message success">
+                <strong>Success</strong>
+                All habits for today are complete.
+              </div>
+
+              <div class="message warning">
+                <strong>Warning</strong>
+                You have used 85% of the weekly budget.
+              </div>
+
+              <div class="message error">
+                <strong>Error</strong>
+                Could not save the entry.
+              </div>
+
+              <div class="message info">
+                <strong>Information</strong>
+                New stats will appear after seven days.
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2 class="section-title">Color roles</h2>
+            </div>
+
+            <div class="swatches">
+              <div class="swatch">
+                <div class="swatch-color" style="background: var(--primary)"></div>
+                <div class="swatch-meta">
+                  <div class="swatch-name">Primary</div>
+                  <div class="swatch-value">#5556D8</div>
+                </div>
+              </div>
+
+              <div class="swatch">
+                <div class="swatch-color" style="background: var(--primary-container)"></div>
+                <div class="swatch-meta">
+                  <div class="swatch-name">Primary container</div>
+                  <div class="swatch-value">#E8E8FF</div>
+                </div>
+              </div>
+
+              <div class="swatch">
+                <div class="swatch-color" style="background: var(--surface-secondary)"></div>
+                <div class="swatch-meta">
+                  <div class="swatch-name">Secondary surface</div>
+                  <div class="swatch-value">#F0F0F5</div>
+                </div>
+              </div>
+
+              <div class="swatch">
+                <div class="swatch-color" style="background: var(--success)"></div>
+                <div class="swatch-meta">
+                  <div class="swatch-name">Success</div>
+                  <div class="swatch-value">#1B7F4B</div>
+                </div>
+              </div>
+
+              <div class="swatch">
+                <div class="swatch-color" style="background: var(--warning)"></div>
+                <div class="swatch-meta">
+                  <div class="swatch-name">Warning</div>
+                  <div class="swatch-value">#9A6700</div>
+                </div>
+              </div>
+
+              <div class="swatch">
+                <div class="swatch-color" style="background: var(--error)"></div>
+                <div class="swatch-meta">
+                  <div class="swatch-name">Error</div>
+                  <div class="swatch-value">#B42318</div>
+                </div>
+              </div>
+
+              <div class="swatch">
+                <div class="swatch-color" style="background: var(--info)"></div>
+                <div class="swatch-meta">
+                  <div class="swatch-name">Info</div>
+                  <div class="swatch-value">#2764C7</div>
+                </div>
+              </div>
+
+              <div class="swatch">
+                <div class="swatch-color" style="background: var(--text-primary)"></div>
+                <div class="swatch-meta">
+                  <div class="swatch-name">Primary text</div>
+                  <div class="swatch-value">#19191F</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>

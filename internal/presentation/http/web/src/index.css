@@ -1,15 +1,53 @@
 :root {
+    /* Core surfaces */
+    --background: #F7F7FA;
+    --surface: #FFFFFF;
+    --surface-secondary: #F0F0F5;
+    --surface-selected: #E8E8FF;
+
+    /* Text */
+    --text-primary: #19191F;
+    --text-secondary: #65656F;
+    --text-disabled: #9696A0;
+    --text-on-primary: #FFFFFF;
+
+    /* Primary accent */
+    --primary: #5556D8;
+    --primary-hover: #4849C2;
+    --primary-container: #E8E8FF;
+    --on-primary-container: #25256F;
+
+    /* Borders and dividers */
+    --divider: #E1E1E8;
+    --outline: #C7C7D0;
+    --outline-focused: #5556D8;
+
+    /* States */
+    --success: #1B7F4B;
+    --success-container: #DDF5E7;
+
+    --warning: #9A6700;
+    --warning-container: #FFF0C2;
+
+    --error: #B42318;
+    --error-container: #FDE3E0;
+
+    --info: #2764C7;
+    --info-container: #E1ECFF;
+
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 12px;
+    --shadow: 0 14px 40px rgba(25, 25, 31, 0.08);
+
     color-scheme: light;
     font-family:
         Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
         sans-serif;
     line-height: 1.5;
     font-weight: 400;
-    color: #1f2937;
-    background:
-        radial-gradient(circle at top left, rgba(245, 158, 11, 0.16), transparent 28%),
-        radial-gradient(circle at right center, rgba(15, 23, 42, 0.09), transparent 22%),
-        linear-gradient(180deg, #fbf8f2 0%, #f4efe7 100%);
+    color: var(--text-primary);
+    background: var(--background);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -26,9 +64,19 @@ body,
     min-height: 100%;
 }
 
+html {
+    background: var(--background);
+    color: var(--text-primary);
+}
+
 body {
     margin: 0;
     min-width: 320px;
+    background: var(--background);
+    color: var(--text-primary);
+    font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        sans-serif;
 }
 
 button,
