@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom'
 import { Page, PageHeader, Panel, PanelBody, Section, SectionHeader } from '../../components/layout'
-import { Button, IconButton, Message, Metric, NavigationItem } from '../../components/primitives'
+import { AppNavigation } from '../../components/navigation'
+import { Button, IconButton, Message, Metric } from '../../components/primitives'
 import './HomePage.sass'
 
 export function HomePage() {
     return (
-        <Page>
+        <Page className="home-page">
             <PageHeader
                 eyebrow="Lifeline"
                 title="Today"
@@ -65,15 +66,6 @@ export function HomePage() {
                             </div>
                         </Section>
                     </PanelBody>
-
-                    <nav className="home-navigation">
-                        <NavigationItem icon="●" active>
-                            Today
-                        </NavigationItem>
-                        <NavigationItem icon="▤">Journal</NavigationItem>
-                        <NavigationItem icon="◷">Habits</NavigationItem>
-                        <NavigationItem icon="⌁">Stats</NavigationItem>
-                    </nav>
                 </Panel>
 
                 <aside className="home-aside">
@@ -97,6 +89,8 @@ export function HomePage() {
                     </Panel>
                 </aside>
             </div>
+
+            <AppNavigation />
         </Page>
     )
 }

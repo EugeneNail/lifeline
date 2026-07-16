@@ -1,0 +1,58 @@
+.app-navigation
+    position: fixed
+    z-index: 20
+    background: var(--surface)
+
+.app-navigation__item
+    color: var(--text-secondary)
+    font-size: 12px
+    font-weight: 700
+
+.app-navigation__item--active
+    background: var(--primary-container)
+    color: var(--primary)
+
+.app-navigation__icon
+    font-size: 20px
+    line-height: 1
+
+@media (orientation: portrait)
+    .app-navigation
+        right: 0
+        bottom: 0
+        left: 0
+        display: grid
+        grid-template-columns: repeat(4, 1fr)
+        gap: 8px
+        padding: 10px 10px calc(10px + env(safe-area-inset-bottom))
+        border-top: 1px solid var(--divider)
+
+    .app-navigation__item
+        display: grid
+        place-items: center
+        gap: 5px
+        min-height: 58px
+        border-radius: 14px
+
+@media (orientation: landscape)
+    .app-navigation
+        top: 0
+        bottom: 0
+        left: 0
+        display: flex
+        flex-direction: column
+        width: 220px
+        padding: 24px 14px
+        border-right: 1px solid var(--divider)
+
+    .app-navigation__item
+        display: flex
+        align-items: center
+        gap: 12px
+        width: 100%
+        min-height: 52px
+        border-radius: 14px
+        padding: 0 14px
+
+    .app-navigation__label
+        font-size: 14px

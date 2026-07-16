@@ -1,3 +1,6 @@
+.home-page
+    padding-bottom: 100px
+
 .home-layout
     display: grid
     grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr)
@@ -69,16 +72,6 @@
     grid-template-columns: repeat(3, 1fr)
     gap: 12px
 
-.home-navigation
-    display: grid
-    grid-template-columns: repeat(4, 1fr)
-    gap: 8px
-    margin-top: 24px
-    padding: 10px
-    border-top: 1px solid var(--divider)
-    background: var(--surface)
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg)
-
 .home-link-list
     display: grid
     gap: 10px
@@ -92,6 +85,15 @@
 @media (max-width: 860px)
     .home-layout
         grid-template-columns: 1fr
+
+@media (orientation: landscape)
+    .home-page
+        padding-left: 236px
+        padding-bottom: 64px
+
+@media (orientation: portrait)
+    .home-page
+        padding-bottom: 100px
 
 @media (max-width: 560px)
     .home-summary
