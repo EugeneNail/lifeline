@@ -1,0 +1,21 @@
+### Create a valid time habit
+
+POST localhost:30000/api/v1/habits/time
+Authorization: Bearer {{loginToken}}
+
+{
+    "label":"Morning run",
+    "icon":3
+}
+
+###
+
+### Reject a time habit with domain validation errors
+
+POST localhost:30000/api/v1/habits/time
+Authorization: Bearer {{loginToken}}
+
+{
+    "label":"@",
+    "icon":99
+}

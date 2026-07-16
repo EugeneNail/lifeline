@@ -13,16 +13,19 @@ const activeHabitLimit = 50
 type HabitCreationPolicy struct {
 	completableHabits CompletableHabitRepository
 	measurableHabits  MeasurableHabitRepository
+	timeHabits        TimeHabitRepository
 }
 
-// NewHabitCreationPolicy returns a habit creation policy configured with the completable and measurable habit repositories.
+// NewHabitCreationPolicy returns a habit creation policy configured with habit repositories.
 func NewHabitCreationPolicy(
 	completableHabits CompletableHabitRepository,
 	measurableHabits MeasurableHabitRepository,
+	timeHabits TimeHabitRepository,
 ) *HabitCreationPolicy {
 	return &HabitCreationPolicy{
 		completableHabits: completableHabits,
 		measurableHabits:  measurableHabits,
+		timeHabits:        timeHabits,
 	}
 }
 
@@ -48,7 +51,17 @@ func (policy *HabitCreationPolicy) EnsureCanAdd(ctx context.Context, accountId u
 		return fmt.Errorf("counting active measurable habits for account id %q: %w", accountId, err)
 	}
 
-	count := completableCount + measurableCount
+	timeFilter := NewTimeHabitFilter().
+		WithAccountIds(accountId).
+		WithArchived(false).
+		WithDeleted(false)
+
+	timeCount, err := policy.timeHabits.Count(ctx, timeFilter)
+	if err != nil {
+		return fmt.Errorf("counting active time habits for account id %q: %w", accountId, err)
+	}
+
+	count := completableCount + measurableCount + timeCount
 	if count >= activeHabitLimit {
 		return ErrHabitLimitExceeded
 	}

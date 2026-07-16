@@ -9,6 +9,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_completable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_entry"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_measurable_habit"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/create_time_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/refresh"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/register_user"
 	"github.com/EugeneNail/lifeline/internal/domain/entries"
@@ -22,6 +23,7 @@ import (
 	transportCreate_completable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_completable_habit"
 	transportCreate_entry "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_entry"
 	transportCreate_measurable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_measurable_habit"
+	transportCreate_time_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_time_habit"
 	transportRefresh "github.com/EugeneNail/lifeline/internal/presentation/http/api/refresh"
 	transportRegister_user "github.com/EugeneNail/lifeline/internal/presentation/http/api/register_user"
 	"github.com/EugeneNail/lifeline/internal/presentation/http/middleware"
@@ -70,8 +72,13 @@ func main() {
 		log.Fatalf("creating a measurable habit repository: %v", err)
 	}
 
+	timeHabitRepository, err := postgres.NewTimeHabitRepository(db)
+	if err != nil {
+		log.Fatalf("creating a time habit repository: %v", err)
+	}
+
 	entryCreationPolicy := entries.NewEntryCreationPolicy(entryRepository)
-	habitCreationPolicy := habits.NewHabitCreationPolicy(completableHabitRepository, measurableHabitRepository)
+	habitCreationPolicy := habits.NewHabitCreationPolicy(completableHabitRepository, measurableHabitRepository, timeHabitRepository)
 
 	registerUserUsecase, err := register_user.NewHandler(bcryptPasswordHasher, accountRepository)
 	if err != nil {
@@ -103,6 +110,11 @@ func main() {
 		log.Fatalf("creating a create-measurable-habit usecase: %v", err)
 	}
 
+	createTimeHabitUsecase, err := create_time_habit.NewHandler(timeHabitRepository, habitCreationPolicy)
+	if err != nil {
+		log.Fatalf("creating a create-time-habit usecase: %v", err)
+	}
+
 	// --- Section: HTTP endpoint handlers ---
 	registerUserEndpoint := transportRegister_user.NewHandler(registerUserUsecase)
 	authenticateEndpoint := transportAuthenticate.NewHandler(authenticateUsecase)
@@ -110,6 +122,7 @@ func main() {
 	createEntryEndpoint := transportCreate_entry.NewHandler(createEntryUsecase, requestIdentity)
 	createCompletableHabitEndpoint := transportCreate_completable_habit.NewHandler(createCompletableHabitUsecase, requestIdentity)
 	createMeasurableHabitEndpoint := transportCreate_measurable_habit.NewHandler(createMeasurableHabitUsecase, requestIdentity)
+	createTimeHabitEndpoint := transportCreate_time_habit.NewHandler(createTimeHabitUsecase, requestIdentity)
 
 	// --- Section: HTTP server ---
 	server := http.NewServeMux()
@@ -119,6 +132,7 @@ func main() {
 	server.Handle("POST /api/v1/entries", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createEntryEndpoint)))
 	server.Handle("POST /api/v1/habits/completable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createCompletableHabitEndpoint)))
 	server.Handle("POST /api/v1/habits/measurable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createMeasurableHabitEndpoint)))
+	server.Handle("POST /api/v1/habits/time", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createTimeHabitEndpoint)))
 
 	// TODO handle the error
 	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", configuration.App.Port), server)
