@@ -19,5 +19,5 @@ func NewError(message string) Error {
 
 // NewErrorf returns a domain error with a formatted message.
 func NewErrorf(format string, a ...any) Error {
-	return Error{message: fmt.Sprintf(format, a)}
+	return Error{message: fmt.Sprintf(format, a...)}
 }
