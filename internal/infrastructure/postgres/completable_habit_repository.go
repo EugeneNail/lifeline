@@ -50,7 +50,7 @@ func (repository *CompletableHabitRepository) Add(ctx context.Context, habit *ha
 // Count returns the number of completable habits matching the provided filter.
 func (repository *CompletableHabitRepository) Count(ctx context.Context, filter habits.CompletableHabitFilter) (int, error) {
 	query := `SELECT COUNT(*) FROM completable_habits`
-	conditions, args := buildConditions(filter)
+	conditions, args := repository.buildConditions(filter)
 
 	query = fmt.Sprintf("%s WHERE %s", query, strings.Join(conditions, " AND "))
 
@@ -81,7 +81,7 @@ func (repository *CompletableHabitRepository) Find(ctx context.Context, filter h
 // FindMany returns all completable habits matching the provided filter.
 func (repository *CompletableHabitRepository) FindMany(ctx context.Context, filter habits.CompletableHabitFilter) ([]*habits.CompletableHabit, error) {
 	query := `SELECT id, label, icon, created_at, updated_at, archived_at, deleted_at, account_id FROM completable_habits`
-	conditions, args := buildConditions(filter)
+	conditions, args := repository.buildConditions(filter)
 
 	if len(conditions) > 0 {
 		query = fmt.Sprintf("%s WHERE %s", query, strings.Join(conditions, " AND "))
@@ -95,7 +95,7 @@ func (repository *CompletableHabitRepository) FindMany(ctx context.Context, filt
 
 	foundHabits := make([]*habits.CompletableHabit, 0)
 	for rows.Next() {
-		habit, err := scanCompletableHabit(rows)
+		habit, err := repository.scan(rows)
 		if err != nil {
 			return nil, fmt.Errorf("scanning a completable habit row: %w", err)
 		}
@@ -110,7 +110,7 @@ func (repository *CompletableHabitRepository) FindMany(ctx context.Context, filt
 	return foundHabits, nil
 }
 
-func buildConditions(filter habits.CompletableHabitFilter) ([]string, []any) {
+func (repository *CompletableHabitRepository) buildConditions(filter habits.CompletableHabitFilter) ([]string, []any) {
 	conditions := make([]string, 0, 3)
 	args := make([]any, 0)
 
@@ -149,9 +149,7 @@ func buildConditions(filter habits.CompletableHabitFilter) ([]string, []any) {
 	return conditions, args
 }
 
-func scanCompletableHabit(scanner interface {
-	Scan(dest ...any) error
-}) (*habits.CompletableHabit, error) {
+func (repository *CompletableHabitRepository) scan(rows *sql.Rows) (*habits.CompletableHabit, error) {
 	var (
 		id         uuid.UUID
 		label      string
@@ -163,7 +161,7 @@ func scanCompletableHabit(scanner interface {
 		accountId  uuid.UUID
 	)
 
-	if err := scanner.Scan(&id, &label, &icon, &createdAt, &updatedAt, &archivedAt, &deletedAt, &accountId); err != nil {
+	if err := rows.Scan(&id, &label, &icon, &createdAt, &updatedAt, &archivedAt, &deletedAt, &accountId); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
@@ -177,13 +175,13 @@ func scanCompletableHabit(scanner interface {
 		icon,
 		createdAt,
 		updatedAt,
-		nullTime(archivedAt),
-		nullTime(deletedAt),
+		repository.nullTime(archivedAt),
+		repository.nullTime(deletedAt),
 		accountId,
 	), nil
 }
 
-func nullTime(value sql.NullTime) *time.Time {
+func (repository *CompletableHabitRepository) nullTime(value sql.NullTime) *time.Time {
 	if !value.Valid {
 		return nil
 	}
