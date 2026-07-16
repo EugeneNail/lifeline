@@ -1,0 +1,125 @@
+.button
+    border: 0
+    border-radius: 14px
+    padding: 12px 18px
+    cursor: pointer
+    font-weight: 750
+    transition: 150ms ease
+
+.button--primary
+    background: var(--primary)
+    color: var(--text-on-primary)
+
+.button--primary:hover
+    background: var(--primary-hover)
+    transform: translateY(-1px)
+
+.button--secondary
+    background: var(--surface-secondary)
+    color: var(--text-primary)
+
+.button--danger
+    background: var(--error-container)
+    color: var(--error)
+
+.button:disabled
+    cursor: not-allowed
+    opacity: 0.7
+    transform: none
+
+.text-field
+    display: block
+
+.text-field__label
+    display: block
+    margin-bottom: 8px
+    font-size: 13px
+    font-weight: 750
+
+.text-field__input
+    width: 100%
+    border: 1px solid var(--outline)
+    border-radius: 14px
+    background: var(--surface)
+    color: var(--text-primary)
+    padding: 13px 14px
+    outline: none
+
+.text-field__input:focus
+    border-color: var(--outline-focused)
+    box-shadow: 0 0 0 4px var(--primary-container)
+
+.text-field__input:disabled
+    color: var(--text-disabled)
+    cursor: not-allowed
+
+.text-field__input::placeholder
+    color: var(--text-disabled)
+
+.text-field__input[aria-invalid='true']
+    border-color: var(--error)
+
+.text-field__error
+    display: block
+    margin-top: 6px
+    color: var(--error)
+    font-size: 13px
+    line-height: 1.4
+
+.message
+    border-radius: var(--radius-md)
+    padding: 14px 16px
+    line-height: 1.45
+
+.message__title
+    display: block
+    margin-bottom: 3px
+
+.message--success
+    background: var(--success-container)
+    color: var(--success)
+
+.message--warning
+    background: var(--warning-container)
+    color: var(--warning)
+
+.message--error
+    background: var(--error-container)
+    color: var(--error)
+
+.message--info
+    background: var(--info-container)
+    color: var(--info)
+
+.metric
+    padding: 16px
+    border-radius: var(--radius-md)
+    background: var(--surface-secondary)
+
+.metric__value
+    margin-bottom: 4px
+    font-size: 24px
+    font-weight: 900
+    letter-spacing: -0.04em
+
+.metric__label
+    color: var(--text-secondary)
+    font-size: 13px
+
+.navigation-item
+    display: grid
+    place-items: center
+    gap: 5px
+    min-height: 58px
+    border-radius: 14px
+    color: var(--text-secondary)
+    font-size: 12px
+    font-weight: 700
+
+.navigation-item--active
+    background: var(--primary-container)
+    color: var(--primary)
+
+.navigation-item__icon
+    font-size: 20px
+    line-height: 1
