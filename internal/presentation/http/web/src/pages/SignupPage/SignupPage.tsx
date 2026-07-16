@@ -3,6 +3,8 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { setAuthTokens } from '../../api/auth-tokens'
+import { Page, PageHeader, Panel, PanelBody } from '../../components/layout'
+import { Button, TextField } from '../../components/primitives'
 import { useApiClient } from '../../hooks/useApiClient'
 import './SignupPage.sass'
 
@@ -75,75 +77,59 @@ export function SignupPage() {
     }
 
     return (
-        <main className="signup-page">
-            <section className="signup-shell">
-                <div className="signup-brand">
-                    <p className="signup-kicker">Lifeline</p>
-                    <h1>Create your account</h1>
-                    <p className="signup-lead">
-                        Set up a workspace for habits, entries, and the rest of your daily
-                        tracking flow.
-                    </p>
-                </div>
+        <Page className="signup-page">
+            <PageHeader
+                eyebrow="Lifeline"
+                title="Create your account"
+                subtitle="Set up a workspace for habits, entries, and the rest of your daily tracking flow."
+            />
 
-                <form className="signup-panel" onSubmit={handleSubmit}>
-                    <label className="signup-field">
-                        <span>Email</span>
-                        <input
-                            className="signup-input"
+            <Panel>
+                <PanelBody>
+                    <form className="signup-form" onSubmit={handleSubmit}>
+                        <TextField
+                            label="Email"
                             type="email"
                             name="email"
                             autoComplete="email"
                             placeholder="you@example.com"
                             value={email}
+                            error={fieldErrors.email}
                             onChange={(event) => setEmail(event.target.value)}
                         />
-                        <span className="signup-field-error" aria-live="polite">
-                            {fieldErrors.email || '\u00A0'}
-                        </span>
-                    </label>
 
-                    <label className="signup-field">
-                        <span>Password</span>
-                        <input
-                            className="signup-input"
+                        <TextField
+                            label="Password"
                             type="password"
                             name="password"
                             autoComplete="new-password"
                             placeholder="Create a strong password"
                             value={password}
+                            error={fieldErrors.password}
                             onChange={(event) => setPassword(event.target.value)}
                         />
-                        <span className="signup-field-error" aria-live="polite">
-                            {fieldErrors.password || '\u00A0'}
-                        </span>
-                    </label>
 
-                    <label className="signup-field">
-                        <span>Confirm password</span>
-                        <input
-                            className="signup-input"
+                        <TextField
+                            label="Confirm password"
                             type="password"
                             name="passwordConfirmation"
                             autoComplete="new-password"
                             placeholder="Repeat the password"
                             value={passwordConfirmation}
+                            error={fieldErrors.passwordConfirmation}
                             onChange={(event) => setPasswordConfirmation(event.target.value)}
                         />
-                        <span className="signup-field-error" aria-live="polite">
-                            {fieldErrors.passwordConfirmation || '\u00A0'}
-                        </span>
-                    </label>
 
-                    <button className="signup-button" type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Signing up...' : 'Sign up'}
-                    </button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? 'Signing up...' : 'Sign up'}
+                        </Button>
 
-                    <p className="signup-switch">
-                        Already have an account? <Link to="/login">Sign in</Link>
-                    </p>
-                </form>
-            </section>
-        </main>
+                        <p className="signup-switch">
+                            Already have an account? <Link to="/login">Sign in</Link>
+                        </p>
+                    </form>
+                </PanelBody>
+            </Panel>
+        </Page>
     )
 }

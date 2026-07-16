@@ -3,6 +3,8 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { setAuthTokens } from '../../api/auth-tokens'
+import { Page, PageHeader, Panel, PanelBody } from '../../components/layout'
+import { Button, TextField } from '../../components/primitives'
 import { useApiClient } from '../../hooks/useApiClient'
 import './LoginPage.sass'
 
@@ -59,58 +61,48 @@ export function LoginPage() {
     }
 
     return (
-        <main className="login-page">
-            <section className="login-shell">
-                <div className="login-brand">
-                    <p className="login-kicker">Lifeline</p>
-                    <h1>Welcome back</h1>
-                    <p className="login-lead">
-                        Sign in to continue tracking habits, entries, and daily progress.
-                    </p>
-                </div>
+        <Page className="login-page">
+            <PageHeader
+                eyebrow="Lifeline"
+                title="Welcome back"
+                subtitle="Sign in to continue tracking habits, entries, and daily progress."
+            />
 
-                <form className="login-panel" onSubmit={handleSubmit}>
-                    <label className="login-field">
-                        <span>Email</span>
-                        <input
-                            className="login-input"
+            <Panel>
+                <PanelBody>
+                    <form className="login-form" onSubmit={handleSubmit}>
+                        <TextField
+                            label="Email"
                             type="email"
                             name="email"
                             autoComplete="email"
                             placeholder="you@example.com"
                             value={email}
+                            error={fieldErrors.email}
                             onChange={(event) => setEmail(event.target.value)}
                         />
-                        <span className="login-field-error" aria-live="polite">
-                            {fieldErrors.email || '\u00A0'}
-                        </span>
-                    </label>
 
-                    <label className="login-field">
-                        <span>Password</span>
-                        <input
-                            className="login-input"
+                        <TextField
+                            label="Password"
                             type="password"
                             name="password"
                             autoComplete="current-password"
                             placeholder="Enter your password"
                             value={password}
+                            error={fieldErrors.password}
                             onChange={(event) => setPassword(event.target.value)}
                         />
-                        <span className="login-field-error" aria-live="polite">
-                            {fieldErrors.password || '\u00A0'}
-                        </span>
-                    </label>
 
-                    <button className="login-button" type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Signing in...' : 'Sign in'}
-                    </button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? 'Signing in...' : 'Sign in'}
+                        </Button>
 
-                    <p className="login-switch">
-                        No account yet? <Link to="/signup">Create one</Link>
-                    </p>
-                </form>
-            </section>
-        </main>
+                        <p className="login-switch">
+                            No account yet? <Link to="/signup">Create one</Link>
+                        </p>
+                    </form>
+                </PanelBody>
+            </Panel>
+        </Page>
     )
 }

@@ -1,148 +1,17 @@
 .login-page
-    min-height: 100svh
+    max-width: 560px
+
+.login-form
     display: grid
-    place-items: center
-    padding: 32px
-
-.login-shell
-    width: min(960px, 100%)
-    display: grid
-    grid-template-columns: 0.95fr 1.05fr
-    gap: 24px
-    align-items: stretch
-
-.login-brand,
-.login-panel
-    border: 1px solid rgba(31, 41, 55, 0.08)
-    border-radius: 28px
-    background: rgba(255, 255, 255, 0.74)
-    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08)
-    backdrop-filter: blur(14px)
-
-.login-brand
-    padding: 48px
-    display: flex
-    flex-direction: column
-    justify-content: space-between
-    gap: 24px
-    background: linear-gradient(145deg, rgba(17, 24, 39, 0.98), rgba(55, 65, 81, 0.92)), rgba(17, 24, 39, 0.96)
-    color: #f8fafc
-
-.login-kicker
-    margin: 0
-    font-size: 0.875rem
-    letter-spacing: 0.24em
-    text-transform: uppercase
-    color: rgba(248, 250, 252, 0.72)
-
-.login-brand h1
-    margin: 0
-    font-size: clamp(2.25rem, 5vw, 4rem)
-    line-height: 1.02
-    letter-spacing: -0.04em
-    max-width: 12ch
-
-.login-lead
-    margin: 0
-    max-width: 36ch
-    font-size: 1.0625rem
-    color: rgba(248, 250, 252, 0.76)
-
-.login-panel
-    padding: 40px
-    display: flex
-    flex-direction: column
     gap: 18px
-
-.login-field
-    display: flex
-    flex-direction: column
-    gap: 8px
-    color: #374151
-    font-weight: 500
-    min-height: 116px
-
-.login-input
-    width: 100%
-    border: 1px solid rgba(31, 41, 55, 0.12)
-    border-radius: 16px
-    padding: 14px 16px
-    background: rgba(255, 255, 255, 0.92)
-    color: #111827
-    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease
-
-.login-input::placeholder
-    color: #9ca3af
-
-.login-input:focus
-    outline: none
-    border-color: rgba(15, 23, 42, 0.45)
-    box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08)
-
-.login-input:disabled
-    opacity: 0.7
-    cursor: not-allowed
-
-.login-button
-    margin-top: 8px
-    border: 0
-    border-radius: 16px
-    padding: 14px 18px
-    background: #111827
-    color: #f9fafb
-    font-weight: 600
-    transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease
-
-.login-button:hover
-    transform: translateY(-1px)
-    box-shadow: 0 16px 30px rgba(17, 24, 39, 0.18)
-
-.login-button:focus-visible
-    outline: 3px solid rgba(17, 24, 39, 0.24)
-    outline-offset: 3px
-
-.login-button:disabled
-    cursor: wait
-    opacity: 0.7
-    transform: none
-    box-shadow: none
-
-.login-field-error
-    font-size: 0.875rem
-    line-height: 1.4
-    min-height: 1.4em
-    display: block
-
-.login-field-error
-    color: #b91c1c
 
 .login-switch
     margin: 0
-    color: #6b7280
-    font-size: 0.9375rem
+    color: var(--text-secondary)
+    font-size: 14px
 
 .login-switch a
-    color: #111827
-    font-weight: 600
+    color: var(--primary)
+    font-weight: 750
     text-decoration: underline
     text-underline-offset: 3px
-
-@media (max-width: 860px)
-    .login-shell
-        grid-template-columns: 1fr
-
-    .login-brand,
-    .login-panel
-        padding: 28px
-        border-radius: 24px
-
-@media (max-width: 520px)
-    .login-page
-        padding: 16px
-
-    .login-brand,
-    .login-panel
-        padding: 22px
-
-    .login-field
-        min-height: 112px
