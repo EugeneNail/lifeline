@@ -1,0 +1,21 @@
+### Create a valid completable habit
+
+POST localhost:30000/api/v1/habits/completable
+Authorization: Bearer {{loginToken}}
+
+{
+    "label":"Drink water",
+    "icon":4
+}
+
+###
+
+### Reject a completable habit with domain validation errors
+
+POST localhost:30000/api/v1/habits/completable
+Authorization: Bearer {{loginToken}}
+
+{
+    "label":"@",
+    "icon":99
+}
