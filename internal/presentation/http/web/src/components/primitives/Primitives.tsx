@@ -47,11 +47,13 @@ export function TextField({ label, error, className, id, ...props }: TextFieldPr
                 aria-invalid={error ? true : undefined}
                 {...props}
             />
-            {error ? (
-                <span className="text-field__error" aria-live="polite">
-                    {error}
-                </span>
-            ) : null}
+            <span
+                className="text-field__error"
+                aria-hidden={error ? undefined : true}
+                aria-live="polite"
+            >
+                {error}
+            </span>
         </label>
     )
 }

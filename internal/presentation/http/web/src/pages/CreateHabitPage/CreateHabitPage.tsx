@@ -1,10 +1,12 @@
+import axios from 'axios'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Page, PageHeader, Panel, PanelBody, Section, SectionHeader } from '../../components/layout'
 import { GoogleIcon, GoogleIcons, IconSelector } from '../../components/icons'
 import { AppNavigation } from '../../components/navigation'
-import { Button, TextField } from '../../components/primitives'
+import { Button, Message, TextField } from '../../components/primitives'
+import { useApiClient } from '../../hooks/useApiClient'
 import './CreateHabitPage.sass'
 
 type HabitType = 'completable' | 'measurable' | 'time'
@@ -17,6 +19,14 @@ type HabitTypeOption = {
     example: string
 }
 
+type CreateHabitFieldErrors = Partial<Record<'label' | 'icon' | 'step' | 'unit', string>>
+
+const habitTypeEndpoints: Record<HabitType, string> = {
+    completable: 'habits/completable',
+    measurable: 'habits/measurable',
+    time: 'habits/time',
+}
+
 const habitTypes: HabitTypeOption[] = [
     {
         value: 'completable',
@@ -26,32 +36,90 @@ const habitTypes: HabitTypeOption[] = [
         example: 'Example: "Brush teeth"',
     },
     {
-        value: 'measurable',
-        icon: '123',
-        title: 'Quantity',
-        description: 'Record a numeric value.',
-        example: 'Example: "Water - 250 ml"',
-    },
-    {
         value: 'time',
         icon: '00:00',
         title: 'Time',
         description: 'Record hours and minutes.',
         example: 'Example: "Run - 00:30"',
     },
+    {
+        value: 'measurable',
+        icon: '123',
+        title: 'Quantity',
+        description: 'Record a numeric value.',
+        example: 'Example: "Water - 250 ml"',
+    },
 ]
 
 // CreateHabitPage renders the habit creation form.
 export function CreateHabitPage() {
+    const apiClient = useApiClient()
     const navigate = useNavigate()
     const [label, setLabel] = useState('')
     const [icon, setIcon] = useState<GoogleIcons>(GoogleIcons.Check)
     const [habitType, setHabitType] = useState<HabitType>('completable')
     const [unit, setUnit] = useState('')
     const [step, setStep] = useState('')
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [fieldErrors, setFieldErrors] = useState<CreateHabitFieldErrors>({})
+    const [formError, setFormError] = useState('')
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    function setCreateHabitErrors(error: unknown) {
+        if (!axios.isAxiosError(error)) {
+            setFormError('Could not create habit.')
+            return
+        }
+
+        if (
+            error.response?.status === 422 &&
+            error.response.data &&
+            typeof error.response.data === 'object'
+        ) {
+            const response = error.response.data as Record<string, string>
+            setFieldErrors({
+                label: response.label,
+                icon: response.icon,
+                step: response.step,
+                unit: response.unit,
+            })
+            return
+        }
+
+        if (error.response?.status === 409) {
+            setFormError('Habit limit exceeded.')
+            return
+        }
+
+        setFormError('Could not create habit.')
+    }
+
+    function createPayload() {
+        if (habitType !== 'measurable') {
+            return { label, icon }
+        }
+
+        return {
+            label,
+            icon,
+            step: Number(step),
+            unit,
+        }
+    }
+
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
+        setIsSubmitting(true)
+        setFieldErrors({})
+        setFormError('')
+
+        try {
+            await apiClient.post<string>(habitTypeEndpoints[habitType], createPayload())
+            navigate('/')
+        } catch (error) {
+            setCreateHabitErrors(error)
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     return (
@@ -77,6 +145,7 @@ export function CreateHabitPage() {
                                 name="label"
                                 placeholder="Drink water"
                                 value={label}
+                                error={fieldErrors.label}
                                 onChange={(event) => setLabel(event.target.value)}
                             />
                         </Section>
@@ -84,6 +153,9 @@ export function CreateHabitPage() {
                         <Section>
                             <SectionHeader title="Icon" meta="Choose one" />
                             <IconSelector value={icon} onChange={setIcon} />
+                            {fieldErrors.icon ? (
+                                <Message variant="error">{fieldErrors.icon}</Message>
+                            ) : null}
                         </Section>
 
                         <Section>
@@ -117,6 +189,7 @@ export function CreateHabitPage() {
                                         name="unit"
                                         placeholder="ml"
                                         value={unit}
+                                        error={fieldErrors.unit}
                                         onChange={(event) => setUnit(event.target.value)}
                                     />
                                     <TextField
@@ -125,18 +198,41 @@ export function CreateHabitPage() {
                                         placeholder="250"
                                         type="number"
                                         value={step}
+                                        error={fieldErrors.step}
                                         onChange={(event) => setStep(event.target.value)}
                                     />
                                 </div>
                             </Section>
                         ) : null}
 
+                        {formError ? <Message variant="error">{formError}</Message> : null}
+
                         <div className="create-habit-actions">
-                            <Button type="submit">
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                aria-label={isSubmitting ? 'Creating habit' : 'Create habit'}
+                            >
                                 <GoogleIcon icon={icon} size={18} />
-                                Create habit
+                                <span
+                                    className="create-habit-submit-label"
+                                    data-submitting={isSubmitting}
+                                    aria-hidden="true"
+                                >
+                                    <span className="create-habit-submit-label__text">
+                                        Create habit
+                                    </span>
+                                    <span className="create-habit-submit-label__text create-habit-submit-label__text--pending">
+                                        Creating...
+                                    </span>
+                                </span>
                             </Button>
-                            <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                disabled={isSubmitting}
+                                onClick={() => navigate(-1)}
+                            >
                                 Back
                             </Button>
                         </div>

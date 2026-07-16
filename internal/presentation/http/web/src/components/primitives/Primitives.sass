@@ -77,10 +77,14 @@
 
 .text-field__error
     display: block
+    min-height: 19px
     margin-top: 6px
     color: var(--error)
     font-size: 13px
     line-height: 1.4
+
+    &:first-letter
+        text-transform: uppercase
 
 .message
     border-radius: var(--radius-md)

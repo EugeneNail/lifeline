@@ -5,6 +5,11 @@
 .create-habit-form
     display: grid
 
+.create-habit-page .section + .section
+    margin-top: 50px
+    padding-top: 0
+    border-top: 0
+
 .habit-type-list
     display: grid
     gap: 10px
@@ -68,9 +73,30 @@
     justify-content: center
     gap: 8px
 
+.create-habit-submit-label
+    display: grid
+    min-width: 86px
+    overflow: hidden
+
+.create-habit-submit-label__text
+    grid-area: 1 / 1
+    opacity: 1
+    transform: translateY(0)
+    transition: opacity 160ms ease, transform 160ms ease
+
+.create-habit-submit-label__text--pending
+    opacity: 0
+    transform: translateY(6px)
+
+.create-habit-submit-label[data-submitting='true'] .create-habit-submit-label__text
+    opacity: 0
+    transform: translateY(-6px)
+
+.create-habit-submit-label[data-submitting='true'] .create-habit-submit-label__text--pending
+    opacity: 1
+    transform: translateY(0)
+
 @media (max-width: 560px)
-    .habit-type-card
-        grid-template-columns: 1fr
 
     .measurement-fields
         grid-template-columns: 1fr
