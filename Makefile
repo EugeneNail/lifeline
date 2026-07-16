@@ -1,6 +1,8 @@
 COMPOSE_FILE := docker/docker-compose.yaml
 ENV_FILE := docker/.env
 ENV_EXAMPLE_FILE := docker/.env.example
+HTTP_CLIENT_ENV_FILE := doc/routes/http-client.env.json
+HTTP_CLIENT_ENV_EXAMPLE_FILE := doc/routes/http-client.env.json.example
 NETWORK_NAME := lifeline
 MIGRATION_COMMAND_TARGET := $(word 2,$(MAKECMDGOALS))
 MIGRATION_NAME := $(wordlist 3,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -34,6 +36,10 @@ env:
 				printf '\n%s\n' "$$line" >> "$(ENV_FILE)"; \
 			fi; \
 		done < "$(ENV_EXAMPLE_FILE)"; \
+	fi
+	@if [ ! -f "$(HTTP_CLIENT_ENV_FILE)" ]; then \
+		cp "$(HTTP_CLIENT_ENV_EXAMPLE_FILE)" "$(HTTP_CLIENT_ENV_FILE)"; \
+		echo "created $(HTTP_CLIENT_ENV_FILE)"; \
 	fi
 
 network:
