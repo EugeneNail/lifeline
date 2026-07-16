@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Page, PageHeader, Panel, PanelBody, Section, SectionHeader } from '../../components/layout'
 import { AppNavigation } from '../../components/navigation'
-import { Button, IconButton, Message, Metric } from '../../components/primitives'
+import { IconButton, Message, Metric } from '../../components/primitives'
 import './HomePage.sass'
 
 export function HomePage() {
@@ -11,7 +11,11 @@ export function HomePage() {
                 eyebrow="Lifeline"
                 title="Today"
                 subtitle="Track habits, entries, and daily progress from one quiet workspace."
-                actions={<Button type="button">+ Add entry</Button>}
+                actions={
+                    <Link className="button button--primary" to="/habits/new">
+                        + Add habit
+                    </Link>
+                }
             />
 
             <div className="home-layout">

@@ -1,0 +1,85 @@
+.create-habit-page
+    max-width: 760px
+    padding-bottom: 100px
+
+.create-habit-form
+    display: grid
+
+.habit-type-list
+    display: grid
+    gap: 10px
+
+.habit-type-card
+    display: grid
+    grid-template-columns: 72px 1fr
+    align-items: center
+    gap: 14px
+    min-height: 96px
+    border: 1px solid var(--divider)
+    border-radius: var(--radius-md)
+    background: var(--surface)
+    color: var(--text-primary)
+    cursor: pointer
+    font: inherit
+    padding: 14px
+    text-align: left
+
+.habit-type-card[aria-pressed='true']
+    border-color: var(--primary)
+    background: var(--primary-container)
+    color: var(--on-primary-container)
+
+.habit-type-card__icon
+    display: grid
+    place-items: center
+    min-height: 52px
+    border-radius: 14px
+    background: var(--surface-secondary)
+    color: var(--primary)
+    font-weight: 900
+
+.habit-type-card__content
+    display: grid
+    gap: 3px
+
+.habit-type-card__content span
+    color: var(--text-secondary)
+    font-size: 14px
+
+.habit-type-card__content em
+    color: var(--text-secondary)
+    font-size: 13px
+    font-style: normal
+
+.measurement-fields
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: 14px
+
+.create-habit-actions
+    display: flex
+    flex-wrap: wrap
+    gap: 10px
+    margin-top: 18px
+
+.create-habit-actions .button
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    gap: 8px
+
+@media (max-width: 560px)
+    .habit-type-card
+        grid-template-columns: 1fr
+
+    .measurement-fields
+        grid-template-columns: 1fr
+
+@media (orientation: landscape)
+    .create-habit-page
+        padding-left: 236px
+        padding-bottom: 64px
+
+@media (orientation: portrait)
+    .create-habit-page
+        padding-bottom: 100px
