@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Page, PageHeader, Panel, PanelBody, Section, SectionHeader } from '../../components/layout'
-import { Button, Message, Metric, NavigationItem } from '../../components/primitives'
+import { Button, IconButton, Message, Metric, NavigationItem } from '../../components/primitives'
 import './HomePage.sass'
 
 export function HomePage() {
@@ -36,13 +36,9 @@ export function HomePage() {
                                         <p className="home-habit__note">Goal: 2000 ml</p>
                                     </div>
                                     <div className="home-habit__actions">
-                                        <button className="home-icon-button" type="button">
-                                            −
-                                        </button>
+                                        <IconButton type="button">−</IconButton>
                                         <span className="home-habit__value">1250</span>
-                                        <button className="home-icon-button" type="button">
-                                            +
-                                        </button>
+                                        <IconButton type="button">+</IconButton>
                                     </div>
                                 </article>
 

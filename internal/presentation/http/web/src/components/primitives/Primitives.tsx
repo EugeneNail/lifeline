@@ -22,6 +22,13 @@ export function Button({ variant = 'primary', className, ...props }: ButtonProps
     )
 }
 
+type IconButtonProps = ButtonHTMLAttributes<HTMLButtonElement>
+
+// IconButton renders the standard circular icon-only action control.
+export function IconButton({ className, ...props }: IconButtonProps) {
+    return <button className={joinClassNames('icon-button', className)} {...props} />
+}
+
 type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
     label: ReactNode
     error?: ReactNode

@@ -1,5 +1,6 @@
 export {
     Button,
+    IconButton,
     Message,
     Metric,
     NavigationItem,
