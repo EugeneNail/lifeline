@@ -6,16 +6,19 @@ import (
 	"net/http"
 
 	"github.com/EugeneNail/lifeline/internal/application/usecases/authenticate"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/create_completable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_entry"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/refresh"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/register_user"
 	"github.com/EugeneNail/lifeline/internal/domain/entries"
+	"github.com/EugeneNail/lifeline/internal/domain/habits"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/authentication"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/config"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/encryption"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/postgres"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/tokens"
 	transportAuthenticate "github.com/EugeneNail/lifeline/internal/presentation/http/api/authenticate"
+	transportCreate_completable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_completable_habit"
 	transportCreate_entry "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_entry"
 	transportRefresh "github.com/EugeneNail/lifeline/internal/presentation/http/api/refresh"
 	transportRegister_user "github.com/EugeneNail/lifeline/internal/presentation/http/api/register_user"
@@ -55,7 +58,13 @@ func main() {
 		log.Fatalf("creating an entry repository: %v", err)
 	}
 
+	completableHabitRepository, err := postgres.NewCompletableHabitRepository(db)
+	if err != nil {
+		log.Fatalf("creating a completable habit repository: %v", err)
+	}
+
 	entryCreationPolicy := entries.NewEntryCreationPolicy(entryRepository)
+	habitCreationPolicy := habits.NewHabitCreationPolicy(completableHabitRepository)
 
 	registerUserUsecase, err := register_user.NewHandler(bcryptPasswordHasher, accountRepository)
 	if err != nil {
@@ -77,11 +86,17 @@ func main() {
 		log.Fatalf("creating a create-entry usecase: %v", err)
 	}
 
+	createCompletableHabitUsecase, err := create_completable_habit.NewHandler(completableHabitRepository, habitCreationPolicy)
+	if err != nil {
+		log.Fatalf("creating a create-completable-habit usecase: %v", err)
+	}
+
 	// --- Section: HTTP endpoint handlers ---
 	registerUserEndpoint := transportRegister_user.NewHandler(registerUserUsecase)
 	authenticateEndpoint := transportAuthenticate.NewHandler(authenticateUsecase)
 	refreshEndpoint := transportRefresh.NewHandler(refreshUsecase)
 	createEntryEndpoint := transportCreate_entry.NewHandler(createEntryUsecase, requestIdentity)
+	createCompletableHabitEndpoint := transportCreate_completable_habit.NewHandler(createCompletableHabitUsecase, requestIdentity)
 
 	// --- Section: HTTP server ---
 	server := http.NewServeMux()
@@ -89,6 +104,7 @@ func main() {
 	server.Handle("POST /api/v1/users/login", middleware.WriteJSONResponse(authenticateEndpoint))
 	server.Handle("POST /api/v1/users/refresh", middleware.WriteJSONResponse(refreshEndpoint))
 	server.Handle("POST /api/v1/entries", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createEntryEndpoint)))
+	server.Handle("POST /api/v1/habits/completable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createCompletableHabitEndpoint)))
 
 	// TODO handle the error
 	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", configuration.App.Port), server)
