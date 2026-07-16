@@ -110,7 +110,7 @@ func invalidCredentialsErrors() application.FieldErrors {
 func selectTokenLifecycle(environment config.Environment) auth.TokenLifecycle {
 	switch environment {
 	case config.EnvironmentDevelopment:
-		return 60 * 60
+		return 60 * 60 * 3
 	case config.EnvironmentProduction:
 		return auth.TokenLifecycleLogin
 	default:
