@@ -33,7 +33,7 @@ type Payload struct {
 func (handler *Handler) Handle(request *http.Request) (int, any) {
 	accountID, err := handler.identity.AccountID(request)
 	if err != nil {
-		return http.StatusUnauthorized, "unauthorized"
+		return http.StatusInternalServerError, fmt.Errorf("extracting account id: %w", err)
 	}
 
 	var payload Payload

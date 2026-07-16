@@ -33,9 +33,9 @@ type Payload struct {
 
 // Handle decodes the request, runs the use case, and maps the result to an HTTP response.
 func (handler *Handler) Handle(request *http.Request) (int, any) {
-	userID, err := handler.identity.AccountID(request)
+	accountID, err := handler.identity.AccountID(request)
 	if err != nil {
-		return http.StatusUnauthorized, "unauthorized"
+		return http.StatusInternalServerError, fmt.Errorf("extracting account id: %w", err)
 	}
 
 	var payload Payload
@@ -52,7 +52,7 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		Date:      date,
 		Mood:      payload.Mood,
 		Note:      payload.Note,
-		AccountID: userID,
+		AccountID: accountID,
 	})
 	if err != nil {
 		var validationErrors domain.ValidationErrors
