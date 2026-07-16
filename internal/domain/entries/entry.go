@@ -90,6 +90,7 @@ func Restore(id uuid.UUID, date time.Time, mood int, note string, createdAt time
 // ===================================== ID ============================================
 // =====================================================================================
 
+// TODO remove as a custom type
 type ID uuid.UUID
 
 // NilID is the zero-value user identifier.
@@ -142,32 +143,6 @@ func (entry *Entry) Date() Date {
 
 // ===================================== Mood ============================================
 // =======================================================================================
-
-type Mood int
-
-const (
-	MoodAwful Mood = 1
-	MoodBad   Mood = 2
-	MoodOkay  Mood = 3
-	MoodGood  Mood = 4
-	MoodGreat Mood = 5
-)
-
-var moodLabels = map[Mood]string{
-	MoodAwful: "Awful",
-	MoodBad:   "Bad",
-	MoodOkay:  "Okay",
-	MoodGood:  "Good",
-	MoodGreat: "Great",
-}
-
-func NewMood(rawMood int) (Mood, error) {
-	if rawMood < int(MoodAwful) || rawMood > int(MoodGreat) {
-		return 0, domain.NewErrorf("mood must be in range between %d and %d", MoodAwful, MoodGreat)
-	}
-
-	return Mood(rawMood), nil
-}
 
 func (entry *Entry) Mood() Mood {
 	return entry.mood
