@@ -3,21 +3,25 @@ package domain
 import "fmt"
 
 // Error represents a domain-level validation or business-rule violation.
-type Error struct {
+type Error interface {
+	error
+}
+
+type domainError struct {
 	message string
 }
 
 // Error returns the domain failure message.
-func (error Error) Error() string {
+func (error domainError) Error() string {
 	return error.message
 }
 
 // NewError returns a domain error with the provided message.
 func NewError(message string) Error {
-	return Error{message: message}
+	return domainError{message: message}
 }
 
 // NewErrorf returns a domain error with a formatted message.
 func NewErrorf(format string, a ...any) Error {
-	return Error{message: fmt.Sprintf(format, a...)}
+	return domainError{message: fmt.Sprintf(format, a...)}
 }
