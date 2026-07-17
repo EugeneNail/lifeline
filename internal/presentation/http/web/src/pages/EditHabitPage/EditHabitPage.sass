@@ -1,0 +1,65 @@
+.edit-habit-page
+    max-width: 760px
+    padding-bottom: 100px
+
+.edit-habit-form
+    display: grid
+
+.edit-habit-page .section + .section
+    margin-top: 50px
+    padding-top: 0
+    border-top: 0
+
+.measurement-fields
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: 14px
+
+.edit-habit-actions
+    display: flex
+    flex-wrap: wrap
+    gap: 10px
+    margin-top: 18px
+
+.edit-habit-actions .button
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    gap: 8px
+
+.edit-habit-submit-label
+    display: grid
+    min-width: 86px
+    overflow: hidden
+
+.edit-habit-submit-label__text
+    grid-area: 1 / 1
+    opacity: 1
+    transform: translateY(0)
+    transition: opacity 160ms ease, transform 160ms ease
+
+.edit-habit-submit-label__text--pending
+    opacity: 0
+    transform: translateY(6px)
+
+.edit-habit-submit-label[data-submitting='true'] .edit-habit-submit-label__text
+    opacity: 0
+    transform: translateY(-6px)
+
+.edit-habit-submit-label[data-submitting='true'] .edit-habit-submit-label__text--pending
+    opacity: 1
+    transform: translateY(0)
+
+@media (max-width: 560px)
+
+    .measurement-fields
+        grid-template-columns: 1fr
+
+@media (orientation: landscape)
+    .edit-habit-page
+        padding-left: 236px
+        padding-bottom: 64px
+
+@media (orientation: portrait)
+    .edit-habit-page
+        padding-bottom: 100px

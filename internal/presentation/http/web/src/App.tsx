@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { CreateHabitPage } from './pages/CreateHabitPage/CreateHabitPage'
 import { HabitsPage } from './pages/HabitsPage/HabitsPage'
+import { EditHabitPage } from './pages/EditHabitPage/EditHabitPage'
 import { HomePage } from './pages/HomePage/HomePage'
 import { LoginPage } from './pages/LoginPage/LoginPage'
 import { SignupPage } from './pages/SignupPage/SignupPage'
@@ -11,6 +12,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/habits/new" element={<CreateHabitPage />} />
+            <Route path="/habits/:type/:id" element={<EditHabitPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="*" element={<Navigate replace to="/" />} />
