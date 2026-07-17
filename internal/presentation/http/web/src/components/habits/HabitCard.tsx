@@ -8,7 +8,6 @@ type HabitCardProps = {
     uuid: string
     icon: GoogleIcons
     title: string
-    description: string
     typeLabel: string
     enabled: boolean
     onToggle: (enabled: boolean) => void
@@ -19,7 +18,6 @@ export function HabitCard({
     uuid,
     icon,
     title,
-    description,
     typeLabel,
     enabled,
     onToggle,
@@ -32,16 +30,11 @@ export function HabitCard({
 
             <div className="habit-card__content">
                 <h3 className="habit-card__title">{title}</h3>
-                <p className="habit-card__description">{description}</p>
             </div>
 
             <div className="habit-card__controls">
                 <span className="habit-card__type">{typeLabel}</span>
-                <Switch
-                    checked={enabled}
-                    label={`Enable ${title}`}
-                    onChange={onToggle}
-                />
+                <Switch checked={enabled} label={`Enable ${title}`} onChange={onToggle} />
             </div>
 
             <Link className="habit-card__more" aria-label={`Edit ${title}`} to={`/habits/${uuid}`}>
