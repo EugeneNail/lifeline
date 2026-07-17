@@ -4,5 +4,5 @@ export type MeasurableHabit = {
     icon: number
     step: number
     unit: string
-    archived_at: string | null
+    archivedAt: string | null
 }

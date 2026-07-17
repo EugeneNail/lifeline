@@ -19,6 +19,7 @@ type HabitsResponse = {
 
 type HabitCardModel = {
     uuid: string
+    type: 'completable' | 'measurable' | 'time'
     icon: GoogleIcons
     title: string
     typeLabel: string
@@ -36,30 +37,33 @@ function mapHabitsResponse(response: HabitsResponse) {
 function mapMeasurableHabit(habit: MeasurableHabit): HabitCardModel {
     return {
         uuid: habit.id,
+        type: 'measurable',
         icon: habit.icon as GoogleIcons,
         title: habit.label,
         typeLabel: 'Quantity',
-        enabled: habit.archived_at === null,
+        enabled: habit.archivedAt === null,
     }
 }
 
 function mapTimeHabit(habit: TimeHabit): HabitCardModel {
     return {
         uuid: habit.id,
+        type: 'time',
         icon: habit.icon as GoogleIcons,
         title: habit.label,
         typeLabel: 'Time',
-        enabled: habit.archived_at === null,
+        enabled: habit.archivedAt === null,
     }
 }
 
 function mapCompletableHabit(habit: CompletableHabit): HabitCardModel {
     return {
         uuid: habit.id,
+        type: 'completable',
         icon: habit.icon as GoogleIcons,
         title: habit.label,
         typeLabel: 'Completion',
-        enabled: habit.archived_at === null,
+        enabled: habit.archivedAt === null,
     }
 }
 
@@ -139,6 +143,7 @@ export function HabitsPage() {
                                     icon={habit.icon}
                                     key={habit.uuid}
                                     onToggle={(nextEnabled) => handleToggle(habit.uuid, nextEnabled)}
+                                    type={habit.type}
                                     title={habit.title}
                                     typeLabel={habit.typeLabel}
                                     uuid={habit.uuid}
