@@ -1,0 +1,21 @@
+### Update a time habit
+
+PUT localhost:30000/api/v1/habits/time/{{habitId}}
+Authorization: Bearer {{loginToken}}
+
+{
+    "label": "Morning run",
+    "icon": 3
+}
+
+###
+
+### Reject a time habit update with domain validation errors
+
+PUT localhost:30000/api/v1/habits/time/{{habitId}}
+Authorization: Bearer {{loginToken}}
+
+{
+    "label": "@",
+    "icon": 99
+}
