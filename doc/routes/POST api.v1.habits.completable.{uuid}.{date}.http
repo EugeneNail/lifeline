@@ -1,0 +1,9 @@
+### Save or update a completable habit record for a specific day.
+
+POST localhost:30000/api/v1/habits/completable/{{habitId}}/2000-01-01
+Authorization: Bearer {{loginToken}}
+Content-Type: application/json
+
+{
+    "value": false
+}
