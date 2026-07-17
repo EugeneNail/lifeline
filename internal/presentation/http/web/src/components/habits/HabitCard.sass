@@ -1,0 +1,89 @@
+.habit-card
+    display: grid
+    grid-template-columns: auto minmax(0, 1fr) auto auto
+    align-items: center
+    gap: 12px
+    padding: 12px 12px 12px 14px
+    border: 1px solid var(--divider)
+    border-radius: 16px
+    background: var(--surface)
+
+.habit-card__icon
+    display: grid
+    place-items: center
+    width: 46px
+    height: 46px
+    border-radius: 14px
+    background: var(--primary-container)
+    color: var(--primary)
+
+.habit-card__content
+    min-width: 0
+    display: grid
+    gap: 4px
+
+.habit-card__title
+    margin: 0
+    color: var(--text-primary)
+    font-size: 16px
+    font-weight: 800
+    letter-spacing: -0.02em
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.habit-card__description
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 13px
+    line-height: 1.45
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.habit-card__controls
+    display: flex
+    align-items: center
+    justify-self: end
+    gap: 10px
+
+.habit-card__type
+    display: inline-flex
+    align-items: center
+    min-height: 28px
+    padding: 0 10px
+    border-radius: 999px
+    background: var(--surface-secondary)
+    color: var(--text-secondary)
+    font-size: 12px
+    font-weight: 800
+    white-space: nowrap
+
+.habit-card__more
+    display: grid
+    place-items: center
+    width: 38px
+    height: 38px
+    border-radius: 12px
+    color: var(--text-secondary)
+    font-size: 22px
+    text-decoration: none
+
+.habit-card__more:hover
+    background: var(--surface-secondary)
+
+@media (max-width: 640px)
+    .habit-card
+        grid-template-columns: auto minmax(0, 1fr) auto
+        align-items: start
+
+    .habit-card__controls
+        grid-column: 2
+        justify-self: start
+        flex-wrap: wrap
+        margin-top: -2px
+
+    .habit-card__more
+        grid-column: 3
+        grid-row: 1 / span 2
+        align-self: start

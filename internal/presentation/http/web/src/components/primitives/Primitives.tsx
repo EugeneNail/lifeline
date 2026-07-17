@@ -29,6 +29,27 @@ export function IconButton({ className, ...props }: IconButtonProps) {
     return <button className={joinClassNames('icon-button', className)} {...props} />
 }
 
+type SwitchProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick' | 'onChange'> & {
+    checked: boolean
+    label: string
+    onChange: (checked: boolean) => void
+}
+
+// Switch renders the standard binary toggle control and reports the next checked state.
+export function Switch({ checked, label, onChange, className, ...props }: SwitchProps) {
+    return (
+        <button
+            aria-checked={checked}
+            aria-label={label}
+            className={joinClassNames('switch', checked ? 'switch--checked' : undefined, className)}
+            onClick={() => onChange(!checked)}
+            role="switch"
+            type="button"
+            {...props}
+        />
+    )
+}
+
 type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
     label: ReactNode
     error?: ReactNode

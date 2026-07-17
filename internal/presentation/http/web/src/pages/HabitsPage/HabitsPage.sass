@@ -1,0 +1,22 @@
+.habits-page
+    max-width: 1120px
+    padding-bottom: 100px
+
+.habits-section__grid
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))
+    gap: 12px
+
+@media (orientation: landscape)
+    .habits-page
+        padding-left: 236px
+        padding-bottom: 64px
+
+@media (orientation: portrait)
+    .habits-page
+        padding-bottom: 100px
+
+@media (max-width: 560px)
+    .habits-page
+        width: min(100% - 20px, 1180px)
+        padding-top: 20px
