@@ -13,6 +13,9 @@ import (
 	"github.com/EugeneNail/lifeline/internal/application/usecases/list_habits"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/refresh"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/register_user"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/update_completable_habit"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/update_measurable_habit"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/update_time_habit"
 	"github.com/EugeneNail/lifeline/internal/domain/entries"
 	"github.com/EugeneNail/lifeline/internal/domain/habits"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/authentication"
@@ -28,6 +31,9 @@ import (
 	transportList_habits "github.com/EugeneNail/lifeline/internal/presentation/http/api/list_habits"
 	transportRefresh "github.com/EugeneNail/lifeline/internal/presentation/http/api/refresh"
 	transportRegister_user "github.com/EugeneNail/lifeline/internal/presentation/http/api/register_user"
+	transportUpdate_completable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/update_completable_habit"
+	transportUpdate_measurable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/update_measurable_habit"
+	transportUpdate_time_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/update_time_habit"
 	"github.com/EugeneNail/lifeline/internal/presentation/http/middleware"
 )
 
@@ -81,6 +87,7 @@ func main() {
 
 	entryCreationPolicy := entries.NewEntryCreationPolicy(entryRepository)
 	habitCreationPolicy := habits.NewHabitCreationPolicy(completableHabitRepository, measurableHabitRepository, timeHabitRepository)
+	habitModificationPolicy := habits.NewModificationPolicy()
 
 	registerUserUsecase, err := register_user.NewHandler(bcryptPasswordHasher, accountRepository)
 	if err != nil {
@@ -122,6 +129,21 @@ func main() {
 		log.Fatalf("creating a list-habits usecase: %v", err)
 	}
 
+	updateCompletableHabitUsecase, err := update_completable_habit.NewHandler(completableHabitRepository, habitModificationPolicy)
+	if err != nil {
+		log.Fatalf("creating an update-completable-habit usecase: %v", err)
+	}
+
+	updateTimeHabitUsecase, err := update_time_habit.NewHandler(timeHabitRepository, habitModificationPolicy)
+	if err != nil {
+		log.Fatalf("creating an update-time-habit usecase: %v", err)
+	}
+
+	updateMeasurableHabitUsecase, err := update_measurable_habit.NewHandler(measurableHabitRepository, habitModificationPolicy)
+	if err != nil {
+		log.Fatalf("creating an update-measurable-habit usecase: %v", err)
+	}
+
 	// --- Section: HTTP endpoint handlers ---
 	registerUserEndpoint := transportRegister_user.NewHandler(registerUserUsecase)
 	authenticateEndpoint := transportAuthenticate.NewHandler(authenticateUsecase)
@@ -131,6 +153,9 @@ func main() {
 	createMeasurableHabitEndpoint := transportCreate_measurable_habit.NewHandler(createMeasurableHabitUsecase, requestIdentity)
 	listHabitsEndpoint := transportList_habits.NewHandler(listHabitsUsecase, requestIdentity)
 	createTimeHabitEndpoint := transportCreate_time_habit.NewHandler(createTimeHabitUsecase, requestIdentity)
+	updateCompletableHabitEndpoint := transportUpdate_completable_habit.NewHandler(updateCompletableHabitUsecase, requestIdentity)
+	updateMeasurableHabitEndpoint := transportUpdate_measurable_habit.NewHandler(updateMeasurableHabitUsecase, requestIdentity)
+	updateTimeHabitEndpoint := transportUpdate_time_habit.NewHandler(updateTimeHabitUsecase, requestIdentity)
 
 	// --- Section: HTTP server ---
 	server := http.NewServeMux()
@@ -141,7 +166,10 @@ func main() {
 	server.Handle("POST /api/v1/habits/completable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createCompletableHabitEndpoint)))
 	server.Handle("POST /api/v1/habits/measurable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createMeasurableHabitEndpoint)))
 	server.Handle("POST /api/v1/habits/time", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createTimeHabitEndpoint)))
-	server.Handle("GET  /api/v1/habits", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(listHabitsEndpoint)))
+	server.Handle("GET /api/v1/habits", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(listHabitsEndpoint)))
+	server.Handle("PUT /api/v1/habits/completable/{uuid}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(updateCompletableHabitEndpoint)))
+	server.Handle("PUT /api/v1/habits/measurable/{uuid}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(updateMeasurableHabitEndpoint)))
+	server.Handle("PUT /api/v1/habits/time/{uuid}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(updateTimeHabitEndpoint)))
 
 	// TODO handle the error
 	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", configuration.App.Port), server)
