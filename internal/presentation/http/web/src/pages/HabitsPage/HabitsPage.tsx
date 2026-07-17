@@ -1,12 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { HabitCard } from '../../components/habits'
 import { Page, PageHeader, Panel, PanelBody } from '../../components/layout'
 import { AppNavigation } from '../../components/navigation'
-import { HabitCard } from '../../components/habits'
 import { GoogleIcons } from '../../components/icons'
+import { Message } from '../../components/primitives'
+import { useApiClient } from '../../hooks/useApiClient'
+import type { CompletableHabit } from './CompletableHabit'
+import type { MeasurableHabit } from './MeasurableHabit'
+import type { TimeHabit } from './TimeHabit'
 import './HabitsPage.sass'
 
-type HabitItem = {
+type HabitsResponse = {
+    measurable: MeasurableHabit[]
+    time: TimeHabit[]
+    completable: CompletableHabit[]
+}
+
+type HabitCardModel = {
     uuid: string
     icon: GoogleIcons
     title: string
@@ -14,73 +25,91 @@ type HabitItem = {
     enabled: boolean
 }
 
-const completionHabits: HabitItem[] = [
-    {
-        uuid: '018f1b7a-0000-7000-8000-000000000001',
-        icon: GoogleIcons.Check,
-        title: 'Work on project',
-        typeLabel: 'Completion',
-        enabled: true,
-    },
-    {
-        uuid: '018f1b7a-0000-7000-8000-000000000002',
-        icon: GoogleIcons.Check,
-        title: 'Read a book',
-        typeLabel: 'Completion',
-        enabled: false,
-    },
-]
+function mapHabitsResponse(response: HabitsResponse) {
+    return [
+        ...response.measurable.map(mapMeasurableHabit),
+        ...response.time.map(mapTimeHabit),
+        ...response.completable.map(mapCompletableHabit),
+    ]
+}
 
-const timeHabits: HabitItem[] = [
-    {
-        uuid: '018f1b7a-0000-7000-8000-000000000003',
-        icon: GoogleIcons.Schedule,
-        title: 'Go to bed',
-        typeLabel: 'Time',
-        enabled: true,
-    },
-    {
-        uuid: '018f1b7a-0000-7000-8000-000000000004',
-        icon: GoogleIcons.Schedule,
-        title: 'Morning walk',
-        typeLabel: 'Time',
-        enabled: false,
-    },
-]
-
-const measurableHabits: HabitItem[] = [
-    {
-        uuid: '018f1b7a-0000-7000-8000-000000000005',
-        icon: GoogleIcons.Water,
-        title: 'Drink water',
+function mapMeasurableHabit(habit: MeasurableHabit): HabitCardModel {
+    return {
+        uuid: habit.id,
+        icon: habit.icon as GoogleIcons,
+        title: habit.label,
         typeLabel: 'Quantity',
-        enabled: true,
-    },
-    {
-        uuid: '018f1b7a-0000-7000-8000-000000000006',
-        icon: GoogleIcons.Numbers,
-        title: 'Study pages',
-        typeLabel: 'Quantity',
-        enabled: true,
-    },
-]
+        enabled: habit.archived_at === null,
+    }
+}
 
-// HabitsPage renders the habit management dashboard with grouped habit cards.
+function mapTimeHabit(habit: TimeHabit): HabitCardModel {
+    return {
+        uuid: habit.id,
+        icon: habit.icon as GoogleIcons,
+        title: habit.label,
+        typeLabel: 'Time',
+        enabled: habit.archived_at === null,
+    }
+}
+
+function mapCompletableHabit(habit: CompletableHabit): HabitCardModel {
+    return {
+        uuid: habit.id,
+        icon: habit.icon as GoogleIcons,
+        title: habit.label,
+        typeLabel: 'Completion',
+        enabled: habit.archived_at === null,
+    }
+}
+
+// HabitsPage renders the habit management dashboard with data loaded from the API.
 export function HabitsPage() {
-    const [habitStates, setHabitStates] = useState<Record<string, boolean>>(() =>
-        Object.fromEntries(
-            [...completionHabits, ...timeHabits, ...measurableHabits].map((habit) => [
-                habit.uuid,
-                habit.enabled,
-            ]),
-        ),
-    )
+    const apiClient = useApiClient()
+    const [habits, setHabits] = useState<HabitCardModel[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [loadError, setLoadError] = useState('')
+
+    useEffect(() => {
+        let isActive = true
+
+        async function loadHabits() {
+            setIsLoading(true)
+            setLoadError('')
+
+            try {
+                const response = await apiClient.get<HabitsResponse>('habits')
+                if (!isActive) {
+                    return
+                }
+
+                setHabits(mapHabitsResponse(response.data))
+            } catch {
+                if (!isActive) {
+                    return
+                }
+
+                setLoadError('Could not load habits.')
+            } finally {
+                if (isActive) {
+                    setIsLoading(false)
+                }
+            }
+        }
+
+        void loadHabits()
+
+        return () => {
+            isActive = false
+        }
+    }, [apiClient])
 
     function handleToggle(uuid: string, nextEnabled: boolean) {
-        setHabitStates((current) => ({
-            ...current,
-            [uuid]: nextEnabled,
-        }))
+        setHabits((current) =>
+            current.map((habit) =>
+                habit.uuid === uuid ? { ...habit, enabled: nextEnabled } : habit,
+            ),
+        )
     }
 
     return (
@@ -98,19 +127,25 @@ export function HabitsPage() {
 
             <Panel>
                 <PanelBody>
-                    <div className="habits-grid">
-                        {[...completionHabits, ...timeHabits, ...measurableHabits].map((habit) => (
-                            <HabitCard
-                                enabled={habitStates[habit.uuid]}
-                                icon={habit.icon}
-                                key={habit.uuid}
-                                onToggle={(nextEnabled) => handleToggle(habit.uuid, nextEnabled)}
-                                title={habit.title}
-                                typeLabel={habit.typeLabel}
-                                uuid={habit.uuid}
-                            />
-                        ))}
-                    </div>
+                    {isLoading ? (
+                        <Message variant="info">Loading habits...</Message>
+                    ) : loadError ? (
+                        <Message variant="error">{loadError}</Message>
+                    ) : (
+                        <div className="habits-grid">
+                            {habits.map((habit) => (
+                                <HabitCard
+                                    enabled={habit.enabled}
+                                    icon={habit.icon}
+                                    key={habit.uuid}
+                                    onToggle={(nextEnabled) => handleToggle(habit.uuid, nextEnabled)}
+                                    title={habit.title}
+                                    typeLabel={habit.typeLabel}
+                                    uuid={habit.uuid}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </PanelBody>
             </Panel>
 
