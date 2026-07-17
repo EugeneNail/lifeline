@@ -1,0 +1,11 @@
+### Get a completable habit
+
+GET localhost:30000/api/v1/habits/completable/{{habitId}}
+Authorization: Bearer {{loginToken}}
+
+###
+
+### Reject a missing completable habit
+
+GET localhost:30000/api/v1/habits/completable/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{loginToken}}

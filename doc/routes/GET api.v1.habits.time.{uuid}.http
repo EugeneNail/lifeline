@@ -1,0 +1,11 @@
+### Get a time habit
+
+GET localhost:30000/api/v1/habits/time/{{habitId}}
+Authorization: Bearer {{loginToken}}
+
+###
+
+### Reject a missing time habit
+
+GET localhost:30000/api/v1/habits/time/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{loginToken}}

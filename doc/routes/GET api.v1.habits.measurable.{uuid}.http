@@ -1,0 +1,11 @@
+### Get a measurable habit
+
+GET localhost:30000/api/v1/habits/measurable/{{habitId}}
+Authorization: Bearer {{loginToken}}
+
+###
+
+### Reject a missing measurable habit
+
+GET localhost:30000/api/v1/habits/measurable/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{loginToken}}
