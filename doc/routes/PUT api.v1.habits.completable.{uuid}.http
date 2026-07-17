@@ -1,0 +1,21 @@
+### Update a completable habit
+
+PUT localhost:30000/api/v1/habits/completable/{{habitId}}
+Authorization: Bearer {{loginToken}}
+
+{
+    "label": "Drink water daily",
+    "icon": 5
+}
+
+###
+
+### Reject a completable habit update with domain validation errors
+
+PUT localhost:30000/api/v1/habits/completable/{{habitId}}
+Authorization: Bearer {{loginToken}}
+
+{
+    "label": "@",
+    "icon": 99
+}
