@@ -30,28 +30,28 @@ type Output struct {
 
 // MeasurableHabit represents the public measurable habit fields returned to the client.
 type MeasurableHabit struct {
-	ID        string     `json:"id"`
-	Label     string     `json:"label"`
-	Icon      int        `json:"icon"`
-	Step      float32    `json:"step"`
-	Unit      string     `json:"unit"`
-	AchivedAt *time.Time `json:"achived_at"`
+	ID         string     `json:"id"`
+	Label      string     `json:"label"`
+	Icon       int        `json:"icon"`
+	Step       float32    `json:"step"`
+	Unit       string     `json:"unit"`
+	ArchivedAt *time.Time `json:"archivedAt"`
 }
 
 // TimeHabit represents the public time habit fields returned to the client.
 type TimeHabit struct {
-	ID        string     `json:"id"`
-	Label     string     `json:"label"`
-	Icon      int        `json:"icon"`
-	AchivedAt *time.Time `json:"achived_at"`
+	ID         string     `json:"id"`
+	Label      string     `json:"label"`
+	Icon       int        `json:"icon"`
+	ArchivedAt *time.Time `json:"archivedAt"`
 }
 
 // CompletableHabit represents the public completable habit fields returned to the client.
 type CompletableHabit struct {
-	ID        string     `json:"id"`
-	Label     string     `json:"label"`
-	Icon      int        `json:"icon"`
-	AchivedAt *time.Time `json:"achived_at"`
+	ID         string     `json:"id"`
+	Label      string     `json:"label"`
+	Icon       int        `json:"icon"`
+	ArchivedAt *time.Time `json:"archivedAt"`
 }
 
 // Handle loads the user's habits, maps them to the transport output, and returns an HTTP response.
@@ -79,12 +79,12 @@ func mapMeasurableHabits(habitsList []*habits.MeasurableHabit) []MeasurableHabit
 	output := make([]MeasurableHabit, 0, len(habitsList))
 	for _, habit := range habitsList {
 		output = append(output, MeasurableHabit{
-			ID:        habit.ID().String(),
-			Label:     habit.Label(),
-			Icon:      int(habit.Icon()),
-			Step:      float32(habit.Step()),
-			Unit:      string(habit.Unit()),
-			AchivedAt: habit.ArchivedAt(),
+			ID:         habit.ID().String(),
+			Label:      habit.Label(),
+			Icon:       int(habit.Icon()),
+			Step:       float32(habit.Step()),
+			Unit:       string(habit.Unit()),
+			ArchivedAt: habit.ArchivedAt(),
 		})
 	}
 
@@ -95,10 +95,10 @@ func mapTimeHabits(habitsList []*habits.TimeHabit) []TimeHabit {
 	output := make([]TimeHabit, 0, len(habitsList))
 	for _, habit := range habitsList {
 		output = append(output, TimeHabit{
-			ID:        habit.ID().String(),
-			Label:     habit.Label(),
-			Icon:      int(habit.Icon()),
-			AchivedAt: habit.ArchivedAt(),
+			ID:         habit.ID().String(),
+			Label:      habit.Label(),
+			Icon:       int(habit.Icon()),
+			ArchivedAt: habit.ArchivedAt(),
 		})
 	}
 
@@ -109,10 +109,10 @@ func mapCompletableHabits(habitsList []*habits.CompletableHabit) []CompletableHa
 	output := make([]CompletableHabit, 0, len(habitsList))
 	for _, habit := range habitsList {
 		output = append(output, CompletableHabit{
-			ID:        habit.ID().String(),
-			Label:     habit.Label(),
-			Icon:      int(habit.Icon()),
-			AchivedAt: habit.ArchivedAt(),
+			ID:         habit.ID().String(),
+			Label:      habit.Label(),
+			Icon:       int(habit.Icon()),
+			ArchivedAt: habit.ArchivedAt(),
 		})
 	}
 
