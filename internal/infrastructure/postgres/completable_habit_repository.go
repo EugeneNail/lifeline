@@ -47,6 +47,36 @@ func (repository *CompletableHabitRepository) Add(ctx context.Context, habit *ha
 	return nil
 }
 
+// Save updates all fields of the provided completable habit in PostgreSQL.
+func (repository *CompletableHabitRepository) Save(ctx context.Context, habit *habits.CompletableHabit) error {
+	result, err := repository.db.ExecContext(
+		ctx,
+		`UPDATE completable_habits SET label = $2, icon = $3, created_at = $4, updated_at = $5, archived_at = $6, deleted_at = $7, account_id = $8 WHERE id = $1`,
+		habit.ID(),
+		habit.Label(),
+		int(habit.Icon()),
+		habit.CreatedAt(),
+		habit.UpdatedAt(),
+		habit.ArchivedAt(),
+		habit.DeletedAt(),
+		habit.AccountId(),
+	)
+	if err != nil {
+		return fmt.Errorf("executing an UPDATE sql query for completable habit %s: %w", habit.ID(), err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("checking updated rows for completable habit %s: %w", habit.ID(), err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("saving completable habit %s: no rows updated", habit.ID())
+	}
+
+	return nil
+}
+
 // Count returns the number of completable habits matching the provided filter.
 func (repository *CompletableHabitRepository) Count(ctx context.Context, filter habits.CompletableHabitFilter) (int, error) {
 	query := `SELECT COUNT(*) FROM completable_habits`

@@ -49,6 +49,38 @@ func (repository *MeasurableHabitRepository) Add(ctx context.Context, habit *hab
 	return nil
 }
 
+// Save updates all fields of the provided measurable habit in PostgreSQL.
+func (repository *MeasurableHabitRepository) Save(ctx context.Context, habit *habits.MeasurableHabit) error {
+	result, err := repository.db.ExecContext(
+		ctx,
+		`UPDATE measurable_habits SET label = $2, icon = $3, step = $4, unit = $5, created_at = $6, updated_at = $7, archived_at = $8, deleted_at = $9, account_id = $10 WHERE id = $1`,
+		habit.ID(),
+		habit.Label(),
+		int(habit.Icon()),
+		float32(habit.Step()),
+		string(habit.Unit()),
+		habit.CreatedAt(),
+		habit.UpdatedAt(),
+		habit.ArchivedAt(),
+		habit.DeletedAt(),
+		habit.AccountId(),
+	)
+	if err != nil {
+		return fmt.Errorf("executing an UPDATE sql query for measurable habit %s: %w", habit.ID(), err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("checking updated rows for measurable habit %s: %w", habit.ID(), err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("no rows updated for habit id %q", habit.ID())
+	}
+
+	return nil
+}
+
 // Count returns the number of measurable habits matching the provided filter.
 func (repository *MeasurableHabitRepository) Count(ctx context.Context, filter habits.MeasurableHabitFilter) (int, error) {
 	query := `SELECT COUNT(*) FROM measurable_habits`

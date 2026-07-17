@@ -47,6 +47,36 @@ func (repository *TimeHabitRepository) Add(ctx context.Context, habit *habits.Ti
 	return nil
 }
 
+// Save updates all fields of the provided time habit in PostgreSQL.
+func (repository *TimeHabitRepository) Save(ctx context.Context, habit *habits.TimeHabit) error {
+	result, err := repository.db.ExecContext(
+		ctx,
+		`UPDATE time_habits SET label = $2, icon = $3, created_at = $4, updated_at = $5, archived_at = $6, deleted_at = $7, account_id = $8 WHERE id = $1`,
+		habit.ID(),
+		habit.Label(),
+		int(habit.Icon()),
+		habit.CreatedAt(),
+		habit.UpdatedAt(),
+		habit.ArchivedAt(),
+		habit.DeletedAt(),
+		habit.AccountId(),
+	)
+	if err != nil {
+		return fmt.Errorf("executing an UPDATE sql query for time habit %s: %w", habit.ID(), err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("checking updated rows for time habit %s: %w", habit.ID(), err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("saving time habit %s: no rows updated", habit.ID())
+	}
+
+	return nil
+}
+
 // Count returns the number of time habits matching the provided filter.
 func (repository *TimeHabitRepository) Count(ctx context.Context, filter habits.TimeHabitFilter) (int, error) {
 	query := `SELECT COUNT(*) FROM time_habits`
