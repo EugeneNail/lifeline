@@ -8,6 +8,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
 )
 
+// TODO remove 'Entry' from the beginning
 // EntryCreationPolicy checks whether a daily entry can be created.
 type EntryCreationPolicy struct {
 	entries EntryRepository

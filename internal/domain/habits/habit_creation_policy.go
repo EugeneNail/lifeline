@@ -9,6 +9,7 @@ import (
 
 const activeHabitLimit = 50
 
+// TODO remove 'Habit' from the beginning
 // HabitCreationPolicy checks whether a habit can be created.
 type HabitCreationPolicy struct {
 	completableHabits CompletableHabitRepository
