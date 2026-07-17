@@ -1,0 +1,8 @@
+# Save or update a measurable habit record for a specific day.
+POST localhost:30000/api/v1/habits/measurable/{{habitId}}/2000-01-01
+Authorization: Bearer {{loginToken}}
+Content-Type: application/json
+
+{
+    "value": 13
+}
