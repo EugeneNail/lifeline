@@ -1,0 +1,4 @@
+### List habits
+
+GET localhost:30000/api/v1/habits
+Authorization: Bearer {{loginToken}}

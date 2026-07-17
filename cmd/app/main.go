@@ -10,6 +10,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_entry"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_measurable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_time_habit"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/list_habits"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/refresh"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/register_user"
 	"github.com/EugeneNail/lifeline/internal/domain/entries"
@@ -24,6 +25,7 @@ import (
 	transportCreate_entry "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_entry"
 	transportCreate_measurable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_measurable_habit"
 	transportCreate_time_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_time_habit"
+	transportList_habits "github.com/EugeneNail/lifeline/internal/presentation/http/api/list_habits"
 	transportRefresh "github.com/EugeneNail/lifeline/internal/presentation/http/api/refresh"
 	transportRegister_user "github.com/EugeneNail/lifeline/internal/presentation/http/api/register_user"
 	"github.com/EugeneNail/lifeline/internal/presentation/http/middleware"
@@ -115,6 +117,11 @@ func main() {
 		log.Fatalf("creating a create-time-habit usecase: %v", err)
 	}
 
+	listHabitsUsecase, err := list_habits.NewHandler(completableHabitRepository, timeHabitRepository, measurableHabitRepository)
+	if err != nil {
+		log.Fatalf("creating a list-habits usecase: %v", err)
+	}
+
 	// --- Section: HTTP endpoint handlers ---
 	registerUserEndpoint := transportRegister_user.NewHandler(registerUserUsecase)
 	authenticateEndpoint := transportAuthenticate.NewHandler(authenticateUsecase)
@@ -122,6 +129,7 @@ func main() {
 	createEntryEndpoint := transportCreate_entry.NewHandler(createEntryUsecase, requestIdentity)
 	createCompletableHabitEndpoint := transportCreate_completable_habit.NewHandler(createCompletableHabitUsecase, requestIdentity)
 	createMeasurableHabitEndpoint := transportCreate_measurable_habit.NewHandler(createMeasurableHabitUsecase, requestIdentity)
+	listHabitsEndpoint := transportList_habits.NewHandler(listHabitsUsecase, requestIdentity)
 	createTimeHabitEndpoint := transportCreate_time_habit.NewHandler(createTimeHabitUsecase, requestIdentity)
 
 	// --- Section: HTTP server ---
@@ -133,6 +141,7 @@ func main() {
 	server.Handle("POST /api/v1/habits/completable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createCompletableHabitEndpoint)))
 	server.Handle("POST /api/v1/habits/measurable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createMeasurableHabitEndpoint)))
 	server.Handle("POST /api/v1/habits/time", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createTimeHabitEndpoint)))
+	server.Handle("GET  /api/v1/habits", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(listHabitsEndpoint)))
 
 	// TODO handle the error
 	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", configuration.App.Port), server)
