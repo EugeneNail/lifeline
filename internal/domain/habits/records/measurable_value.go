@@ -23,21 +23,26 @@ func NewMeasurableValue(rawValue float32, step habits.MeasurementStep) (Measurab
 
 	value := float64(rawValue)
 	stepValue := float64(step)
-	// The record value must be an exact multiple of the habit step.
-	// Example: if step is 0.25, then 1.00, 1.25, 1.50, and 1.75 are valid.
-	// We use math.Mod to compute the remainder after division by step:
-	// - remainder == 0 means the value fits the step exactly
-	// - a small remainder can still appear because float32/float64 math is not perfectly precise
-	// That is why we allow only a tiny epsilon instead of comparing raw floats with strict equality.
-	remainder := math.Mod(value, stepValue)
-	if remainder != 0 {
-		const epsilon = 1e-6
-		if remainder > epsilon && stepValue-remainder > epsilon {
-			return 0, domain.NewErrorf("measurable value must be a multiple of step %g", step)
-		}
+	// The record value must land on one of the step boundaries.
+	//
+	// Example: if step is 0.1, then 91.7 is valid even when the raw float comes in
+	// as 91.69999695 from JSON, because the source of truth is still "91.7".
+	//
+	// We therefore do not compare the raw float for strict equality. Instead, we:
+	// 1. divide the value by step,
+	// 2. round to the nearest whole step count,
+	// 3. rebuild the value from that count,
+	// 4. compare the difference with a small epsilon.
+	//
+	// If the value is far from the nearest step boundary, it is rejected.
+	const epsilon = 1e-5
+	nearestStepCount := math.Round(value / stepValue)
+	normalizedValue := nearestStepCount * stepValue
+	if math.Abs(value-normalizedValue) > epsilon {
+		return 0, domain.NewErrorf("measurable value %0.8f must be a multiple of step %g", value, step)
 	}
 
-	return MeasurableValue(rawValue), nil
+	return MeasurableValue(float32(normalizedValue)), nil
 }
 
 // Value returns the measurable value as a float32.
