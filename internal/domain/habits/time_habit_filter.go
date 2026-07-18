@@ -7,8 +7,8 @@ import (
 // TimeHabitFilter carries optional time habit lookup criteria.
 type TimeHabitFilter struct {
 	AccountIds   []uuid.UUID
-	Archived     bool
-	Deleted      bool
+	Archived     *bool
+	Deleted      *bool
 	TimeHabitIds []uuid.UUID
 }
 
@@ -26,14 +26,16 @@ func (filter TimeHabitFilter) WithAccountIds(accountIds ...uuid.UUID) TimeHabitF
 
 // WithArchived returns a filter with the provided archive status.
 func (filter TimeHabitFilter) WithArchived(archived bool) TimeHabitFilter {
-	filter.Archived = archived
+	value := archived
+	filter.Archived = &value
 
 	return filter
 }
 
 // WithDeleted returns a filter with the provided deletion status.
 func (filter TimeHabitFilter) WithDeleted(deleted bool) TimeHabitFilter {
-	filter.Deleted = deleted
+	value := deleted
+	filter.Deleted = &value
 
 	return filter
 }

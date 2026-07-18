@@ -164,16 +164,20 @@ func (repository *CompletableHabitRepository) buildConditions(filter habits.Comp
 		conditions = append(conditions, fmt.Sprintf("id IN (%s)", strings.Join(placeholders, ", ")))
 	}
 
-	if filter.Archived {
-		conditions = append(conditions, "archived_at IS NOT NULL")
-	} else {
-		conditions = append(conditions, "archived_at IS NULL")
+	if filter.Archived != nil {
+		if *filter.Archived {
+			conditions = append(conditions, "archived_at IS NOT NULL")
+		} else {
+			conditions = append(conditions, "archived_at IS NULL")
+		}
 	}
 
-	if filter.Deleted {
-		conditions = append(conditions, "deleted_at IS NOT NULL")
-	} else {
-		conditions = append(conditions, "deleted_at IS NULL")
+	if filter.Deleted != nil {
+		if *filter.Deleted {
+			conditions = append(conditions, "deleted_at IS NOT NULL")
+		} else {
+			conditions = append(conditions, "deleted_at IS NULL")
+		}
 	}
 
 	return conditions, args

@@ -7,8 +7,8 @@ import (
 // CompletableHabitFilter carries optional completable habit lookup criteria.
 type CompletableHabitFilter struct {
 	AccountIds          []uuid.UUID
-	Archived            bool
-	Deleted             bool
+	Archived            *bool
+	Deleted             *bool
 	CompletableHabitIds []uuid.UUID
 }
 
@@ -26,14 +26,16 @@ func (filter CompletableHabitFilter) WithAccountIds(accountIds ...uuid.UUID) Com
 
 // WithArchived returns a filter with the provided archive status.
 func (filter CompletableHabitFilter) WithArchived(archived bool) CompletableHabitFilter {
-	filter.Archived = archived
+	value := archived
+	filter.Archived = &value
 
 	return filter
 }
 
 // WithDeleted returns a filter with the provided deletion status.
 func (filter CompletableHabitFilter) WithDeleted(deleted bool) CompletableHabitFilter {
-	filter.Deleted = deleted
+	value := deleted
+	filter.Deleted = &value
 
 	return filter
 }
