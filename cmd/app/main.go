@@ -13,6 +13,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/application/usecases/get_completable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/get_measurable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/get_time_habit"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/list_habit_records"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/list_habits"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/refresh"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/register_user"
@@ -38,6 +39,7 @@ import (
 	transportGet_completable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/get_completable_habit"
 	transportGet_measurable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/get_measurable_habit"
 	transportGet_time_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/get_time_habit"
+	transportList_habit_records "github.com/EugeneNail/lifeline/internal/presentation/http/api/list_habit_records"
 	transportList_habits "github.com/EugeneNail/lifeline/internal/presentation/http/api/list_habits"
 	transportRefresh "github.com/EugeneNail/lifeline/internal/presentation/http/api/refresh"
 	transportRegister_user "github.com/EugeneNail/lifeline/internal/presentation/http/api/register_user"
@@ -173,6 +175,11 @@ func main() {
 		log.Fatalf("creating a list-habits usecase: %v", err)
 	}
 
+	listHabitRecordsUsecase, err := list_habit_records.NewHandler(completableHabitRecordRepository, timeHabitRecordRepository, measurableHabitRecordRepository)
+	if err != nil {
+		log.Fatalf("creating a list-habit-records usecase: %v", err)
+	}
+
 	saveCompletableHabitRecordUsecase, err := save_completable_habit_record.NewHandler(completableHabitRecordRepository, completableHabitRepository, habitSavingPolicy)
 	if err != nil {
 		log.Fatalf("creating a save-completable-habit-record usecase: %v", err)
@@ -211,6 +218,7 @@ func main() {
 	createCompletableHabitEndpoint := transportCreate_completable_habit.NewHandler(createCompletableHabitUsecase, requestIdentity)
 	createMeasurableHabitEndpoint := transportCreate_measurable_habit.NewHandler(createMeasurableHabitUsecase, requestIdentity)
 	listHabitsEndpoint := transportList_habits.NewHandler(listHabitsUsecase, requestIdentity)
+	listHabitRecordsEndpoint := transportList_habit_records.NewHandler(listHabitRecordsUsecase, requestIdentity)
 	saveCompletableHabitRecordEndpoint := transportSave_completable_habit_record.NewHandler(saveCompletableHabitRecordUsecase, requestIdentity)
 	saveMeasurableHabitRecordEndpoint := transportSave_measurable_habit_record.NewHandler(saveMeasurableHabitRecordUsecase, requestIdentity)
 	saveTimeHabitRecordEndpoint := transportSave_time_habit_record.NewHandler(saveTimeHabitRecordUsecase, requestIdentity)
@@ -235,6 +243,7 @@ func main() {
 	server.Handle("GET /api/v1/habits/time/{uuid}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getTimeHabitEndpoint)))
 	server.Handle("GET /api/v1/habits/measurable/{uuid}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getMeasurableHabitEndpoint)))
 	server.Handle("GET /api/v1/habits", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(listHabitsEndpoint)))
+	server.Handle("GET /api/v1/habits/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(listHabitRecordsEndpoint)))
 	server.Handle("POST /api/v1/habits/completable/{uuid}/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(saveCompletableHabitRecordEndpoint)))
 	server.Handle("POST /api/v1/habits/measurable/{uuid}/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(saveMeasurableHabitRecordEndpoint)))
 	server.Handle("POST /api/v1/habits/time/{uuid}/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(saveTimeHabitRecordEndpoint)))

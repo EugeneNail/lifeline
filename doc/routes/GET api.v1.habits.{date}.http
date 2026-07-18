@@ -1,0 +1,4 @@
+### List all habit records for a specific day.
+
+GET localhost:30000/api/v1/habits/2000-01-01
+Authorization: Bearer {{loginToken}}
