@@ -82,7 +82,7 @@ export function EditHabitPage() {
     const habitType = params.type
     const habitId = params.id
     const [label, setLabel] = useState('')
-    const [icon, setIcon] = useState<GoogleIcons>(GoogleIcons.Check)
+    const [icon, setIcon] = useState<GoogleIcons>(GoogleIcons.Favorite)
     const [unit, setUnit] = useState('')
     const [step, setStep] = useState('')
     const [isLoading, setIsLoading] = useState(true)

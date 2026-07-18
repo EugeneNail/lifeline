@@ -56,7 +56,7 @@ export function CreateHabitPage() {
     const apiClient = useApiClient()
     const navigate = useNavigate()
     const [label, setLabel] = useState('')
-    const [icon, setIcon] = useState<GoogleIcons>(GoogleIcons.Check)
+    const [icon, setIcon] = useState<GoogleIcons>(GoogleIcons.Favorite)
     const [habitType, setHabitType] = useState<HabitType>('completable')
     const [unit, setUnit] = useState('')
     const [step, setStep] = useState('')

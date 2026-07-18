@@ -1,24 +1,7 @@
 import type { HTMLAttributes } from 'react'
+import { googleIconNames } from './googleIconCatalog'
+import type { GoogleIcons } from './googleIconCatalog'
 import './GoogleIcon.sass'
-
-// GoogleIcons identifies the supported Material Symbols placeholder icons.
-export const GoogleIcons = {
-    Check: 1,
-    Water: 2,
-    Numbers: 3,
-    Schedule: 4,
-    Fitness: 5,
-} as const
-
-export type GoogleIcons = (typeof GoogleIcons)[keyof typeof GoogleIcons]
-
-const googleIconNames: Record<GoogleIcons, string> = {
-    [GoogleIcons.Check]: 'check_circle',
-    [GoogleIcons.Water]: 'water_drop',
-    [GoogleIcons.Numbers]: 'pin',
-    [GoogleIcons.Schedule]: 'schedule',
-    [GoogleIcons.Fitness]: 'exercise',
-}
 
 type GoogleIconProps = HTMLAttributes<HTMLSpanElement> & {
     icon: GoogleIcons
