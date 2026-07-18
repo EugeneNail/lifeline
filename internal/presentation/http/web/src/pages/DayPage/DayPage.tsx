@@ -1,0 +1,138 @@
+import axios from 'axios'
+import { useEffect, useMemo, useState } from 'react'
+import { Navigate, useParams } from 'react-router-dom'
+import { AppNavigation } from '../../components/navigation'
+import {
+    DailyHabits,
+    type DailyHabitsData,
+    type DailyHabitRecords,
+} from '../../components/habits/DailyHabits'
+import { Page } from '../../components/layout'
+import { Message } from '../../components/primitives'
+import { useApiClient } from '../../hooks/useApiClient'
+import './DayPage.sass'
+
+type HabitsResponse = DailyHabitsData & {
+    completable: Array<DailyHabitsData['completable'][number]>
+    measurable: Array<DailyHabitsData['measurable'][number]>
+    time: Array<DailyHabitsData['time'][number]>
+}
+
+type RecordsResponse = DailyHabitRecords
+
+function resolvePageDate(rawDate: string | undefined) {
+    if (!rawDate) {
+        return null
+    }
+
+    if (rawDate === 'today') {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        return today
+    }
+
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(rawDate)
+    if (!match) {
+        return null
+    }
+
+    const year = Number(match[1])
+    const month = Number(match[2]) - 1
+    const day = Number(match[3])
+    const date = new Date(year, month, day)
+
+    if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month ||
+        date.getDate() !== day
+    ) {
+        return null
+    }
+
+    return date
+}
+
+function formatDateKey(date: Date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+// DayPage loads the selected day data and renders the daily habits workspace.
+export function DayPage() {
+    const apiClient = useApiClient()
+    const params = useParams<{ date: string }>()
+    const pageDate = useMemo(() => resolvePageDate(params.date), [params.date])
+    const dateKey = useMemo(() => (pageDate ? formatDateKey(pageDate) : ''), [pageDate])
+    const [habits, setHabits] = useState<HabitsResponse | null>(null)
+    const [records, setRecords] = useState<RecordsResponse | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [loadError, setLoadError] = useState('')
+
+    useEffect(() => {
+        let isActive = true
+
+        async function loadDayData() {
+            if (!pageDate) {
+                if (isActive) {
+                    setIsLoading(false)
+                }
+                return
+            }
+
+            setIsLoading(true)
+            setLoadError('')
+
+            try {
+                const [habitsResponse, recordsResponse] = await Promise.all([
+                    apiClient.get<HabitsResponse>('habits'),
+                    apiClient.get<RecordsResponse>(`habits/${dateKey}`),
+                ])
+
+                if (!isActive) {
+                    return
+                }
+
+                setHabits(habitsResponse.data)
+                setRecords(recordsResponse.data)
+            } catch (error) {
+                if (!isActive) {
+                    return
+                }
+
+                if (axios.isAxiosError(error) && error.response?.status === 404) {
+                    setLoadError('Could not load the selected day.')
+                    return
+                }
+
+                setLoadError('Could not load the selected day.')
+            } finally {
+                if (isActive) {
+                    setIsLoading(false)
+                }
+            }
+        }
+
+        void loadDayData()
+
+        return () => {
+            isActive = false
+        }
+    }, [apiClient, dateKey, pageDate])
+
+    if (!pageDate) {
+        return <Navigate replace to="/habits" />
+    }
+
+    return (
+        <Page className="day-page">
+            {isLoading ? (
+                <Message variant="info">Loading day data...</Message>
+            ) : loadError ? (
+                <Message variant="error">{loadError}</Message>
+            ) : habits && records ? (
+                <DailyHabits date={pageDate} dateKey={dateKey} habits={habits} records={records} />
+            ) : null}
+
+            <AppNavigation />
+        </Page>
+    )
+}

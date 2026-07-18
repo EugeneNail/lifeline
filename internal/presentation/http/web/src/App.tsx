@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { DayPage } from './pages/DayPage/DayPage'
 import { CreateHabitPage } from './pages/CreateHabitPage/CreateHabitPage'
 import { HabitsPage } from './pages/HabitsPage/HabitsPage'
 import { EditHabitPage } from './pages/EditHabitPage/EditHabitPage'
@@ -13,6 +14,8 @@ function App() {
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/habits/new" element={<CreateHabitPage />} />
             <Route path="/habits/:type/:id" element={<EditHabitPage />} />
+            <Route path="/dates/today" element={<DayPage />} />
+            <Route path="/dates/:date" element={<DayPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="*" element={<Navigate replace to="/" />} />

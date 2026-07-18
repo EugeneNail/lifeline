@@ -1,0 +1,335 @@
+.daily-habits__body
+    display: grid
+    gap: 24px
+
+.daily-habits__header
+    display: flex
+    align-items: start
+    justify-content: space-between
+    gap: 16px
+
+.daily-habits__heading
+    min-width: 0
+
+.daily-habits__eyebrow
+    margin: 0 0 4px
+    color: var(--primary)
+    font-size: 13px
+    font-weight: 800
+    letter-spacing: 0.08em
+    text-transform: uppercase
+
+.daily-habits__title
+    margin: 0
+    font-size: 20px
+    letter-spacing: -0.02em
+
+.daily-habits__subtitle
+    margin: 6px 0 0
+    color: var(--text-secondary)
+    font-size: 14px
+    line-height: 1.6
+
+.daily-habits__header-actions
+    display: flex
+    align-items: center
+    justify-content: flex-end
+    gap: 10px
+    flex-wrap: wrap
+
+.daily-habits__footer
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 12px
+
+.daily-habits__footer .daily-habits__status
+    margin-left: auto
+
+.daily-habits__count
+    display: inline-flex
+    align-items: center
+    gap: 10px
+    min-height: 28px
+    min-width: 0
+    padding: 0
+    color: var(--text-secondary)
+    font-size: 12px
+    font-weight: 750
+    white-space: nowrap
+
+.daily-habits__count-text
+    flex: 0 0 auto
+
+.daily-habits__count-bar
+    position: relative
+    width: 96px
+    height: 8px
+    border-radius: 999px
+    background: var(--surface-secondary)
+    overflow: hidden
+
+.daily-habits__count-bar-fill
+    display: block
+    height: 100%
+    border-radius: inherit
+    background: var(--success)
+    transition: width 180ms ease
+
+.daily-habits__status
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    min-height: 28px
+    padding: 0 10px
+    border-radius: 999px
+    background: var(--surface-secondary)
+    color: var(--text-secondary)
+    font-size: 12px
+    font-weight: 750
+    white-space: nowrap
+
+.daily-habits__status::before
+    content: ''
+    width: 7px
+    height: 7px
+    border-radius: 50%
+    background: var(--text-disabled)
+
+.daily-habits__status[data-status='saving']
+    background: var(--info-container)
+    color: var(--info)
+
+.daily-habits__status[data-status='saving']::before
+    background: var(--info)
+    animation: daily-habits-pulse 0.9s infinite
+
+.daily-habits__status[data-status='error']
+    background: var(--error-container)
+    color: var(--error)
+
+.daily-habits__status[data-status='error']::before
+    background: var(--error)
+
+.daily-habits__status[data-status='saved']
+    background: var(--success-container)
+    color: var(--success)
+
+.daily-habits__status[data-status='saved']::before
+    background: var(--success)
+
+.daily-habits__list
+    display: grid
+    gap: 10px
+
+.daily-habit
+    display: grid
+    grid-template-columns: 72px minmax(0, 1fr) auto
+    align-items: center
+    gap: 14px
+    min-height: 88px
+    padding: 14px
+    border-radius: var(--radius-md)
+    background: var(--surface-secondary)
+
+.daily-habit__icon
+    display: grid
+    place-items: center
+    width: 72px
+    height: 72px
+    border-radius: 18px
+    border: 1px solid var(--divider)
+    background: var(--primary-container)
+    color: var(--primary)
+
+.daily-habit__content
+    min-width: 0
+
+.daily-habit__title
+    margin: 0 0 4px
+    overflow: hidden
+    color: var(--text-primary)
+    font-size: 17px
+    font-weight: 800
+    letter-spacing: -0.02em
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.daily-habit__meta
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 12px
+
+.daily-habit__control
+    justify-self: end
+
+.daily-habit-checkbox
+    display: inline-flex
+    align-items: center
+    gap: 8px
+    min-height: 42px
+    padding: 0 12px
+    border: 1px solid var(--outline)
+    border-radius: 13px
+    background: var(--surface)
+    color: var(--text-secondary)
+    font-size: 13px
+    font-weight: 780
+
+.daily-habit-checkbox__box
+    display: grid
+    place-items: center
+    width: 20px
+    height: 20px
+    border: 2px solid var(--outline)
+    border-radius: 7px
+    color: transparent
+    font-size: 14px
+    line-height: 1
+
+.daily-habit-checkbox--checked
+    border-color: var(--success)
+    background: var(--success-container)
+    color: var(--success)
+
+.daily-habit-checkbox--checked .daily-habit-checkbox__box
+    border-color: var(--success)
+    background: var(--success)
+    color: var(--surface)
+
+.daily-habit-stepper
+    display: flex
+    align-items: center
+    flex-wrap: wrap
+    overflow: hidden
+    border: 1px solid var(--outline)
+    border-radius: 13px
+    background: var(--surface)
+
+.daily-habit-stepper__button
+    min-height: 42px
+    min-width: 40px
+    padding-inline: 0
+    border-radius: 0
+    font-size: 13px
+
+.daily-habit-stepper__button.button--secondary
+    background: transparent
+    color: var(--primary)
+
+.daily-habit-stepper__button.button--secondary:hover:not(:disabled)
+    background: var(--primary-container)
+
+.daily-habit-stepper__value
+    display: grid
+    place-items: center
+    min-width: 84px
+    padding: 0 12px
+    font-size: 13px
+    font-weight: 780
+    font-variant-numeric: tabular-nums
+    white-space: nowrap
+
+.daily-habit-time
+    display: inline-flex
+    align-items: center
+    gap: 8px
+    min-height: 42px
+    padding: 0 12px
+    border: 1px solid var(--outline)
+    border-radius: 13px
+    background: var(--surface)
+
+.daily-habit-time__icon
+    display: grid
+    place-items: center
+    color: var(--primary)
+
+.daily-habit-time__select
+    border: 0
+    padding: 0
+    background: transparent
+    color: var(--text-primary)
+    font-size: 13px
+    font-weight: 780
+    outline: none
+    appearance: none
+
+.daily-habit-time__select::-ms-expand
+    display: none
+
+.daily-habit-time__separator
+    color: var(--text-secondary)
+    font-weight: 800
+    line-height: 1
+
+@keyframes daily-habits-pulse
+    50%
+        opacity: 0.35
+
+@media (max-width: 860px)
+    .daily-habits__header
+        flex-direction: column
+
+    .daily-habits__header-actions
+        justify-content: flex-start
+
+@media (max-width: 720px)
+    .daily-habit
+        grid-template-columns: 64px minmax(0, 1fr)
+        gap: 10px
+        min-height: 76px
+        padding: 12px
+
+    .daily-habit__icon
+        width: 64px
+        height: 64px
+        border-radius: 16px
+
+    .daily-habit__title
+        font-size: 16px
+
+    .daily-habit__control
+        grid-column: 1 / -1
+        padding-left: 74px
+
+    .daily-habit-stepper__value
+        min-width: 80px
+
+@media (max-width: 560px)
+    .daily-habits__body
+        gap: 18px
+
+    .daily-habits__subtitle
+        font-size: 13px
+
+    .daily-habit
+        padding: 10px
+
+    .daily-habit__control
+        padding-left: 62px
+
+    .daily-habit-checkbox,
+    .daily-habit-time
+        width: 100%
+
+    .daily-habit-time
+        justify-content: space-between
+
+    .daily-habit-time__select
+        flex: 1 1 auto
+
+    .daily-habit-stepper
+        width: 100%
+
+    .daily-habit-stepper__value
+        flex: 1 1 auto
+
+    .daily-habits__footer
+        flex-wrap: wrap
+
+    .daily-habits__count-bar
+        width: 72px
+
+    .daily-habits__status
+        margin-left: 0
