@@ -1,0 +1,11 @@
+### Get a journal for a day
+
+GET localhost:30000/api/v1/journals/2000-01-01
+Authorization: Bearer {{loginToken}}
+
+###
+
+### Reject a missing journal
+
+GET localhost:30000/api/v1/journals/1999-12-31
+Authorization: Bearer {{loginToken}}
