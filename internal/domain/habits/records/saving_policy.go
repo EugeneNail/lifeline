@@ -17,7 +17,7 @@ func NewSavingPolicy() *SavingPolicy {
 }
 
 // Check returns nil when the target belongs to the account and is not deleted or archived after the given date, or a domain error otherwise.
-func (policy *SavingPolicy) Check(accountID uuid.UUID, date Date, target SavingTarget) domain.Error {
+func (policy *SavingPolicy) Check(accountID uuid.UUID, date Date, target SavingTarget) domain.Violation {
 	if target.AccountId() != accountID {
 		return habits.ErrHabitBelongsToAnotherUser
 	}

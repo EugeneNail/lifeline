@@ -2,10 +2,11 @@ package register_user
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/EugeneNail/lifeline/internal/application"
 	"time"
 
+	"github.com/EugeneNail/lifeline/internal/domain"
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
 )
 
@@ -37,24 +38,34 @@ type RegisterUserCommand struct {
 
 // Handle validates the registration command, hashes the password, and returns the new user identifier or field validation errors.
 func (h *Handler) Handle(ctx context.Context, command RegisterUserCommand) (auth.ID, error) {
-	errs := application.NewFieldErrors()
+	violations := domain.NewViolations()
 
 	email, err := auth.NewEmail(command.Email)
-	if err := errs.AddFromDomain("email", err); err != nil {
-		return auth.NilID, fmt.Errorf("creating an email: %w", err)
+	if err != nil {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
+			return auth.NilID, fmt.Errorf("creating an email: %w", err)
+		}
+
+		violations.Add("email", violation)
 	}
 
 	password, err := auth.NewPassword(command.Password)
-	if err := errs.AddFromDomain("password", err); err != nil {
-		return auth.NilID, fmt.Errorf("creating a password: %w", err)
+	if err != nil {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
+			return auth.NilID, fmt.Errorf("creating a password: %w", err)
+		}
+
+		violations.Add("password", violation)
 	}
 
 	if command.Password != command.PasswordConfirmation {
-		errs.Add("passwordConfirmation", "password confirmation must match the password")
+		violations.Add("passwordConfirmation", domain.NewViolation("password confirmation must match the password"))
 	}
 
-	if errs.HasErrors() {
-		return auth.NilID, errs
+	if violations.HasViolations() {
+		return auth.NilID, violations
 	}
 
 	existingUser, err := h.accounts.FindByEmail(ctx, email)

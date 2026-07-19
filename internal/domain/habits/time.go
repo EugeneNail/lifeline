@@ -17,7 +17,7 @@ type Time int
 // NewTime returns a time of day or a domain error when the minute is outside the supported range.
 func NewTime(value int) (Time, error) {
 	if value < timeMinMinute || value > timeMaxMinute {
-		return 0, domain.NewErrorf("time must be between %d and %d minutes", timeMinMinute, timeMaxMinute)
+		return 0, domain.NewViolationf("time must be between %d and %d minutes", timeMinMinute, timeMaxMinute)
 	}
 
 	return Time(value), nil

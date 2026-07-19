@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/EugeneNail/lifeline/internal/application"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/refresh"
+	"github.com/EugeneNail/lifeline/internal/domain"
 )
 
 // Handler adapts the refresh use case to the HTTP transport.
@@ -36,9 +36,9 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		RefreshToken: payload.RefreshToken,
 	})
 	if err != nil {
-		var fieldErrors application.FieldErrors
-		if errors.As(err, &fieldErrors) {
-			return http.StatusUnauthorized, fieldErrors.Errors()
+		var violations domain.Violations
+		if errors.As(err, &violations) {
+			return http.StatusUnauthorized, violations.Violations()
 		}
 
 		return http.StatusInternalServerError, fmt.Errorf("handling Refresh command: %w", err)

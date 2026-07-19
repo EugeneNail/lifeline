@@ -20,20 +20,20 @@ type MeasurableHabitRecord struct {
 
 // NewMeasurableHabitRecord returns a measurable habit record with immutable habit, account, and date fields and a validated numeric value.
 func NewMeasurableHabitRecord(measurableHabitId uuid.UUID, accountId uuid.UUID, date time.Time, rawValue float32, step habits.MeasurementStep) (*MeasurableHabitRecord, error) {
-	errs := domain.NewValidationErrors()
+	violations := domain.NewViolations()
 
 	value, err := NewMeasurableValue(rawValue, step)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a measurable value: %w", err)
 		}
 
-		errs.Add("value", domainError)
+		violations.Add("value", violation)
 	}
 
-	if errs.HasErrors() {
-		return nil, errs
+	if violations.HasViolations() {
+		return nil, violations
 	}
 
 	return &MeasurableHabitRecord{
@@ -75,7 +75,7 @@ func (record *MeasurableHabitRecord) Value() MeasurableValue {
 }
 
 // ChangeValue updates the record value after validating the provided raw numeric value against the step.
-func (record *MeasurableHabitRecord) ChangeValue(rawValue float32, step habits.MeasurementStep) domain.Error {
+func (record *MeasurableHabitRecord) ChangeValue(rawValue float32, step habits.MeasurementStep) domain.Violation {
 	value, err := NewMeasurableValue(rawValue, step)
 	if err != nil {
 		return err

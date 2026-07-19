@@ -26,50 +26,50 @@ type MeasurableHabit struct {
 
 // NewMeasurableHabit returns a measurable habit with validated fields or domain validation errors.
 func NewMeasurableHabit(rawLabel string, rawIcon int, rawStep float32, rawUnit string, accountId uuid.UUID) (*MeasurableHabit, error) {
-	errs := domain.NewValidationErrors()
+	violations := domain.NewViolations()
 
 	label, err := NewLabel(rawLabel)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a measurable habit label: %w", err)
 		}
 
-		errs.Add("label", domainError)
+		violations.Add("label", violation)
 	}
 
 	icon, err := NewIcon(rawIcon)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a measurable habit icon: %w", err)
 		}
 
-		errs.Add("icon", domainError)
+		violations.Add("icon", violation)
 	}
 
 	step, err := NewMeasurementStep(rawStep)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a measurable habit step: %w", err)
 		}
 
-		errs.Add("step", domainError)
+		violations.Add("step", violation)
 	}
 
 	unit, err := NewMeasurableUnit(rawUnit)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a measurable habit unit: %w", err)
 		}
 
-		errs.Add("unit", domainError)
+		violations.Add("unit", violation)
 	}
 
-	if errs.HasErrors() {
-		return nil, errs
+	if violations.HasViolations() {
+		return nil, violations
 	}
 
 	now := time.Now()

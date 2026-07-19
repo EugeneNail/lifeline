@@ -2,8 +2,9 @@ package authenticate
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/EugeneNail/lifeline/internal/application"
+	"github.com/EugeneNail/lifeline/internal/domain"
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/config"
 )
@@ -53,20 +54,30 @@ func NewHandler(accounts auth.AccountRepository, passwordVerifier auth.PasswordV
 
 // Handle validates the credentials, checks the password against the stored hash, and returns login and refresh tokens or field validation errors.
 func (h *Handler) Handle(ctx context.Context, command Query) (Result, error) {
-	errs := application.NewFieldErrors()
+	violations := domain.NewViolations()
 
 	email, err := auth.NewEmail(command.Email)
-	if err := errs.AddFromDomain("email", err); err != nil {
-		return Result{}, fmt.Errorf("creating an email: %w", err)
+	if err != nil {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
+			return Result{}, fmt.Errorf("creating an email: %w", err)
+		}
+
+		violations.Add("email", violation)
 	}
 
 	password, err := auth.NewPassword(command.Password)
-	if err := errs.AddFromDomain("password", err); err != nil {
-		return Result{}, fmt.Errorf("creating a password: %w", err)
+	if err != nil {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
+			return Result{}, fmt.Errorf("creating a password: %w", err)
+		}
+
+		violations.Add("password", violation)
 	}
 
-	if errs.HasErrors() {
-		return Result{}, errs
+	if violations.HasViolations() {
+		return Result{}, violations
 	}
 
 	account, err := h.accounts.FindByEmail(ctx, email)
@@ -99,11 +110,11 @@ func (h *Handler) Handle(ctx context.Context, command Query) (Result, error) {
 }
 
 // invalidCredentialsErrors returns the same field-level validation payload used for any authentication failure.
-func invalidCredentialsErrors() application.FieldErrors {
-	errs := application.NewFieldErrors()
-	errs.Add("email", "Invalid email or password")
-	errs.Add("password", "Invalid email or password")
-	return errs
+func invalidCredentialsErrors() domain.Violations {
+	violations := domain.NewViolations()
+	violations.Add("email", domain.NewViolation("Invalid email or password"))
+	violations.Add("password", domain.NewViolation("Invalid email or password"))
+	return violations
 }
 
 // selectTokenLifecycle returns a 1-hour login token lifecycle for development or the default login token lifecycle for production and unknown environments.

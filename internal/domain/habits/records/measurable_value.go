@@ -16,9 +16,9 @@ const (
 type MeasurableValue float32
 
 // NewMeasurableValue returns a measurable value or a domain error when the value violates domain rules.
-func NewMeasurableValue(rawValue float32, step habits.MeasurementStep) (MeasurableValue, domain.Error) {
+func NewMeasurableValue(rawValue float32, step habits.MeasurementStep) (MeasurableValue, domain.Violation) {
 	if rawValue < measurableValueMin || rawValue > measurableValueMax {
-		return 0, domain.NewErrorf("measurable value must be between %.2f and %f", measurableValueMin, measurableValueMax)
+		return 0, domain.NewViolationf("measurable value must be between %.2f and %f", measurableValueMin, measurableValueMax)
 	}
 
 	value := float64(rawValue)
@@ -39,7 +39,7 @@ func NewMeasurableValue(rawValue float32, step habits.MeasurementStep) (Measurab
 	nearestStepCount := math.Round(value / stepValue)
 	normalizedValue := nearestStepCount * stepValue
 	if math.Abs(value-normalizedValue) > epsilon {
-		return 0, domain.NewErrorf("measurable value %0.8f must be a multiple of step %g", value, step)
+		return 0, domain.NewViolationf("measurable value %0.8f must be a multiple of step %g", value, step)
 	}
 
 	return MeasurableValue(float32(normalizedValue)), nil

@@ -19,11 +19,11 @@ func (account *Account) Password() HashedPassword {
 // NewPassword validates and returns a password value when it satisfies the domain password policy.
 func NewPassword(rawPassword string) (Password, error) {
 	if utf8.RuneCountInString(rawPassword) < 8 {
-		return "", domain.NewError("password must be at least 8 characters long")
+		return "", domain.NewViolation("password must be at least 8 characters long")
 	}
 
 	if utf8.RuneCountInString(rawPassword) > 128 {
-		return "", domain.NewError("password must be at most 128 characters long")
+		return "", domain.NewViolation("password must be at most 128 characters long")
 	}
 
 	var hasUppercase bool
@@ -45,7 +45,7 @@ func NewPassword(rawPassword string) (Password, error) {
 	}
 
 	if !hasUppercase || !hasLowercase || !hasDigit || !hasSpecial {
-		return "", domain.NewError(passwordPolicyMessage(hasUppercase, hasLowercase, hasDigit, hasSpecial))
+		return "", domain.NewViolation(passwordPolicyMessage(hasUppercase, hasLowercase, hasDigit, hasSpecial))
 	}
 
 	return Password(rawPassword), nil

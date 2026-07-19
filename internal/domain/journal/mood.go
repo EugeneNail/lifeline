@@ -22,7 +22,7 @@ var moodLabels = map[Mood]string{
 
 func NewMood(rawMood int) (Mood, error) {
 	if rawMood < int(MoodAwful) || rawMood > int(MoodGreat) {
-		return 0, domain.NewErrorf("mood must be in range between %d and %d", MoodAwful, MoodGreat)
+		return 0, domain.NewViolationf("mood must be in range between %d and %d", MoodAwful, MoodGreat)
 	}
 
 	return Mood(rawMood), nil

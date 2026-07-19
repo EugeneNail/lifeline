@@ -82,9 +82,9 @@ func (handler *Handler) Handle(ctx context.Context, command Command) error {
 		isNew = true
 		record, err = records.NewMeasurableHabitRecord(command.MeasurableHabitId, command.AccountId, time.Time(date), command.Value, habit.Step())
 		if err != nil {
-			var errs domain.ValidationErrors
-			if errors.As(err, &errs) {
-				return errs
+			var violations domain.Violations
+			if errors.As(err, &violations) {
+				return violations
 			}
 
 			return fmt.Errorf("creating a new measurable habit record: %w", err)
@@ -92,10 +92,10 @@ func (handler *Handler) Handle(ctx context.Context, command Command) error {
 	}
 
 	if err := record.ChangeValue(command.Value, habit.Step()); err != nil {
-		errs := domain.NewValidationErrors()
-		errs.Add("value", err)
+		violations := domain.NewViolations()
+		violations.Add("value", err)
 
-		return errs
+		return violations
 	}
 
 	if isNew {

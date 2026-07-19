@@ -316,7 +316,7 @@ var iconNames = map[Icon]string{
 func NewIcon(rawIcon int) (Icon, error) {
 	icon := Icon(rawIcon)
 	if !icon.IsValid() {
-		return 0, domain.NewErrorf("icon must be in range between %d and %d", IconFavorite, IconCamping)
+		return 0, domain.NewViolationf("icon must be in range between %d and %d", IconFavorite, IconCamping)
 	}
 
 	return icon, nil

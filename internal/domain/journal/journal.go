@@ -25,40 +25,40 @@ type Journal struct {
 }
 
 func NewJournal(rawDate time.Time, rawMood int, rawNote string, accountId auth.ID) (*Journal, error) {
-	errs := domain.NewValidationErrors()
+	violations := domain.NewViolations()
 
 	date, err := NewDate(rawDate)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a date: %w", err)
 		}
 
-		errs.Add("date", domainError)
+		violations.Add("date", violation)
 	}
 
 	mood, err := NewMood(rawMood)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a mood: %w", err)
 		}
 
-		errs.Add("mood", domainError)
+		violations.Add("mood", violation)
 	}
 
 	note, err := NewNote(rawNote)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a note: %w", err)
 		}
 
-		errs.Add("note", domainError)
+		violations.Add("note", violation)
 	}
 
-	if errs.HasErrors() {
-		return nil, errs
+	if violations.HasViolations() {
+		return nil, violations
 	}
 
 	now := time.Now()
@@ -123,7 +123,7 @@ type Date time.Time
 
 func NewDate(raw time.Time) (Date, error) {
 	if raw.IsZero() {
-		return Date{}, domain.NewError("date is empty")
+		return Date{}, domain.NewViolation("date is empty")
 	}
 
 	date := raw.Truncate(time.Hour * 24)
@@ -131,7 +131,7 @@ func NewDate(raw time.Time) (Date, error) {
 	maxDate := time.Date(2099, time.January, 1, 0, 0, 0, 0, date.Location())
 
 	if date.Before(minDate) || date.After(maxDate) {
-		return Date{}, domain.NewError("date must be between 2000-01-01 and 2099-01-01")
+		return Date{}, domain.NewViolation("date must be between 2000-01-01 and 2099-01-01")
 	}
 
 	return Date(date), nil
@@ -169,16 +169,16 @@ func NewNote(raw string) (Note, error) {
 	raw = normalizeNote(raw)
 
 	if !utf8.ValidString(raw) {
-		return "", domain.NewError("note must be valid UTF-8")
+		return "", domain.NewViolation("note must be valid UTF-8")
 	}
 
 	// Emojis may look like one symbol while occupying 2-4 runes, so this check counts runes rather than visual glyphs.
 	if utf8.RuneCountInString(raw) > noteMaxLength {
-		return "", domain.NewErrorf("note must not exceed %d characters", noteMaxLength)
+		return "", domain.NewViolationf("note must not exceed %d characters", noteMaxLength)
 	}
 
 	if containsForbiddenControlChars(raw) {
-		return "", domain.NewError("note contains forbidden control characters")
+		return "", domain.NewViolation("note contains forbidden control characters")
 	}
 
 	return Note(raw), nil

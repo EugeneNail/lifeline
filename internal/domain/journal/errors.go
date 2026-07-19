@@ -4,4 +4,4 @@ import (
 	"github.com/EugeneNail/lifeline/internal/domain"
 )
 
-var ErrDateIsOccupied = domain.NewErrorf("date is occupied by another journal")
+var ErrDateIsOccupied = domain.NewViolationf("date is occupied by another journal")

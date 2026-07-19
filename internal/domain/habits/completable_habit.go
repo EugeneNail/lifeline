@@ -24,30 +24,30 @@ type CompletableHabit struct {
 
 // NewCompletableHabit returns a completable habit with validated fields or domain validation errors.
 func NewCompletableHabit(rawLabel string, rawIcon int, accountId uuid.UUID) (*CompletableHabit, error) {
-	errs := domain.NewValidationErrors()
+	violations := domain.NewViolations()
 
 	label, err := NewLabel(rawLabel)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a completable habit label: %w", err)
 		}
 
-		errs.Add("label", domainError)
+		violations.Add("label", violation)
 	}
 
 	icon, err := NewIcon(rawIcon)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a completable habit icon: %w", err)
 		}
 
-		errs.Add("icon", domainError)
+		violations.Add("icon", violation)
 	}
 
-	if errs.HasErrors() {
-		return nil, errs
+	if violations.HasViolations() {
+		return nil, violations
 	}
 
 	now := time.Now()

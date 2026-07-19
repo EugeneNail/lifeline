@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/EugeneNail/lifeline/internal/application"
+	"github.com/EugeneNail/lifeline/internal/domain"
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
 )
 
@@ -64,8 +64,8 @@ func (h *Handler) Handle(ctx context.Context, command Command) (auth.Token, erro
 }
 
 // invalidRefreshTokenErrors returns the same field-level validation payload used for any refresh failure.
-func invalidRefreshTokenErrors() application.FieldErrors {
-	errs := application.NewFieldErrors()
-	errs.Add("refreshToken", "Invalid refresh token")
-	return errs
+func invalidRefreshTokenErrors() domain.Violations {
+	violations := domain.NewViolations()
+	violations.Add("refreshToken", domain.NewViolation("Invalid refresh token"))
+	return violations
 }

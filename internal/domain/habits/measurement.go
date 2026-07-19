@@ -19,7 +19,7 @@ type MeasurementStep float32
 // NewMeasurementStep returns a measurement step or a domain error when the value is outside the supported range.
 func NewMeasurementStep(rawStep float32) (MeasurementStep, error) {
 	if rawStep < measurementStepMin || rawStep > measurementStepMax {
-		return 0, domain.NewErrorf("step must be between %.2f and %.0f", measurementStepMin, measurementStepMax)
+		return 0, domain.NewViolationf("step must be between %.2f and %.0f", measurementStepMin, measurementStepMax)
 	}
 
 	return MeasurementStep(rawStep), nil
@@ -32,7 +32,7 @@ type MeasurableUnit string
 func NewMeasurableUnit(rawUnit string) (MeasurableUnit, error) {
 	length := utf8.RuneCountInString(rawUnit)
 	if length < measurableUnitMinLength || length > measurableUnitMaxLength {
-		return "", domain.NewErrorf(
+		return "", domain.NewViolationf(
 			"unit length must be between %d and %d characters",
 			measurableUnitMinLength,
 			measurableUnitMaxLength,
@@ -48,7 +48,7 @@ func NewMeasurableUnit(rawUnit string) (MeasurableUnit, error) {
 			continue
 		}
 
-		return "", domain.NewError("unit contains unsupported characters")
+		return "", domain.NewViolation("unit contains unsupported characters")
 	}
 
 	return MeasurableUnit(rawUnit), nil

@@ -42,30 +42,30 @@ type Command struct {
 
 // Handle validates the command, updates a time habit, and returns the habit identifier or field validation errors.
 func (handler *Handler) Handle(ctx context.Context, command Command) (uuid.UUID, error) {
-	errs := domain.NewValidationErrors()
+	violations := domain.NewViolations()
 
 	label, err := habits.NewLabel(command.Label)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return uuid.Nil, fmt.Errorf("creating a time habit label: %w", err)
 		}
 
-		errs.Add("label", domainError)
+		violations.Add("label", violation)
 	}
 
 	icon, err := habits.NewIcon(command.Icon)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return uuid.Nil, fmt.Errorf("creating a time habit icon: %w", err)
 		}
 
-		errs.Add("icon", domainError)
+		violations.Add("icon", violation)
 	}
 
-	if errs.HasErrors() {
-		return uuid.Nil, errs
+	if violations.HasViolations() {
+		return uuid.Nil, violations
 	}
 
 	habit, err := handler.timeHabits.Find(ctx, habits.NewTimeHabitFilter().

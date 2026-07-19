@@ -17,7 +17,7 @@ type TimeValue int
 // NewTimeValue returns a time value or a domain error when the minute is outside the supported range.
 func NewTimeValue(rawValue int) (TimeValue, error) {
 	if rawValue < timeValueMinMinute || rawValue > timeValueMaxMinute {
-		return 0, domain.NewErrorf("time value must be between %d and %d minutes", timeValueMinMinute, timeValueMaxMinute)
+		return 0, domain.NewViolationf("time value must be between %d and %d minutes", timeValueMinMinute, timeValueMaxMinute)
 	}
 
 	return TimeValue(rawValue), nil

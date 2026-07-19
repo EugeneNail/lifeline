@@ -45,9 +45,9 @@ type Command struct {
 func (handler *Handler) Handle(ctx context.Context, command Command) (journal.ID, error) {
 	journalEntry, err := journal.NewJournal(command.Date, command.Mood, command.Note, command.AccountID)
 	if err != nil {
-		var validationErrors domain.ValidationErrors
-		if errors.As(err, &validationErrors) {
-			return journal.NilID, validationErrors
+		var violations domain.Violations
+		if errors.As(err, &violations) {
+			return journal.NilID, violations
 		}
 
 		return journal.NilID, fmt.Errorf("creating a journal: %w", err)

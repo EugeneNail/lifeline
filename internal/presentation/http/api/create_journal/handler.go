@@ -55,9 +55,9 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		AccountID: accountID,
 	})
 	if err != nil {
-		var validationErrors domain.ValidationErrors
-		if errors.As(err, &validationErrors) {
-			return http.StatusUnprocessableEntity, validationErrors.Errors()
+		var violations domain.Violations
+		if errors.As(err, &violations) {
+			return http.StatusUnprocessableEntity, violations.Violations()
 		}
 
 		if errors.Is(err, journal.ErrDateIsOccupied) {

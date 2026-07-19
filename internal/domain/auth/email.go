@@ -29,17 +29,17 @@ func (account *Account) ChangeEmail(email Email) {
 func NewEmail(rawEmail string) (Email, error) {
 	normalizedEmail := strings.ToLower(strings.TrimSpace(rawEmail))
 	if normalizedEmail == "" {
-		return "", domain.NewError("email is empty")
+		return "", domain.NewViolation("email is empty")
 	}
 
 	// TODO extract into a constant and add as a placeholder into the error message
 	if len(normalizedEmail) > 200 {
-		return "", domain.NewError("email length exceeds 200 characters")
+		return "", domain.NewViolation("email length exceeds 200 characters")
 	}
 
 	parsedEmail, err := mail.ParseAddress(normalizedEmail)
 	if err != nil || parsedEmail.Address != normalizedEmail {
-		return "", domain.NewError("email has invalid format")
+		return "", domain.NewViolation("email has invalid format")
 	}
 
 	return Email(normalizedEmail), nil

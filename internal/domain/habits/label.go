@@ -18,7 +18,7 @@ func NewLabel(rawLabel string) (string, error) {
 	length := utf8.RuneCountInString(label)
 
 	if length < habitLabelMinLength || length > habitLabelMaxLength {
-		return "", domain.NewErrorf(
+		return "", domain.NewViolationf(
 			"label length must be between %d and %d characters",
 			habitLabelMinLength,
 			habitLabelMaxLength,
@@ -30,7 +30,7 @@ func NewLabel(rawLabel string) (string, error) {
 			continue
 		}
 
-		return "", domain.NewError("label contains unsupported characters")
+		return "", domain.NewViolation("label contains unsupported characters")
 	}
 
 	return label, nil

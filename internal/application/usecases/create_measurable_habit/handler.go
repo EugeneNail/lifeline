@@ -45,9 +45,9 @@ type Command struct {
 func (handler *Handler) Handle(ctx context.Context, command Command) (uuid.UUID, error) {
 	habit, err := habits.NewMeasurableHabit(command.Label, command.Icon, command.Step, command.Unit, command.AccountID)
 	if err != nil {
-		var validationErrors domain.ValidationErrors
-		if errors.As(err, &validationErrors) {
-			return uuid.Nil, validationErrors
+		var violations domain.Violations
+		if errors.As(err, &violations) {
+			return uuid.Nil, violations
 		}
 
 		return uuid.Nil, fmt.Errorf("creating a measurable habit: %w", err)

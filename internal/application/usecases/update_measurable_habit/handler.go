@@ -44,50 +44,50 @@ type Command struct {
 
 // Handle validates the command, updates a measurable habit, and returns the habit identifier or field validation errors.
 func (handler *Handler) Handle(ctx context.Context, command Command) (uuid.UUID, error) {
-	errs := domain.NewValidationErrors()
+	violations := domain.NewViolations()
 
 	label, err := habits.NewLabel(command.Label)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return uuid.Nil, fmt.Errorf("creating a measurable habit label: %w", err)
 		}
 
-		errs.Add("label", domainError)
+		violations.Add("label", violation)
 	}
 
 	icon, err := habits.NewIcon(command.Icon)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return uuid.Nil, fmt.Errorf("creating a measurable habit icon: %w", err)
 		}
 
-		errs.Add("icon", domainError)
+		violations.Add("icon", violation)
 	}
 
 	step, err := habits.NewMeasurementStep(command.Step)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return uuid.Nil, fmt.Errorf("creating a measurable habit step: %w", err)
 		}
 
-		errs.Add("step", domainError)
+		violations.Add("step", violation)
 	}
 
 	unit, err := habits.NewMeasurableUnit(command.Unit)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return uuid.Nil, fmt.Errorf("creating a measurable habit unit: %w", err)
 		}
 
-		errs.Add("unit", domainError)
+		violations.Add("unit", violation)
 	}
 
-	if errs.HasErrors() {
-		return uuid.Nil, errs
+	if violations.HasViolations() {
+		return uuid.Nil, violations
 	}
 
 	habit, err := handler.measurableHabits.Find(ctx, habits.NewMeasurableHabitFilter().

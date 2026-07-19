@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/EugeneNail/lifeline/internal/application"
-	"github.com/EugeneNail/lifeline/internal/application/usecases/register_user"
-	"github.com/EugeneNail/lifeline/internal/domain/auth"
 	"net/http"
+
+	"github.com/EugeneNail/lifeline/internal/application/usecases/register_user"
+	"github.com/EugeneNail/lifeline/internal/domain"
+	"github.com/EugeneNail/lifeline/internal/domain/auth"
 )
 
 // Handler adapts the register-user use case to the HTTP transport.
@@ -40,9 +41,9 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		PasswordConfirmation: payload.PasswordConfirmation,
 	})
 	if err != nil {
-		var fieldErrors application.FieldErrors
-		if errors.As(err, &fieldErrors) {
-			return http.StatusUnprocessableEntity, fieldErrors.Errors()
+		var violations domain.Violations
+		if errors.As(err, &violations) {
+			return http.StatusUnprocessableEntity, violations.Violations()
 		}
 
 		if errors.Is(err, auth.EmailAlreadyTaken) {

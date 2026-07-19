@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/EugeneNail/lifeline/internal/application"
 	authenticate "github.com/EugeneNail/lifeline/internal/application/usecases/authenticate"
+	"github.com/EugeneNail/lifeline/internal/domain"
 )
 
 // Handler adapts the authenticate use case to the HTTP transport.
@@ -44,9 +44,9 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		Password: payload.Password,
 	})
 	if err != nil {
-		var fieldErrors application.FieldErrors
-		if errors.As(err, &fieldErrors) {
-			return http.StatusUnprocessableEntity, fieldErrors.Errors()
+		var violations domain.Violations
+		if errors.As(err, &violations) {
+			return http.StatusUnprocessableEntity, violations.Violations()
 		}
 
 		return http.StatusInternalServerError, fmt.Errorf("handling Authenticate command: %w", err)

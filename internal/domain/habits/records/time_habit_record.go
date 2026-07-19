@@ -19,20 +19,20 @@ type TimeHabitRecord struct {
 
 // NewTimeHabitRecord returns a time habit record with immutable habit, account, and date fields and a validated time value or domain validation errors.
 func NewTimeHabitRecord(timeHabitId uuid.UUID, accountId uuid.UUID, date time.Time, rawValue int) (*TimeHabitRecord, error) {
-	errs := domain.NewValidationErrors()
+	violations := domain.NewViolations()
 
 	value, err := NewTimeValue(rawValue)
 	if err != nil {
-		var domainError domain.Error
-		if !errors.As(err, &domainError) {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
 			return nil, fmt.Errorf("creating a time habit record value: %w", err)
 		}
 
-		errs.Add("value", domainError)
+		violations.Add("value", violation)
 	}
 
-	if errs.HasErrors() {
-		return nil, errs
+	if violations.HasViolations() {
+		return nil, violations
 	}
 
 	return &TimeHabitRecord{
@@ -74,7 +74,7 @@ func (record *TimeHabitRecord) Value() TimeValue {
 }
 
 // ChangeValue updates the record value after validating the provided raw minute count.
-func (record *TimeHabitRecord) ChangeValue(rawValue int) domain.Error {
+func (record *TimeHabitRecord) ChangeValue(rawValue int) domain.Violation {
 	value, err := NewTimeValue(rawValue)
 	if err != nil {
 		return err

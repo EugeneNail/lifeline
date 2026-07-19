@@ -14,7 +14,7 @@ func NewModificationPolicy() *ModificationPolicy {
 }
 
 // Check returns nil when the target belongs to the account and is neither archived nor deleted, or a domain error otherwise.
-func (policy *ModificationPolicy) Check(accountId uuid.UUID, target ModificationTarget) domain.Error {
+func (policy *ModificationPolicy) Check(accountId uuid.UUID, target ModificationTarget) domain.Violation {
 	if target.AccountId() != accountId {
 		return ErrHabitBelongsToAnotherUser
 	}
