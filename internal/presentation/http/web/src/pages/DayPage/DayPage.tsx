@@ -56,11 +56,16 @@ function formatDateKey(date: Date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
+type DayPageProps = {
+    date?: string
+}
+
 // DayPage loads the selected day data and renders the daily habits workspace.
-export function DayPage() {
+export function DayPage({ date: explicitDate }: DayPageProps) {
     const apiClient = useApiClient()
     const params = useParams<{ date: string }>()
-    const pageDate = useMemo(() => resolvePageDate(params.date), [params.date])
+    const rawDate = explicitDate ?? params.date
+    const pageDate = useMemo(() => resolvePageDate(rawDate), [rawDate])
     const dateKey = useMemo(() => (pageDate ? formatDateKey(pageDate) : ''), [pageDate])
     const [habits, setHabits] = useState<HabitsResponse | null>(null)
     const [records, setRecords] = useState<RecordsResponse | null>(null)
