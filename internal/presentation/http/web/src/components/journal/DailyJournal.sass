@@ -1,0 +1,74 @@
+.daily-journal
+    position: relative
+
+.daily-journal__body
+    display: grid
+    gap: 18px
+
+.daily-journal__header
+    display: flex
+    align-items: start
+    justify-content: space-between
+    gap: 16px
+
+.daily-journal__heading
+    min-width: 0
+
+.daily-journal__title
+    margin: 0 0 8px
+    font-size: 20px
+    letter-spacing: -0.02em
+
+.daily-journal__subtitle
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 14px
+    line-height: 1.6
+
+.daily-journal__status
+    margin-top: 2px
+
+.daily-journal__input
+    min-height: 320px
+    width: 100%
+    resize: vertical
+    padding: 18px 20px
+    border: 1px solid var(--divider)
+    border-radius: var(--radius-md)
+    background: var(--surface-secondary)
+    color: var(--text-primary)
+    font: inherit
+    line-height: 1.6
+    outline: none
+
+    &:focus
+        border-color: var(--outline-focused)
+        box-shadow: 0 0 0 1px var(--outline-focused)
+
+.daily-journal__footer
+    display: grid
+    grid-template-columns: auto 1fr
+    align-items: end
+    gap: 12px
+    min-height: 22px
+
+.daily-journal__count
+    color: var(--text-secondary)
+    font-size: 13px
+
+.daily-journal__footer-spacer
+    min-height: 1px
+
+@media (max-width: 560px)
+    .daily-journal__body
+        gap: 16px
+
+    .daily-journal__input
+        min-height: 260px
+        padding: 16px
+
+    .daily-journal__header
+        flex-direction: column
+
+    .daily-journal__status
+        align-self: flex-start

@@ -2,6 +2,7 @@ import axios from 'axios'
 import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { AppNavigation } from '../../components/navigation'
+import { DailyJournal } from '../../components/journal'
 import {
     DailyHabits,
     type DailyHabitsData,
@@ -129,13 +130,17 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
 
     return (
         <Page className="day-page">
-            {isLoading ? (
-                <Message variant="info">Loading day data...</Message>
-            ) : loadError ? (
-                <Message variant="error">{loadError}</Message>
-            ) : habits && records ? (
-                <DailyHabits date={pageDate} dateKey={dateKey} habits={habits} records={records} />
-            ) : null}
+            <div className="day-page__content">
+                <DailyJournal dateKey={dateKey} />
+
+                {isLoading ? (
+                    <Message variant="info">Loading day data...</Message>
+                ) : loadError ? (
+                    <Message variant="error">{loadError}</Message>
+                ) : habits && records ? (
+                    <DailyHabits date={pageDate} dateKey={dateKey} habits={habits} records={records} />
+                ) : null}
+            </div>
 
             <AppNavigation />
         </Page>
