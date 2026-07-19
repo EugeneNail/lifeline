@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { useEffect, useMemo, useState } from 'react'
-import { Navigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { DateSelector } from '../../components/date'
 import { AppNavigation } from '../../components/navigation'
 import { DailyMood, type MoodValue } from '../../components/mood'
 import { DailyJournal } from '../../components/journal'
@@ -9,8 +10,9 @@ import {
     type DailyHabitsData,
     type DailyHabitRecords,
 } from '../../components/habits/DailyHabits'
-import { Page } from '../../components/layout'
-import { Message } from '../../components/primitives'
+import { Page, PageHeader } from '../../components/layout'
+import { Button, IconButton, Message } from '../../components/primitives'
+import { GoogleIcon, GoogleIcons } from '../../components/icons'
 import { useApiClient } from '../../hooks/useApiClient'
 import './DayPage.sass'
 
@@ -73,6 +75,7 @@ type DayPageProps = {
 // DayPage loads the selected day data and renders the daily habits workspace.
 export function DayPage({ date: explicitDate }: DayPageProps) {
     const apiClient = useApiClient()
+    const navigate = useNavigate()
     const params = useParams<{ date: string }>()
     const rawDate = explicitDate ?? params.date
     const pageDate = useMemo(() => resolvePageDate(rawDate), [rawDate])
@@ -81,8 +84,13 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
     const [records, setRecords] = useState<RecordsResponse | null>(null)
     const [mood, setMood] = useState<MoodValue | null>(null)
     const [journal, setJournal] = useState<string | null>(null)
+    const [isDateSelectorOpen, setDateSelectorOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
+    const todayKey = useMemo(() => formatDateKey(startOfDay(new Date())), [])
+    const isToday = dateKey === todayKey
+    const pageTitle = pageDate ? formatPageTitle(pageDate) : ''
+    const pageDateLabel = pageDate ? formatPageLabel(pageDate) : ''
 
     useEffect(() => {
         let isActive = true
@@ -155,11 +163,70 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
         return <Navigate replace to="/habits" />
     }
 
+    const currentPageDate = pageDate
+
+    function handleDateSelect(selectedDate: Date) {
+        const selectedKey = formatDateKey(selectedDate)
+        setDateSelectorOpen(false)
+
+        if (selectedKey === todayKey) {
+            navigate('/')
+            return
+        }
+
+        navigate(`/dates/${selectedKey}`)
+    }
+
+    function handlePreviousDay() {
+        navigateForDate(addDays(currentPageDate, -1), navigate, todayKey)
+    }
+
+    function handleNextDay() {
+        navigateForDate(addDays(currentPageDate, 1), navigate, todayKey)
+    }
+
     return (
         <Page className="day-page">
+            <PageHeader
+                eyebrow={isToday ? 'Today' : 'Day overview'}
+                title={pageTitle}
+                subtitle="Mood, journal, and habits for the selected day."
+                actions={
+                    <div className="day-page__header-actions">
+                        <IconButton
+                            aria-label="Previous day"
+                            className="day-page__date-step-button"
+                            type="button"
+                            onClick={handlePreviousDay}
+                        >
+                            ←
+                        </IconButton>
+
+                        <Button
+                            className="day-page__date-button"
+                            variant="secondary"
+                            type="button"
+                            onClick={() => setDateSelectorOpen(true)}
+                        >
+                            <GoogleIcon icon={GoogleIcons.CalendarMonth} size={18} />
+                            Change date
+                        </Button>
+
+                        <IconButton
+                            aria-label="Next day"
+                            className="day-page__date-step-button"
+                            type="button"
+                            onClick={handleNextDay}
+                        >
+                            →
+                        </IconButton>
+                    </div>
+                }
+            />
+
             <div className="day-page__content">
-                <DailyMood dateKey={dateKey} initialMood={mood} />
-                <DailyJournal dateKey={dateKey} initialNote={journal} />
+                <DailyMood dateKey={dateKey} dateLabel={pageDateLabel} initialMood={mood} />
+                <DailyJournal dateKey={dateKey} dateLabel={pageDateLabel} initialNote={journal} />
 
                 {isLoading ? (
                     <Message variant="info">Loading day data...</Message>
@@ -171,6 +238,56 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
             </div>
 
             <AppNavigation />
+            <DateSelector
+                mode="single"
+                open={isDateSelectorOpen}
+                value={pageDate}
+                onChange={handleDateSelect}
+                onClose={() => setDateSelectorOpen(false)}
+            />
         </Page>
     )
+}
+
+function formatPageTitle(date: Date) {
+    return new Intl.DateTimeFormat('en-US', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+    }).format(date)
+}
+
+function formatPageLabel(date: Date) {
+    return new Intl.DateTimeFormat('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(date)
+}
+
+function startOfDay(date: Date) {
+    const copy = new Date(date)
+    copy.setHours(0, 0, 0, 0)
+
+    return copy
+}
+
+function addDays(date: Date, delta: number) {
+    const nextDate = new Date(date)
+    nextDate.setDate(nextDate.getDate() + delta)
+    nextDate.setHours(0, 0, 0, 0)
+
+    return nextDate
+}
+
+function navigateForDate(date: Date, navigate: (path: string) => void, todayKey: string) {
+    const selectedKey = formatDateKey(date)
+
+    if (selectedKey === todayKey) {
+        navigate('/')
+        return
+    }
+
+    navigate(`/dates/${selectedKey}`)
 }

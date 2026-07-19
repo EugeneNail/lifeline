@@ -5,6 +5,31 @@
     display: grid
     gap: 24px
 
+.day-page__header-actions
+    display: flex
+    align-items: center
+    gap: 8px
+
+.day-page__date-button
+    display: inline-flex
+    align-items: center
+    gap: 8px
+    min-height: 42px
+    border: 1px solid var(--divider)
+
+    .google-icon
+        flex: 0 0 auto
+
+.day-page__date-step-button.icon-button
+    width: 42px
+    height: 42px
+    min-height: 42px
+    min-width: 42px
+    border-radius: 14px
+    border: 1px solid var(--divider)
+    background: var(--surface-secondary)
+    color: var(--text-primary)
+
 @media (orientation: landscape)
     .day-page
         padding-left: 236px

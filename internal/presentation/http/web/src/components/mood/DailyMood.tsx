@@ -15,6 +15,7 @@ type MoodOption = {
 
 type DailyMoodProps = {
     dateKey: string
+    dateLabel: string
     initialMood: MoodValue | null
 }
 
@@ -29,7 +30,7 @@ const moodOptions: MoodOption[] = [
 ]
 
 // DailyMood renders the day mood panel and saves the selected mood independently from other panels.
-export function DailyMood({ dateKey, initialMood }: DailyMoodProps) {
+export function DailyMood({ dateKey, dateLabel, initialMood }: DailyMoodProps) {
     const apiClient = useApiClient()
     const [selectedMood, setSelectedMood] = useState<MoodValue | null>(null)
     const [status, setStatus] = useState<MoodSavingStatus>('saved')
@@ -78,7 +79,7 @@ export function DailyMood({ dateKey, initialMood }: DailyMoodProps) {
                     <div className="daily-mood__heading">
                         <h2 className="daily-mood__title">How did the day go?</h2>
                         <p className="daily-mood__subtitle">
-                            Choose one mood. It saves immediately after selection.
+                            Track the mood that belongs to {dateLabel}.
                         </p>
                     </div>
                     <SavingStatus status={status} className="daily-mood__status" />
