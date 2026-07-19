@@ -4,13 +4,14 @@ import (
 	"time"
 
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
+	"github.com/google/uuid"
 )
 
 // JournalFilter carries optional journal lookup criteria.
 type JournalFilter struct {
 	AccountIds []auth.ID
 	Dates      []time.Time
-	Ids        []ID
+	Ids        []uuid.UUID
 }
 
 // NewJournalFilter returns an empty journal filter.
@@ -35,7 +36,7 @@ func (filter JournalFilter) WithDates(dates ...time.Time) JournalFilter {
 }
 
 // WithIds returns a filter with the provided journal identifiers.
-func (filter JournalFilter) WithIds(ids ...ID) JournalFilter {
+func (filter JournalFilter) WithIds(ids ...uuid.UUID) JournalFilter {
 	filter.Ids = append(filter.Ids, ids...)
 
 	return filter

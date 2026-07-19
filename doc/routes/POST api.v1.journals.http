@@ -4,8 +4,7 @@ POST localhost:30000/api/v1/journals
 Authorization: Bearer {{loginToken}}
 
 {
-    "date":"2026-07-15",
-    "mood":3,
+    "date":"2026-07-19",
     "note":"Productive day"
 }
 
@@ -18,6 +17,5 @@ Authorization: Bearer {{loginToken}}
 
 {
     "date":"1999-12-31",
-    "mood":6,
     "note":"Invalid\u0008note"
 }

@@ -30,10 +30,9 @@ func NewJournalRepository(db *sql.DB) (*JournalRepository, error) {
 func (repository *JournalRepository) Add(ctx context.Context, journalEntry *journal.Journal) error {
 	_, err := repository.db.ExecContext(
 		ctx,
-		`INSERT INTO journals (id, date, mood, note, created_at, updated_at, account_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		journalEntry.ID().Uuid(),
+		`INSERT INTO journals (id, date, note, created_at, updated_at, account_id) VALUES ($1, $2, $3, $4, $5, $6)`,
+		journalEntry.ID(),
 		time.Time(journalEntry.Date()),
-		int(journalEntry.Mood()),
 		string(journalEntry.Note()),
 		journalEntry.CreatedAt(),
 		journalEntry.UpdatedAt(),
@@ -48,7 +47,7 @@ func (repository *JournalRepository) Add(ctx context.Context, journalEntry *jour
 
 // Find returns the first journal matching the provided filter or nil when no row exists.
 func (repository *JournalRepository) Find(ctx context.Context, filter journal.JournalFilter) (*journal.Journal, error) {
-	query := `SELECT id, date, mood, note, created_at, updated_at, account_id FROM journals`
+	query := `SELECT id, date, note, created_at, updated_at, account_id FROM journals`
 	conditions := make([]string, 0, 3)
 	args := make([]any, 0)
 
@@ -75,7 +74,7 @@ func (repository *JournalRepository) Find(ctx context.Context, filter journal.Jo
 	if len(filter.Ids) > 0 {
 		placeholders := make([]string, 0, len(filter.Ids))
 		for _, id := range filter.Ids {
-			args = append(args, id.Uuid())
+			args = append(args, id)
 			placeholders = append(placeholders, fmt.Sprintf("$%d", len(args)))
 		}
 
@@ -93,14 +92,13 @@ func (repository *JournalRepository) Find(ctx context.Context, filter journal.Jo
 	var (
 		id        uuid.UUID
 		date      time.Time
-		mood      int
 		note      string
 		createdAt time.Time
 		updatedAt time.Time
 		accountId uuid.UUID
 	)
 
-	if err := row.Scan(&id, &date, &mood, &note, &createdAt, &updatedAt, &accountId); err != nil {
+	if err := row.Scan(&id, &date, &note, &createdAt, &updatedAt, &accountId); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
@@ -108,7 +106,7 @@ func (repository *JournalRepository) Find(ctx context.Context, filter journal.Jo
 		return nil, fmt.Errorf("executing a SELECT sql query: %w", err)
 	}
 
-	journalEntry := journal.RestoreJournal(id, date, mood, note, createdAt, updatedAt, accountId)
+	journalEntry := journal.RestoreJournal(id, date, note, createdAt, updatedAt, accountId)
 
 	return journalEntry, nil
 }

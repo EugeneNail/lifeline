@@ -27,7 +27,6 @@ func NewHandler(usecase *create_journal.Handler, identity authentication.Request
 // Payload represents the JSON request body for journal creation.
 type Payload struct {
 	Date string `json:"date"`
-	Mood int    `json:"mood"`
 	Note string `json:"note"`
 }
 
@@ -50,7 +49,6 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 
 	id, err := handler.usecase.Handle(request.Context(), create_journal.Command{
 		Date:      date,
-		Mood:      payload.Mood,
 		Note:      payload.Note,
 		AccountID: accountID,
 	})

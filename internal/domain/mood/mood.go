@@ -1,7 +1,8 @@
-package journal
+package mood
 
 import "github.com/EugeneNail/lifeline/internal/domain"
 
+// Mood is a discrete daily mood value.
 type Mood int
 
 const (
@@ -20,10 +21,16 @@ var moodLabels = map[Mood]string{
 	MoodGreat: "Great",
 }
 
-func NewMood(rawMood int) (Mood, error) {
+// New returns a validated mood value or an error when rawMood is outside the allowed range.
+func New(rawMood int) (Mood, error) {
 	if rawMood < int(MoodAwful) || rawMood > int(MoodGreat) {
 		return 0, domain.NewViolationf("mood must be in range between %d and %d", MoodAwful, MoodGreat)
 	}
 
 	return Mood(rawMood), nil
+}
+
+// String returns the human-readable label for the mood.
+func (mood Mood) String() string {
+	return moodLabels[mood]
 }
