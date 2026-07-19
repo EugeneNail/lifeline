@@ -22,7 +22,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     ports:
-      - "30000:30000"
+      - "${APP_PORT}:${APP_PORT}"
     networks:
       - lifeline
     depends_on:
