@@ -7,3 +7,4 @@ export {
     Switch,
     TextField,
 } from './Primitives'
+export { SavingStatus } from './SavingStatus'

@@ -1,0 +1,48 @@
+.saving-status
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    min-height: 28px
+    padding: 0 10px
+    border-radius: 999px
+    background: var(--surface-secondary)
+    color: var(--text-secondary)
+    font-size: 12px
+    font-weight: 750
+    white-space: nowrap
+
+.saving-status::before
+    content: ''
+    width: 7px
+    height: 7px
+    border-radius: 50%
+    background: var(--text-disabled)
+
+.saving-status[data-status='saving']
+    background: var(--info-container)
+    color: var(--info)
+
+.saving-status[data-status='saving']::before
+    background: var(--info)
+    animation: saving-status-pulse 0.9s infinite
+
+.saving-status[data-status='error']
+    background: var(--error-container)
+    color: var(--error)
+
+.saving-status[data-status='error']::before
+    background: var(--error)
+
+.saving-status[data-status='saved']
+    background: var(--success-container)
+    color: var(--success)
+
+.saving-status[data-status='saved']::before
+    background: var(--success)
+
+@keyframes saving-status-pulse
+    0%, 100%
+        opacity: 1
+
+    50%
+        opacity: 0.35

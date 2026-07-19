@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { GoogleIcon, GoogleIcons } from '../icons'
-import { Button } from '../primitives'
+import { Button, SavingStatus } from '../primitives'
 import { Panel, PanelBody } from '../layout'
 import { useApiClient } from '../../hooks/useApiClient'
 import './DailyHabits.sass'
@@ -504,9 +504,7 @@ export function DailyHabits({ date, dateKey, habits, records }: DailyHabitsProps
                         </span>
                     </div>
 
-                    <span className="daily-habits__status" data-status={status}>
-                        {statusLabel(status)}
-                    </span>
+                    <SavingStatus status={status} className="daily-habits__status" />
                 </div>
             </PanelBody>
         </Panel>
@@ -707,18 +705,6 @@ function formatPageDate(date: Date) {
         month: 'long',
         year: 'numeric',
     }).format(date)
-}
-
-function statusLabel(status: SavingStatus) {
-    if (status === 'saving') {
-        return 'Saving...'
-    }
-
-    if (status === 'error') {
-        return 'Save failed'
-    }
-
-    return 'Saved'
 }
 
 function buildRecordedHabitIds(records: DailyHabitRecords) {
