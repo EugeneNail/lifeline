@@ -5,7 +5,7 @@ import { SavingStatus } from '../primitives'
 import { useApiClient } from '../../hooks/useApiClient'
 import './DailyMood.sass'
 
-type MoodValue = 1 | 2 | 3 | 4 | 5
+export type MoodValue = 1 | 2 | 3 | 4 | 5
 
 type MoodOption = {
     value: MoodValue
@@ -15,6 +15,7 @@ type MoodOption = {
 
 type DailyMoodProps = {
     dateKey: string
+    initialMood: MoodValue | null
 }
 
 type MoodSavingStatus = 'saved' | 'saving' | 'error'
@@ -28,17 +29,17 @@ const moodOptions: MoodOption[] = [
 ]
 
 // DailyMood renders the day mood panel and saves the selected mood independently from other panels.
-export function DailyMood({ dateKey }: DailyMoodProps) {
+export function DailyMood({ dateKey, initialMood }: DailyMoodProps) {
     const apiClient = useApiClient()
     const [selectedMood, setSelectedMood] = useState<MoodValue | null>(null)
     const [status, setStatus] = useState<MoodSavingStatus>('saved')
     const saveGeneration = useRef(0)
 
     useEffect(() => {
-        setSelectedMood(null)
+        setSelectedMood(initialMood)
         setStatus('saved')
         saveGeneration.current += 1
-    }, [dateKey])
+    }, [dateKey, initialMood])
 
     function handleSelectMood(mood: MoodValue) {
         setSelectedMood(mood)
