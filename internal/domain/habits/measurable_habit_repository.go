@@ -16,6 +16,6 @@ type MeasurableHabitRepository interface {
 	// FindMany returns all measurable habits matching the filter or an error when lookup fails.
 	FindMany(ctx context.Context, filter MeasurableHabitFilter) ([]*MeasurableHabit, error)
 
-	// Save updates a measurable habit in storage or returns an error when persistence fails.
-	Save(ctx context.Context, habit *MeasurableHabit) error
+	// Update updates a measurable habit in storage or returns an error when persistence fails.
+	Update(ctx context.Context, habit *MeasurableHabit) error
 }

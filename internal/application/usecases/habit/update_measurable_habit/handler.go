@@ -112,7 +112,7 @@ func (handler *Handler) Handle(ctx context.Context, command Command) (uuid.UUID,
 	habit.ChangeStep(step)
 	habit.ChangeUnit(unit)
 
-	if err := handler.measurableHabits.Save(ctx, habit); err != nil {
+	if err := handler.measurableHabits.Update(ctx, habit); err != nil {
 		return uuid.Nil, fmt.Errorf("saving a measurable habit: %w", err)
 	}
 

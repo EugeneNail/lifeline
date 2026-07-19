@@ -47,8 +47,8 @@ func (repository *CompletableHabitRepository) Add(ctx context.Context, habit *ha
 	return nil
 }
 
-// Save updates all fields of the provided completable habit in PostgreSQL.
-func (repository *CompletableHabitRepository) Save(ctx context.Context, habit *habits.CompletableHabit) error {
+// Update updates all fields of the provided completable habit in PostgreSQL.
+func (repository *CompletableHabitRepository) Update(ctx context.Context, habit *habits.CompletableHabit) error {
 	result, err := repository.db.ExecContext(
 		ctx,
 		`UPDATE completable_habits SET label = $2, icon = $3, created_at = $4, updated_at = $5, archived_at = $6, deleted_at = $7, account_id = $8 WHERE id = $1`,

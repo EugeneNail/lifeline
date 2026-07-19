@@ -48,7 +48,7 @@ func (repository *TimeHabitRepository) Add(ctx context.Context, habit *habits.Ti
 }
 
 // Save updates all fields of the provided time habit in PostgreSQL.
-func (repository *TimeHabitRepository) Save(ctx context.Context, habit *habits.TimeHabit) error {
+func (repository *TimeHabitRepository) Update(ctx context.Context, habit *habits.TimeHabit) error {
 	result, err := repository.db.ExecContext(
 		ctx,
 		`UPDATE time_habits SET label = $2, icon = $3, created_at = $4, updated_at = $5, archived_at = $6, deleted_at = $7, account_id = $8 WHERE id = $1`,

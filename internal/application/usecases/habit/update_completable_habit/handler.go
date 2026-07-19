@@ -88,7 +88,7 @@ func (handler *Handler) Handle(ctx context.Context, command Command) (uuid.UUID,
 	habit.ChangeLabel(label)
 	habit.ChangeIcon(icon)
 
-	if err := handler.completableHabits.Save(ctx, habit); err != nil {
+	if err := handler.completableHabits.Update(ctx, habit); err != nil {
 		return uuid.Nil, fmt.Errorf("saving a completable habit: %w", err)
 	}
 

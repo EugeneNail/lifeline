@@ -49,8 +49,8 @@ func (repository *MeasurableHabitRepository) Add(ctx context.Context, habit *hab
 	return nil
 }
 
-// Save updates all fields of the provided measurable habit in PostgreSQL.
-func (repository *MeasurableHabitRepository) Save(ctx context.Context, habit *habits.MeasurableHabit) error {
+// Update updates all fields of the provided measurable habit in PostgreSQL.
+func (repository *MeasurableHabitRepository) Update(ctx context.Context, habit *habits.MeasurableHabit) error {
 	result, err := repository.db.ExecContext(
 		ctx,
 		`UPDATE measurable_habits SET label = $2, icon = $3, step = $4, unit = $5, created_at = $6, updated_at = $7, archived_at = $8, deleted_at = $9, account_id = $10 WHERE id = $1`,
