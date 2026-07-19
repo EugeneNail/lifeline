@@ -1,0 +1,19 @@
+### Save a valid daily mood
+
+POST localhost:30000/api/v1/moods/2000-01-01
+Authorization: Bearer {{loginToken}}
+
+{
+    "mood": 3
+}
+
+###
+
+### Reject a mood record with domain validation errors
+
+POST localhost:30000/api/v1/moods/1999-12-31
+Authorization: Bearer {{loginToken}}
+
+{
+    "mood": 9
+}

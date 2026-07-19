@@ -23,3 +23,7 @@ func NewDate(raw time.Time) (Date, error) {
 
 	return Date(date), nil
 }
+
+func (date Date) Time() time.Time {
+	return time.Time(date)
+}
