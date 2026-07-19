@@ -8,20 +8,20 @@ import (
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
 )
 
-// JournalCreationPolicy checks whether a daily journal can be created.
-type JournalCreationPolicy struct {
+// CreationPolicy checks whether a daily journal can be created.
+type CreationPolicy struct {
 	journals JournalRepository
 }
 
-// NewJournalCreationPolicy returns a journal creation policy configured with the journal repository.
-func NewJournalCreationPolicy(repository JournalRepository) *JournalCreationPolicy {
-	return &JournalCreationPolicy{journals: repository}
+// NewCreationPolicy returns a journal creation policy configured with the journal repository.
+func NewCreationPolicy(repository JournalRepository) *CreationPolicy {
+	return &CreationPolicy{journals: repository}
 }
 
-// EnsureCanAdd returns nil when the account has no journal for the date, ErrDateIsOccupied when one exists, or an error when the journal lookup fails.
-func (policy *JournalCreationPolicy) EnsureCanAdd(ctx context.Context, accountID auth.ID, date time.Time) error {
+// Check returns nil when the account has no journal for the date, ErrDateIsOccupied when one exists, or an error when the journal lookup fails.
+func (policy *CreationPolicy) Check(ctx context.Context, accountID auth.ID, date time.Time) error {
 	date = date.Truncate(time.Hour * 24)
-	filter := NewJournalFilter().
+	filter := NewFilter().
 		WithAccountIds(accountID).
 		WithDates(date)
 

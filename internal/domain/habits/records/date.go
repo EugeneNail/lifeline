@@ -2,6 +2,7 @@ package records
 
 import "time"
 
+// TODO remove and replace with domain.Date
 // Date represents a calendar day truncated to 00:00.
 type Date time.Time
 

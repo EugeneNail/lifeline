@@ -46,7 +46,7 @@ func (repository *JournalRepository) Add(ctx context.Context, journalEntry *jour
 }
 
 // Find returns the first journal matching the provided filter or nil when no row exists.
-func (repository *JournalRepository) Find(ctx context.Context, filter journal.JournalFilter) (*journal.Journal, error) {
+func (repository *JournalRepository) Find(ctx context.Context, filter journal.Filter) (*journal.Journal, error) {
 	query := `SELECT id, date, note, created_at, updated_at, account_id FROM journals`
 	conditions := make([]string, 0, 3)
 	args := make([]any, 0)
@@ -106,7 +106,7 @@ func (repository *JournalRepository) Find(ctx context.Context, filter journal.Jo
 		return nil, fmt.Errorf("executing a SELECT sql query: %w", err)
 	}
 
-	journalEntry := journal.RestoreJournal(id, date, note, createdAt, updatedAt, accountId)
+	journalEntry := journal.Restore(id, date, note, createdAt, updatedAt, accountId)
 
 	return journalEntry, nil
 }

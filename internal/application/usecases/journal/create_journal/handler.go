@@ -15,11 +15,11 @@ import (
 // Handler executes the create-journal use case.
 type Handler struct {
 	journals              journal.JournalRepository
-	journalCreationPolicy *journal.JournalCreationPolicy
+	journalCreationPolicy *journal.CreationPolicy
 }
 
 // NewHandler returns a create-journal handler configured with the journal repository and creation policy or an error when a dependency is missing.
-func NewHandler(journals journal.JournalRepository, journalCreationPolicy *journal.JournalCreationPolicy) (*Handler, error) {
+func NewHandler(journals journal.JournalRepository, journalCreationPolicy *journal.CreationPolicy) (*Handler, error) {
 	if journals == nil {
 		return nil, fmt.Errorf("create_journal handler requires a journal repository")
 	}
@@ -43,7 +43,7 @@ type Command struct {
 
 // Handle validates the command, stores a new daily journal, and returns the journal identifier or field validation errors.
 func (handler *Handler) Handle(ctx context.Context, command Command) (uuid.UUID, error) {
-	journalEntry, err := journal.NewJournal(command.Date, command.Note, command.AccountID)
+	journalEntry, err := journal.New(command.Date, command.Note, command.AccountID)
 	if err != nil {
 		var violations domain.Violations
 		if errors.As(err, &violations) {
@@ -53,7 +53,7 @@ func (handler *Handler) Handle(ctx context.Context, command Command) (uuid.UUID,
 		return uuid.Nil, fmt.Errorf("creating a journal: %w", err)
 	}
 
-	if err := handler.journalCreationPolicy.EnsureCanAdd(ctx, command.AccountID, command.Date); err != nil {
+	if err := handler.journalCreationPolicy.Check(ctx, command.AccountID, command.Date); err != nil {
 		if errors.Is(err, journal.ErrDateIsOccupied) {
 			return uuid.Nil, err
 		}

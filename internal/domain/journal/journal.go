@@ -14,18 +14,18 @@ import (
 // Journal represents a daily journal entry orchestrating validated value objects.
 type Journal struct {
 	id        uuid.UUID
-	date      Date
+	date      domain.Date
 	note      Note
 	createdAt time.Time
 	updatedAt time.Time
 	accountId auth.ID
 }
 
-// NewJournal returns a validated journal or domain validation violations when construction fails.
-func NewJournal(rawDate time.Time, rawNote string, accountId auth.ID) (*Journal, error) {
+// New returns a validated journal or domain validation violations when construction fails.
+func New(rawDate time.Time, rawNote string, accountId auth.ID) (*Journal, error) {
 	violations := domain.NewViolations()
 
-	date, err := NewDate(rawDate)
+	date, err := domain.NewDate(rawDate)
 	if err != nil {
 		var violation domain.Violation
 		if !errors.As(err, &violation) {
@@ -61,11 +61,11 @@ func NewJournal(rawDate time.Time, rawNote string, accountId auth.ID) (*Journal,
 	}, nil
 }
 
-// RestoreJournal returns a journal reconstructed from persisted values without validating them.
-func RestoreJournal(id uuid.UUID, date time.Time, note string, createdAt time.Time, updatedAt time.Time, accountId uuid.UUID) *Journal {
+// Restore returns a journal reconstructed from persisted values without validating them.
+func Restore(id uuid.UUID, date time.Time, note string, createdAt time.Time, updatedAt time.Time, accountId uuid.UUID) *Journal {
 	return &Journal{
 		id:        id,
-		date:      Date(date),
+		date:      domain.Date(date),
 		note:      Note(note),
 		createdAt: createdAt,
 		updatedAt: updatedAt,
@@ -79,7 +79,7 @@ func (journal *Journal) ID() uuid.UUID {
 }
 
 // Date returns the journal date.
-func (journal *Journal) Date() Date {
+func (journal *Journal) Date() domain.Date {
 	return journal.date
 }
 

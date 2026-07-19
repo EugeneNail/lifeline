@@ -121,7 +121,7 @@ func main() {
 		log.Fatalf("creating a time habit repository: %v", err)
 	}
 
-	journalCreationPolicy := journal.NewJournalCreationPolicy(journalRepository)
+	journalCreationPolicy := journal.NewCreationPolicy(journalRepository)
 	habitCreationPolicy := habits.NewHabitCreationPolicy(completableHabitRepository, measurableHabitRepository, timeHabitRepository)
 	habitModificationPolicy := habits.NewModificationPolicy()
 	habitSavingPolicy := habitrecords.NewSavingPolicy()

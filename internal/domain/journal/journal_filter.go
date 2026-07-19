@@ -7,27 +7,27 @@ import (
 	"github.com/google/uuid"
 )
 
-// JournalFilter carries optional journal lookup criteria.
-type JournalFilter struct {
+// Filter carries optional journal lookup criteria.
+type Filter struct {
 	AccountIds []auth.ID
 	Dates      []time.Time
 	Ids        []uuid.UUID
 }
 
-// NewJournalFilter returns an empty journal filter.
-func NewJournalFilter() JournalFilter {
-	return JournalFilter{}
+// NewFilter returns an empty journal filter.
+func NewFilter() Filter {
+	return Filter{}
 }
 
 // WithAccountIds returns a filter with the provided account identifiers.
-func (filter JournalFilter) WithAccountIds(accountIds ...auth.ID) JournalFilter {
+func (filter Filter) WithAccountIds(accountIds ...auth.ID) Filter {
 	filter.AccountIds = append(filter.AccountIds, accountIds...)
 
 	return filter
 }
 
 // WithDates returns a filter with the provided dates truncated to day precision.
-func (filter JournalFilter) WithDates(dates ...time.Time) JournalFilter {
+func (filter Filter) WithDates(dates ...time.Time) Filter {
 	for _, date := range dates {
 		filter.Dates = append(filter.Dates, date.Truncate(time.Hour*24))
 	}
@@ -36,7 +36,7 @@ func (filter JournalFilter) WithDates(dates ...time.Time) JournalFilter {
 }
 
 // WithIds returns a filter with the provided journal identifiers.
-func (filter JournalFilter) WithIds(ids ...uuid.UUID) JournalFilter {
+func (filter Filter) WithIds(ids ...uuid.UUID) Filter {
 	filter.Ids = append(filter.Ids, ids...)
 
 	return filter
