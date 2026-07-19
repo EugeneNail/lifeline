@@ -1,0 +1,85 @@
+.daily-mood
+    position: relative
+
+.daily-mood__body
+    display: grid
+    gap: 18px
+
+.daily-mood__header
+    display: flex
+    align-items: start
+    justify-content: space-between
+    gap: 16px
+
+.daily-mood__heading
+    min-width: 0
+
+.daily-mood__title
+    margin: 0 0 8px
+    font-size: 20px
+    letter-spacing: -0.02em
+
+.daily-mood__subtitle
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 14px
+    line-height: 1.6
+
+.daily-mood__status
+    margin-top: 2px
+
+.daily-mood__choices
+    display: grid
+    grid-template-columns: repeat(5, minmax(0, 1fr))
+    gap: 8px
+
+.daily-mood__choice
+    display: grid
+    place-items: center
+    gap: 8px
+    min-height: 108px
+    padding: 14px 10px
+    border: 1px solid transparent
+    border-radius: 16px
+    background: var(--surface-secondary)
+    color: var(--text-primary)
+    cursor: pointer
+    transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease
+
+    &:hover
+        border-color: var(--primary)
+        transform: translateY(-1px)
+
+.daily-mood__choice--selected
+    border-color: var(--primary)
+    background: var(--primary-container)
+    color: var(--on-primary-container)
+
+.daily-mood__emoji
+    font-size: 28px
+    line-height: 1
+
+.daily-mood__label
+    color: var(--text-secondary)
+    font-size: 12px
+    font-weight: 750
+
+.daily-mood__choice--selected .daily-mood__label
+    color: var(--on-primary-container)
+
+@media (max-width: 860px)
+    .daily-mood__header
+        flex-direction: column
+
+    .daily-mood__status
+        align-self: flex-start
+
+@media (max-width: 560px)
+    .daily-mood__choices
+        gap: 6px
+        overflow-x: auto
+        grid-template-columns: repeat(5, minmax(72px, 1fr))
+
+    .daily-mood__choice
+        min-height: 96px
+        padding-inline: 8px

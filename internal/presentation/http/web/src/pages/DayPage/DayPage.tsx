@@ -2,6 +2,7 @@ import axios from 'axios'
 import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { AppNavigation } from '../../components/navigation'
+import { DailyMood } from '../../components/mood'
 import { DailyJournal } from '../../components/journal'
 import {
     DailyHabits,
@@ -131,6 +132,7 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
     return (
         <Page className="day-page">
             <div className="day-page__content">
+                <DailyMood dateKey={dateKey} />
                 <DailyJournal dateKey={dateKey} />
 
                 {isLoading ? (
