@@ -65,7 +65,7 @@ export function LoginPage() {
             <PageHeader
                 eyebrow="Lifeline"
                 title="Welcome back"
-                subtitle="Sign in to continue tracking habits, entries, and daily progress."
+                subtitle="Sign in to continue tracking habits, journals, and daily progress."
             />
 
             <Panel>

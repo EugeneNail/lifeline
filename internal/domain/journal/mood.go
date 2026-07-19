@@ -1,4 +1,4 @@
-package entries
+package journal
 
 import "github.com/EugeneNail/lifeline/internal/domain"
 

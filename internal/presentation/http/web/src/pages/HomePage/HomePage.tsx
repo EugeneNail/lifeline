@@ -10,7 +10,7 @@ export function HomePage() {
             <PageHeader
                 eyebrow="Lifeline"
                 title="Today"
-                subtitle="Track habits, entries, and daily progress from one quiet workspace."
+                subtitle="Track habits, journals, and daily progress from one quiet workspace."
                 actions={
                     <Link className="button button--primary" to="/habits/new">
                         + Add habit
@@ -66,7 +66,7 @@ export function HomePage() {
                             <div className="home-summary">
                                 <Metric value="73%" label="Habits completed" />
                                 <Metric value="8 days" label="Current streak" />
-                                <Metric value="2" label="Open entries" />
+                                <Metric value="2" label="Open journals" />
                             </div>
                         </Section>
                     </PanelBody>

@@ -8,36 +8,36 @@ import (
 	"strings"
 	"time"
 
-	"github.com/EugeneNail/lifeline/internal/domain/entries"
+	"github.com/EugeneNail/lifeline/internal/domain/journal"
 	"github.com/google/uuid"
 )
 
-// EntryRepository stores entries in PostgreSQL.
-type EntryRepository struct {
+// JournalRepository stores journals in PostgreSQL.
+type JournalRepository struct {
 	db *sql.DB
 }
 
-// NewEntryRepository returns a PostgreSQL entry repository.
-func NewEntryRepository(db *sql.DB) (*EntryRepository, error) {
+// NewJournalRepository returns a PostgreSQL journal repository.
+func NewJournalRepository(db *sql.DB) (*JournalRepository, error) {
 	if db == nil {
-		return nil, fmt.Errorf("EntryRepository requires an sql.DB instance")
+		return nil, fmt.Errorf("JournalRepository requires an sql.DB instance")
 	}
 
-	return &EntryRepository{db: db}, nil
+	return &JournalRepository{db: db}, nil
 }
 
-// Add stores the provided entry in PostgreSQL.
-func (repository *EntryRepository) Add(ctx context.Context, entry *entries.Entry) error {
+// Add stores the provided journal in PostgreSQL.
+func (repository *JournalRepository) Add(ctx context.Context, journalEntry *journal.Journal) error {
 	_, err := repository.db.ExecContext(
 		ctx,
-		`INSERT INTO entries (id, date, mood, note, created_at, updated_at, account_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		entry.ID().Uuid(),
-		time.Time(entry.Date()),
-		int(entry.Mood()),
-		string(entry.Note()),
-		entry.CreatedAt(),
-		entry.UpdatedAt(),
-		entry.AccountId().Uuid(),
+		`INSERT INTO journals (id, date, mood, note, created_at, updated_at, account_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		journalEntry.ID().Uuid(),
+		time.Time(journalEntry.Date()),
+		int(journalEntry.Mood()),
+		string(journalEntry.Note()),
+		journalEntry.CreatedAt(),
+		journalEntry.UpdatedAt(),
+		journalEntry.AccountId().Uuid(),
 	)
 	if err != nil {
 		return fmt.Errorf("executing an INSERT sql query: %w", err)
@@ -46,9 +46,9 @@ func (repository *EntryRepository) Add(ctx context.Context, entry *entries.Entry
 	return nil
 }
 
-// Find returns the first entry matching the provided filter or nil when no row exists.
-func (repository *EntryRepository) Find(ctx context.Context, filter entries.EntryFilter) (*entries.Entry, error) {
-	query := `SELECT id, date, mood, note, created_at, updated_at, account_id FROM entries`
+// Find returns the first journal matching the provided filter or nil when no row exists.
+func (repository *JournalRepository) Find(ctx context.Context, filter journal.JournalFilter) (*journal.Journal, error) {
+	query := `SELECT id, date, mood, note, created_at, updated_at, account_id FROM journals`
 	conditions := make([]string, 0, 3)
 	args := make([]any, 0)
 
@@ -108,7 +108,7 @@ func (repository *EntryRepository) Find(ctx context.Context, filter entries.Entr
 		return nil, fmt.Errorf("executing a SELECT sql query: %w", err)
 	}
 
-	entry := entries.Restore(id, date, mood, note, createdAt, updatedAt, accountId)
+	journalEntry := journal.RestoreJournal(id, date, mood, note, createdAt, updatedAt, accountId)
 
-	return entry, nil
+	return journalEntry, nil
 }

@@ -81,7 +81,7 @@ export function SignupPage() {
             <PageHeader
                 eyebrow="Lifeline"
                 title="Create your account"
-                subtitle="Set up a workspace for habits, entries, and the rest of your daily tracking flow."
+                subtitle="Set up a workspace for habits, journals, and the rest of your daily tracking flow."
             />
 
             <Panel>

@@ -11,7 +11,7 @@ import (
 
 	"github.com/EugeneNail/lifeline/internal/application/usecases/authenticate"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_completable_habit"
-	"github.com/EugeneNail/lifeline/internal/application/usecases/create_entry"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/create_journal"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_measurable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_time_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/get_completable_habit"
@@ -27,9 +27,9 @@ import (
 	"github.com/EugeneNail/lifeline/internal/application/usecases/update_completable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/update_measurable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/update_time_habit"
-	"github.com/EugeneNail/lifeline/internal/domain/entries"
 	"github.com/EugeneNail/lifeline/internal/domain/habits"
 	habitrecords "github.com/EugeneNail/lifeline/internal/domain/habits/records"
+	"github.com/EugeneNail/lifeline/internal/domain/journal"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/authentication"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/config"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/encryption"
@@ -37,7 +37,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/infrastructure/tokens"
 	transportAuthenticate "github.com/EugeneNail/lifeline/internal/presentation/http/api/authenticate"
 	transportCreate_completable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_completable_habit"
-	transportCreate_entry "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_entry"
+	transportCreate_journal "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_journal"
 	transportCreate_measurable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_measurable_habit"
 	transportCreate_time_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/create_time_habit"
 	transportGet_completable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/get_completable_habit"
@@ -86,9 +86,9 @@ func main() {
 		log.Fatalf("creating an account repository: %v", err)
 	}
 
-	entryRepository, err := postgres.NewEntryRepository(db)
+	journalRepository, err := postgres.NewJournalRepository(db)
 	if err != nil {
-		log.Fatalf("creating an entry repository: %v", err)
+		log.Fatalf("creating a journal repository: %v", err)
 	}
 
 	completableHabitRepository, err := postgres.NewCompletableHabitRepository(db)
@@ -121,7 +121,7 @@ func main() {
 		log.Fatalf("creating a time habit repository: %v", err)
 	}
 
-	entryCreationPolicy := entries.NewEntryCreationPolicy(entryRepository)
+	journalCreationPolicy := journal.NewJournalCreationPolicy(journalRepository)
 	habitCreationPolicy := habits.NewHabitCreationPolicy(completableHabitRepository, measurableHabitRepository, timeHabitRepository)
 	habitModificationPolicy := habits.NewModificationPolicy()
 	habitSavingPolicy := habitrecords.NewSavingPolicy()
@@ -141,9 +141,9 @@ func main() {
 		log.Fatalf("creating a refresh usecase: %v", err)
 	}
 
-	createEntryUsecase, err := create_entry.NewHandler(entryRepository, entryCreationPolicy)
+	createJournalUsecase, err := create_journal.NewHandler(journalRepository, journalCreationPolicy)
 	if err != nil {
-		log.Fatalf("creating a create-entry usecase: %v", err)
+		log.Fatalf("creating a create-journal usecase: %v", err)
 	}
 
 	createCompletableHabitUsecase, err := create_completable_habit.NewHandler(completableHabitRepository, habitCreationPolicy)
@@ -220,7 +220,7 @@ func main() {
 	registerUserEndpoint := transportRegister_user.NewHandler(registerUserUsecase)
 	authenticateEndpoint := transportAuthenticate.NewHandler(authenticateUsecase)
 	refreshEndpoint := transportRefresh.NewHandler(refreshUsecase)
-	createEntryEndpoint := transportCreate_entry.NewHandler(createEntryUsecase, requestIdentity)
+	createJournalEndpoint := transportCreate_journal.NewHandler(createJournalUsecase, requestIdentity)
 	createCompletableHabitEndpoint := transportCreate_completable_habit.NewHandler(createCompletableHabitUsecase, requestIdentity)
 	createMeasurableHabitEndpoint := transportCreate_measurable_habit.NewHandler(createMeasurableHabitUsecase, requestIdentity)
 	listHabitsEndpoint := transportList_habits.NewHandler(listHabitsUsecase, requestIdentity)
@@ -241,7 +241,7 @@ func main() {
 	server.Handle("POST /api/v1/users/register", middleware.WriteJSONResponse(registerUserEndpoint))
 	server.Handle("POST /api/v1/users/login", middleware.WriteJSONResponse(authenticateEndpoint))
 	server.Handle("POST /api/v1/users/refresh", middleware.WriteJSONResponse(refreshEndpoint))
-	server.Handle("POST /api/v1/entries", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createEntryEndpoint)))
+	server.Handle("POST /api/v1/journals", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createJournalEndpoint)))
 	server.Handle("POST /api/v1/habits/completable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createCompletableHabitEndpoint)))
 	server.Handle("POST /api/v1/habits/measurable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createMeasurableHabitEndpoint)))
 	server.Handle("POST /api/v1/habits/time", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createTimeHabitEndpoint)))

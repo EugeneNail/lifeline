@@ -1,30 +1,30 @@
-package create_entry
+package create_journal
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/EugeneNail/lifeline/internal/domain/entries"
 	"net/http"
 	"time"
 
-	create_entry "github.com/EugeneNail/lifeline/internal/application/usecases/create_entry"
+	create_journal "github.com/EugeneNail/lifeline/internal/application/usecases/create_journal"
 	"github.com/EugeneNail/lifeline/internal/domain"
+	"github.com/EugeneNail/lifeline/internal/domain/journal"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/authentication"
 )
 
-// Handler adapts the create-entry use case to the HTTP transport.
+// Handler adapts the create-journal use case to the HTTP transport.
 type Handler struct {
-	usecase  *create_entry.Handler
+	usecase  *create_journal.Handler
 	identity authentication.RequestIdentity
 }
 
-// NewHandler returns a transport handler wired to the create-entry use case.
-func NewHandler(usecase *create_entry.Handler, identity authentication.RequestIdentity) *Handler {
+// NewHandler returns a transport handler wired to the create-journal use case.
+func NewHandler(usecase *create_journal.Handler, identity authentication.RequestIdentity) *Handler {
 	return &Handler{usecase: usecase, identity: identity}
 }
 
-// Payload represents the JSON request body for entry creation.
+// Payload represents the JSON request body for journal creation.
 type Payload struct {
 	Date string `json:"date"`
 	Mood int    `json:"mood"`
@@ -48,7 +48,7 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		return http.StatusBadRequest, fmt.Errorf("parsing date: %w", err)
 	}
 
-	id, err := handler.usecase.Handle(request.Context(), create_entry.Command{
+	id, err := handler.usecase.Handle(request.Context(), create_journal.Command{
 		Date:      date,
 		Mood:      payload.Mood,
 		Note:      payload.Note,
@@ -60,11 +60,11 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 			return http.StatusUnprocessableEntity, validationErrors.Errors()
 		}
 
-		if errors.Is(err, entries.ErrDateIsOccupied) {
+		if errors.Is(err, journal.ErrDateIsOccupied) {
 			return http.StatusConflict, nil
 		}
 
-		return http.StatusInternalServerError, fmt.Errorf("handling CreateEntry command: %w", err)
+		return http.StatusInternalServerError, fmt.Errorf("handling CreateJournal command: %w", err)
 	}
 
 	return http.StatusCreated, id.String()

@@ -7,6 +7,7 @@ services:
       POSTGRES_USER: ${DATABASE_POSTGRES_USER}
       POSTGRES_PASSWORD: ${DATABASE_POSTGRES_PASSWORD}
     ports:
+      # TODO Remove after the final release
       - 30001:${DATABASE_POSTGRES_PORT}
     networks:
       - lifeline

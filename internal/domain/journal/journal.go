@@ -1,4 +1,4 @@
-package entries
+package journal
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ import (
 	"unicode/utf8"
 )
 
-type Entry struct {
+type Journal struct {
 	id        ID
 	date      Date
 	mood      Mood
@@ -24,7 +24,7 @@ type Entry struct {
 	accountId auth.ID
 }
 
-func New(rawDate time.Time, rawMood int, rawNote string, accountId auth.ID) (*Entry, error) {
+func NewJournal(rawDate time.Time, rawMood int, rawNote string, accountId auth.ID) (*Journal, error) {
 	errs := domain.NewValidationErrors()
 
 	date, err := NewDate(rawDate)
@@ -63,7 +63,7 @@ func New(rawDate time.Time, rawMood int, rawNote string, accountId auth.ID) (*En
 
 	now := time.Now()
 
-	return &Entry{
+	return &Journal{
 		id:        NewID(),
 		date:      date,
 		mood:      mood,
@@ -74,9 +74,9 @@ func New(rawDate time.Time, rawMood int, rawNote string, accountId auth.ID) (*En
 	}, nil
 }
 
-// Restore returns an entry reconstructed from persisted values without validating or changing them.
-func Restore(id uuid.UUID, date time.Time, mood int, note string, createdAt time.Time, updatedAt time.Time, accountId uuid.UUID) *Entry {
-	return &Entry{
+// RestoreJournal returns a journal reconstructed from persisted values without validating or changing them.
+func RestoreJournal(id uuid.UUID, date time.Time, mood int, note string, createdAt time.Time, updatedAt time.Time, accountId uuid.UUID) *Journal {
+	return &Journal{
 		id:        ID(id),
 		date:      Date(date),
 		mood:      Mood(mood),
@@ -97,8 +97,8 @@ type ID uuid.UUID
 var NilID = ID(uuid.Nil)
 
 // ID returns the user identifier.
-func (entry *Entry) ID() ID {
-	return entry.id
+func (journal *Journal) ID() ID {
+	return journal.id
 }
 
 // Uuid returns the UUID value of the identifier.
@@ -137,20 +137,20 @@ func NewDate(raw time.Time) (Date, error) {
 	return Date(date), nil
 }
 
-func (entry *Entry) Date() Date {
-	return entry.date
+func (journal *Journal) Date() Date {
+	return journal.date
 }
 
 // ===================================== Mood ============================================
 // =======================================================================================
 
-func (entry *Entry) Mood() Mood {
-	return entry.mood
+func (journal *Journal) Mood() Mood {
+	return journal.mood
 }
 
-func (entry *Entry) ChangeMood(mood Mood) {
-	entry.mood = mood
-	entry.updatedAt = time.Now()
+func (journal *Journal) ChangeMood(mood Mood) {
+	journal.mood = mood
+	journal.updatedAt = time.Now()
 }
 
 func (mood Mood) String() string {
@@ -206,26 +206,26 @@ func containsForbiddenControlChars(text string) bool {
 	return false
 }
 
-func (entry *Entry) Note() Note {
-	return entry.note
+func (journal *Journal) Note() Note {
+	return journal.note
 }
 
-func (entry *Entry) ChangeNote(note Note) {
-	entry.note = note
-	entry.updatedAt = time.Now()
+func (journal *Journal) ChangeNote(note Note) {
+	journal.note = note
+	journal.updatedAt = time.Now()
 }
 
 // ===================================== Misc ============================================
 // =======================================================================================
 
-func (entry *Entry) CreatedAt() time.Time {
-	return entry.createdAt
+func (journal *Journal) CreatedAt() time.Time {
+	return journal.createdAt
 }
 
-func (entry *Entry) UpdatedAt() time.Time {
-	return entry.updatedAt
+func (journal *Journal) UpdatedAt() time.Time {
+	return journal.updatedAt
 }
 
-func (entry *Entry) AccountId() auth.ID {
-	return entry.accountId
+func (journal *Journal) AccountId() auth.ID {
+	return journal.accountId
 }

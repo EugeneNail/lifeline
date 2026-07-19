@@ -1,4 +1,4 @@
-package entries
+package journal
 
 import (
 	"time"
@@ -6,27 +6,27 @@ import (
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
 )
 
-// EntryFilter carries optional entry lookup criteria.
-type EntryFilter struct {
+// JournalFilter carries optional journal lookup criteria.
+type JournalFilter struct {
 	AccountIds []auth.ID
 	Dates      []time.Time
 	Ids        []ID
 }
 
-// NewEntryFilter returns an empty entry filter.
-func NewEntryFilter() EntryFilter {
-	return EntryFilter{}
+// NewJournalFilter returns an empty journal filter.
+func NewJournalFilter() JournalFilter {
+	return JournalFilter{}
 }
 
 // WithAccountIds returns a filter with the provided account identifiers.
-func (filter EntryFilter) WithAccountIds(accountIds ...auth.ID) EntryFilter {
+func (filter JournalFilter) WithAccountIds(accountIds ...auth.ID) JournalFilter {
 	filter.AccountIds = append(filter.AccountIds, accountIds...)
 
 	return filter
 }
 
 // WithDates returns a filter with the provided dates truncated to day precision.
-func (filter EntryFilter) WithDates(dates ...time.Time) EntryFilter {
+func (filter JournalFilter) WithDates(dates ...time.Time) JournalFilter {
 	for _, date := range dates {
 		filter.Dates = append(filter.Dates, date.Truncate(time.Hour*24))
 	}
@@ -34,8 +34,8 @@ func (filter EntryFilter) WithDates(dates ...time.Time) EntryFilter {
 	return filter
 }
 
-// WithIds returns a filter with the provided entry identifiers.
-func (filter EntryFilter) WithIds(ids ...ID) EntryFilter {
+// WithIds returns a filter with the provided journal identifiers.
+func (filter JournalFilter) WithIds(ids ...ID) JournalFilter {
 	filter.Ids = append(filter.Ids, ids...)
 
 	return filter

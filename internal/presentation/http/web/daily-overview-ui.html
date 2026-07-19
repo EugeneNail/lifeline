@@ -187,7 +187,7 @@ dialog::backdrop{background:rgba(25,25,31,.42);backdrop-filter:blur(4px)}
 
 <section class="panel">
   <div class="panel-head">
-    <div><h2>Дневник</h2><p class="desc">Одна Entry на день. Текст сохраняется автоматически.</p></div>
+    <div><h2>Дневник</h2><p class="desc">Одна Journal-запись на день. Текст сохраняется автоматически.</p></div>
     <span class="state saved" id="journalState">Сохранено</span>
   </div>
   <textarea class="journal" id="journal" maxlength="10000" placeholder="Что сегодня произошло?">Сегодня наконец закрыл задачу, которую откладывал всю неделю. После работы вышел прогуляться и поймал себя на том, что впервые за несколько дней никуда не тороплюсь.</textarea>
@@ -198,7 +198,7 @@ dialog::backdrop{background:rgba(25,25,31,.42);backdrop-filter:blur(4px)}
 <div class="col">
 <section class="panel">
   <div class="panel-head">
-    <div><h2>Привычки</h2><p class="desc">Каждая HabitRecord существует независимо от Entry.</p></div>
+    <div><h2>Привычки</h2><p class="desc">Каждая HabitRecord существует независимо от Journal.</p></div>
     <button class="action">Настроить</button>
   </div>
   <div class="habits">
@@ -240,7 +240,7 @@ dialog::backdrop{background:rgba(25,25,31,.42);backdrop-filter:blur(4px)}
     <article class="tx" data-amount="120"><div class="cat">🚌</div><div><h3 class="tx-title">Автобус</h3><p class="tx-meta">18:10 · Транспорт</p></div><span class="amount">−120 ₽</span><button class="menu">⋮</button></article>
     <article class="tx" data-amount="499"><div class="cat">☁</div><div><h3 class="tx-title">Облачное хранилище</h3><p class="tx-meta">20:00 · Подписки</p></div><span class="amount">−499 ₽</span><button class="menu">⋮</button></article>
   </div>
-  <p class="hint">Удаление текста дневника не удаляет расходы: транзакции связаны с пользователем и временем, а не с Entry.</p>
+  <p class="hint">Удаление текста дневника не удаляет расходы: транзакции связаны с пользователем и временем, а не с Journal.</p>
 </section>
 </div>
 </div>
@@ -248,8 +248,8 @@ dialog::backdrop{background:rgba(25,25,31,.42);backdrop-filter:blur(4px)}
 <section class="principles">
   <h2>Что показывает прототип</h2>
   <div class="principle-grid">
-    <article class="principle"><span class="tag">Entry</span><strong>Настроение и текст — одна дневная запись</strong><p>Пустая Entry не создаётся просто при открытии дня. Ошибка сохранения остаётся локальной для секции.</p></article>
-    <article class="principle"><span class="tag">HabitRecord</span><strong>Отметки привычек не принадлежат Entry</strong><p>Они объединены с дневником только датой и попадают в общий DailyOverview.</p></article>
+    <article class="principle"><span class="tag">Journal</span><strong>Настроение и текст — одна дневная запись</strong><p>Пустая Journal-запись не создаётся просто при открытии дня. Ошибка сохранения остаётся локальной для секции.</p></article>
+    <article class="principle"><span class="tag">HabitRecord</span><strong>Отметки привычек не принадлежат Journal</strong><p>Они объединены с дневником только датой и попадают в общий DailyOverview.</p></article>
     <article class="principle"><span class="tag">Transaction</span><strong>Финансовые операции самостоятельны</strong><p>Создание и редактирование транзакции не пересохраняет весь день.</p></article>
   </div>
 </section>

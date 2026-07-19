@@ -1,6 +1,6 @@
-### Create a valid daily entry
+### Create a valid daily journal
 
-POST localhost:30000/api/v1/entries
+POST localhost:30000/api/v1/journals
 Authorization: Bearer {{loginToken}}
 
 {
@@ -11,9 +11,9 @@ Authorization: Bearer {{loginToken}}
 
 ###
 
-### Reject an entry with domain validation errors
+### Reject a journal with domain validation errors
 
-POST localhost:30000/api/v1/entries
+POST localhost:30000/api/v1/journals
 Authorization: Bearer {{loginToken}}
 
 {
