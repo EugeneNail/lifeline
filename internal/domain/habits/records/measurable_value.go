@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	measurableValueMin = 0.01
+	measurableValueMin = 0.0
 	measurableValueMax = 1000000000.0
 )
 
@@ -18,7 +18,7 @@ type MeasurableValue float32
 // NewMeasurableValue returns a measurable value or a domain error when the value violates domain rules.
 func NewMeasurableValue(rawValue float32, step habits.MeasurementStep) (MeasurableValue, domain.Violation) {
 	if rawValue < measurableValueMin || rawValue > measurableValueMax {
-		return 0, domain.NewViolationf("measurable value must be between %.2f and %f", measurableValueMin, measurableValueMax)
+		return 0, domain.NewViolationf("measurable value must be between %f and %f", measurableValueMin, measurableValueMax)
 	}
 
 	value := float64(rawValue)
