@@ -1,0 +1,11 @@
+### Get a mood record for a day
+
+GET localhost:30000/api/v1/moods/2000-01-01
+Authorization: Bearer {{loginToken}}
+
+###
+
+### Reject a missing mood record
+
+GET localhost:30000/api/v1/moods/1999-12-31
+Authorization: Bearer {{loginToken}}

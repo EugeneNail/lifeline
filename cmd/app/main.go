@@ -20,6 +20,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/application/usecases/habit/update_measurable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/habit/update_time_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/journal/create_journal"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/moods/get_mood_record"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/moods/save_mood_record"
 	transportAuthenticate "github.com/EugeneNail/lifeline/internal/presentation/http/api/auth/authenticate"
 	transportRefresh "github.com/EugeneNail/lifeline/internal/presentation/http/api/auth/refresh"
@@ -39,6 +40,7 @@ import (
 	transportUpdate_measurable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/update_measurable_habit"
 	transportUpdate_time_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/update_time_habit"
 	transportCreate_journal "github.com/EugeneNail/lifeline/internal/presentation/http/api/journal/create_journal"
+	transportGet_mood_record "github.com/EugeneNail/lifeline/internal/presentation/http/api/moods/get_mood_record"
 	transportSave_mood_record "github.com/EugeneNail/lifeline/internal/presentation/http/api/moods/save_mood_record"
 	"log"
 	"net/http"
@@ -156,6 +158,11 @@ func main() {
 		log.Fatalf("creating a save-mood-record usecase: %v", err)
 	}
 
+	getMoodRecordUsecase, err := get_mood_record.NewHandler(moodRecordRepository)
+	if err != nil {
+		log.Fatalf("creating a get-mood-record usecase: %v", err)
+	}
+
 	createCompletableHabitUsecase, err := create_completable_habit.NewHandler(completableHabitRepository, habitCreationPolicy)
 	if err != nil {
 		log.Fatalf("creating a create-completable-habit usecase: %v", err)
@@ -231,6 +238,7 @@ func main() {
 	authenticateEndpoint := transportAuthenticate.NewHandler(authenticateUsecase)
 	refreshEndpoint := transportRefresh.NewHandler(refreshUsecase)
 	createJournalEndpoint := transportCreate_journal.NewHandler(createJournalUsecase, requestIdentity)
+	getMoodRecordEndpoint := transportGet_mood_record.NewHandler(getMoodRecordUsecase, requestIdentity)
 	saveMoodRecordEndpoint := transportSave_mood_record.NewHandler(saveMoodRecordUsecase, requestIdentity)
 	createCompletableHabitEndpoint := transportCreate_completable_habit.NewHandler(createCompletableHabitUsecase, requestIdentity)
 	createMeasurableHabitEndpoint := transportCreate_measurable_habit.NewHandler(createMeasurableHabitUsecase, requestIdentity)
@@ -253,6 +261,7 @@ func main() {
 	server.Handle("POST /api/v1/users/login", middleware.WriteJSONResponse(authenticateEndpoint))
 	server.Handle("POST /api/v1/users/refresh", middleware.WriteJSONResponse(refreshEndpoint))
 	server.Handle("POST /api/v1/journals/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createJournalEndpoint)))
+	server.Handle("GET /api/v1/moods/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getMoodRecordEndpoint)))
 	server.Handle("POST /api/v1/moods/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(saveMoodRecordEndpoint)))
 	server.Handle("POST /api/v1/habits/completable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createCompletableHabitEndpoint)))
 	server.Handle("POST /api/v1/habits/measurable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createMeasurableHabitEndpoint)))
