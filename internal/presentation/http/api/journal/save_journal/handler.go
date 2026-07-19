@@ -1,4 +1,4 @@
-package create_journal
+package save_journal
 
 import (
 	"encoding/json"
