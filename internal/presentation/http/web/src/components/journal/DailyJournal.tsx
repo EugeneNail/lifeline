@@ -9,10 +9,11 @@ type JournalSavingStatus = 'saved' | 'saving' | 'error'
 
 type DailyJournalProps = {
     dateKey: string
+    initialNote: string | null
 }
 
 // DailyJournal renders the day journal panel and saves the note independently from habits.
-export function DailyJournal({ dateKey }: DailyJournalProps) {
+export function DailyJournal({ dateKey, initialNote }: DailyJournalProps) {
     const apiClient = useApiClient()
     const [note, setNote] = useState('')
     const [status, setStatus] = useState<JournalSavingStatus>('saved')
@@ -20,7 +21,7 @@ export function DailyJournal({ dateKey }: DailyJournalProps) {
     const saveGeneration = useRef(0)
 
     useEffect(() => {
-        setNote('')
+        setNote(initialNote ?? '')
         setStatus('saved')
         clearPendingSave(saveTimer.current)
         saveGeneration.current += 1
@@ -28,7 +29,7 @@ export function DailyJournal({ dateKey }: DailyJournalProps) {
         return () => {
             clearPendingSave(saveTimer.current)
         }
-    }, [dateKey])
+    }, [dateKey, initialNote])
 
     function handleChange(nextNote: string) {
         setNote(nextNote)

@@ -26,6 +26,10 @@ type MoodResponse = {
     mood: MoodValue
 }
 
+type JournalResponse = {
+    note: string
+}
+
 function resolvePageDate(rawDate: string | undefined) {
     if (!rawDate) {
         return null
@@ -76,6 +80,7 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
     const [habits, setHabits] = useState<HabitsResponse | null>(null)
     const [records, setRecords] = useState<RecordsResponse | null>(null)
     const [mood, setMood] = useState<MoodValue | null>(null)
+    const [journal, setJournal] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
 
@@ -94,19 +99,24 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
             setLoadError('')
 
             try {
-                const [habitsResponse, recordsResponse] = await Promise.all([
+                const [habitsResponse, recordsResponse, moodResponse, journalResponse] = await Promise.all([
                     apiClient.get<HabitsResponse>('habits'),
                     apiClient.get<RecordsResponse>(`habits/${dateKey}`),
-                ])
-                const moodResponse = await apiClient.get<MoodResponse>(`moods/${dateKey}`).catch(
-                    (error) => {
+                    apiClient.get<MoodResponse>(`moods/${dateKey}`).catch((error) => {
                         if (axios.isAxiosError(error) && error.response?.status === 404) {
                             return null
                         }
 
                         throw error
-                    },
-                )
+                    }),
+                    apiClient.get<JournalResponse>(`journals/${dateKey}`).catch((error) => {
+                        if (axios.isAxiosError(error) && error.response?.status === 404) {
+                            return null
+                        }
+
+                        throw error
+                    }),
+                ])
 
                 if (!isActive) {
                     return
@@ -115,6 +125,7 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
                 setHabits(habitsResponse.data)
                 setRecords(recordsResponse.data)
                 setMood(moodResponse?.data.mood ?? null)
+                setJournal(journalResponse?.data.note ?? null)
             } catch (error) {
                 if (!isActive) {
                     return
@@ -148,7 +159,7 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
         <Page className="day-page">
             <div className="day-page__content">
                 <DailyMood dateKey={dateKey} initialMood={mood} />
-                <DailyJournal dateKey={dateKey} />
+                <DailyJournal dateKey={dateKey} initialNote={journal} />
 
                 {isLoading ? (
                     <Message variant="info">Loading day data...</Message>
