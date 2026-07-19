@@ -10,7 +10,7 @@ SHELL_TARGET := $(word 2,$(MAKECMDGOALS))
 GO_RUN_CONTAINER := docker run --rm -v "$(CURDIR)":/workspace -w /workspace golang:1.26.1
 GO_RUN_NETWORK_CONTAINER := docker run --rm --network "$(NETWORK_NAME)" --env-file "$(ENV_FILE)" -v "$(CURDIR)":/workspace -w /workspace golang:1.26.1
 
-.PHONY: help up down shell envs networks fetch deploy create migrate rollback
+.PHONY: help up down shell logs containers envs networks fetch deploy create migrate rollback
 
 help:
 	@printf '%-14s %-28s %s\n' "Target" "Interface" "Description"
@@ -19,6 +19,8 @@ help:
 	@printf '%-14s %-28s %s\n' "up" "" "Start the full stack with Docker Compose."
 	@printf '%-14s %-28s %s\n' "down" "" "Stop the full stack."
 	@printf '%-14s %-28s %s\n' "shell" "<container>" "Open a shell inside a running Lifeline container."
+	@printf '%-14s %-28s %s\n' "logs" "<container>" "Follow logs of a running Lifeline container."
+	@printf '%-14s %-28s %s\n' "containers" "" "List all Lifeline containers."
 	@printf '%-14s %-28s %s\n' "envs" "" "Create or refresh local environment files from examples."
 	@printf '%-14s %-28s %s\n' "networks" "" "Create the shared Docker network if it is missing."
 	@printf '%-14s %-28s %s\n' "fetch" "" "Pull the latest master branch from git."
@@ -36,6 +38,13 @@ down:
 shell:
 	@if [ -z "$(SHELL_TARGET)" ]; then echo "usage: make shell <container-name-without-lifeline-prefix>"; exit 1; fi
 	docker exec -it lifeline-$(SHELL_TARGET) sh
+
+logs:
+	@if [ -z "$(SHELL_TARGET)" ]; then echo "usage: make logs <container-name-without-lifeline-prefix>"; exit 1; fi
+	docker logs lifeline-$(SHELL_TARGET) -f
+
+containers:
+	docker container ls -a | grep lifeline
 
 envs:
 	@if [ ! -f "$(ENV_FILE)" ]; then \
@@ -67,8 +76,8 @@ deploy:
 	@$(MAKE) fetch
 	@$(MAKE) networks
 	@$(MAKE) envs
-	@$(MAKE) migrate
 	@$(MAKE) up
+	@$(MAKE) migrate
 
 create:
 	@if [ "$(MIGRATION_COMMAND_TARGET)" != "migration" ]; then echo "usage: make create migration <multi word name>"; exit 1; fi
