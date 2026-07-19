@@ -8,30 +8,21 @@ import (
 
 	"github.com/EugeneNail/lifeline/internal/domain"
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
-	"github.com/EugeneNail/lifeline/internal/domain/journal"
-	"github.com/google/uuid"
+	"github.com/EugeneNail/lifeline/internal/domain/journals"
 )
 
 // Handler executes the create-journal use case.
 type Handler struct {
-	journals              journal.JournalRepository
-	journalCreationPolicy *journal.CreationPolicy
+	journals journals.Repository
 }
 
-// NewHandler returns a create-journal handler configured with the journal repository and creation policy or an error when a dependency is missing.
-func NewHandler(journals journal.JournalRepository, journalCreationPolicy *journal.CreationPolicy) (*Handler, error) {
+// NewHandler returns a create-journal handler configured with the journal repository or an error when a dependency is missing.
+func NewHandler(journals journals.Repository) (*Handler, error) {
 	if journals == nil {
 		return nil, fmt.Errorf("create_journal handler requires a journal repository")
 	}
 
-	if journalCreationPolicy == nil {
-		return nil, fmt.Errorf("create_journal handler requires a journal creation policy")
-	}
-
-	return &Handler{
-		journals:              journals,
-		journalCreationPolicy: journalCreationPolicy,
-	}, nil
+	return &Handler{journals: journals}, nil
 }
 
 // Command carries the data required to create a daily journal.
@@ -41,29 +32,59 @@ type Command struct {
 	AccountID auth.ID
 }
 
-// Handle validates the command, stores a new daily journal, and returns the journal identifier or field validation errors.
-func (handler *Handler) Handle(ctx context.Context, command Command) (uuid.UUID, error) {
-	journalEntry, err := journal.New(command.Date, command.Note, command.AccountID)
+// Handle validates the command, updates an existing journal or creates a new one, and returns an error when persistence fails.
+func (handler *Handler) Handle(ctx context.Context, command Command) error {
+	violations := domain.NewViolations()
+
+	date, err := domain.NewDate(command.Date)
 	if err != nil {
-		var violations domain.Violations
-		if errors.As(err, &violations) {
-			return uuid.Nil, violations
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
+			return fmt.Errorf("creating a journal date: %w", err)
 		}
 
-		return uuid.Nil, fmt.Errorf("creating a journal: %w", err)
+		violations.Add("date", violation)
 	}
 
-	if err := handler.journalCreationPolicy.Check(ctx, command.AccountID, command.Date); err != nil {
-		if errors.Is(err, journal.ErrDateIsOccupied) {
-			return uuid.Nil, err
+	note, err := journals.NewNote(command.Note)
+	if err != nil {
+		var violation domain.Violation
+		if !errors.As(err, &violation) {
+			return fmt.Errorf("creating a journal note: %w", err)
 		}
 
-		return uuid.Nil, fmt.Errorf("ensuring journal can be added: %w", err)
+		violations.Add("note", violation)
 	}
 
-	if err := handler.journals.Add(ctx, journalEntry); err != nil {
-		return uuid.Nil, fmt.Errorf("adding a new journal to the collection: %w", err)
+	if violations.HasViolations() {
+		return violations
 	}
 
-	return journalEntry.ID(), nil
+	journal, err := handler.journals.Find(ctx, journals.NewFilter().
+		WithAccountIds(command.AccountID).
+		WithDates(time.Time(date)),
+	)
+	if err != nil {
+		return fmt.Errorf("finding a journal by account id %q and date %q: %w", command.AccountID, time.Time(date), err)
+	}
+
+	isNew := false
+	if journal == nil {
+		isNew = true
+		journal = journals.New(date, note, command.AccountID)
+	}
+
+	journal.ChangeNote(note)
+
+	if isNew {
+		if err := handler.journals.Add(ctx, journal); err != nil {
+			return fmt.Errorf("adding a new journal to the collection: %w", err)
+		}
+	} else {
+		if err := handler.journals.Update(ctx, journal); err != nil {
+			return fmt.Errorf("updating a journal by account id %q and date %q: %w", command.AccountID, time.Time(date), err)
+		}
+	}
+
+	return nil
 }

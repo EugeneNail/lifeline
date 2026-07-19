@@ -1,4 +1,4 @@
-package journal
+package journals
 
 import (
 	"errors"
@@ -8,12 +8,10 @@ import (
 	"github.com/EugeneNail/lifeline/internal/domain"
 	"github.com/EugeneNail/lifeline/internal/domain/auth"
 	"github.com/google/uuid"
-	"github.com/samborkent/uuidv7"
 )
 
 // Journal represents a daily journal entry orchestrating validated value objects.
 type Journal struct {
-	id        uuid.UUID
 	date      domain.Date
 	note      Note
 	createdAt time.Time
@@ -21,8 +19,9 @@ type Journal struct {
 	accountId auth.ID
 }
 
-// New returns a validated journal or domain validation violations when construction fails.
-func New(rawDate time.Time, rawNote string, accountId auth.ID) (*Journal, error) {
+// TODO rename raw constructors of the other domain models
+// NewFromRaw returns a validated journal or domain validation violations when construction fails.
+func NewFromRaw(rawDate time.Time, rawNote string, accountId auth.ID) (*Journal, error) {
 	violations := domain.NewViolations()
 
 	date, err := domain.NewDate(rawDate)
@@ -52,7 +51,6 @@ func New(rawDate time.Time, rawNote string, accountId auth.ID) (*Journal, error)
 	now := time.Now()
 
 	return &Journal{
-		id:        uuid.UUID(uuidv7.New()),
 		date:      date,
 		note:      note,
 		createdAt: now,
@@ -61,21 +59,28 @@ func New(rawDate time.Time, rawNote string, accountId auth.ID) (*Journal, error)
 	}, nil
 }
 
-// Restore returns a journal reconstructed from persisted values without validating them.
-func Restore(id uuid.UUID, date time.Time, note string, createdAt time.Time, updatedAt time.Time, accountId uuid.UUID) *Journal {
+// New returns a validated journal.
+func New(date domain.Date, note Note, accountId auth.ID) *Journal {
+	now := time.Now()
+
 	return &Journal{
-		id:        id,
+		date:      date,
+		note:      note,
+		createdAt: now,
+		updatedAt: now,
+		accountId: accountId,
+	}
+}
+
+// Restore returns a journal reconstructed from persisted values without validating them.
+func Restore(date time.Time, note string, createdAt time.Time, updatedAt time.Time, accountId uuid.UUID) *Journal {
+	return &Journal{
 		date:      domain.Date(date),
 		note:      Note(note),
 		createdAt: createdAt,
 		updatedAt: updatedAt,
 		accountId: auth.ID(accountId),
 	}
-}
-
-// ID returns the journal identifier.
-func (journal *Journal) ID() uuid.UUID {
-	return journal.id
 }
 
 // Date returns the journal date.

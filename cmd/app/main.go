@@ -47,7 +47,6 @@ import (
 
 	"github.com/EugeneNail/lifeline/internal/domain/habits"
 	habitrecords "github.com/EugeneNail/lifeline/internal/domain/habits/records"
-	"github.com/EugeneNail/lifeline/internal/domain/journal"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/authentication"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/config"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/encryption"
@@ -121,7 +120,6 @@ func main() {
 		log.Fatalf("creating a time habit repository: %v", err)
 	}
 
-	journalCreationPolicy := journal.NewCreationPolicy(journalRepository)
 	habitCreationPolicy := habits.NewHabitCreationPolicy(completableHabitRepository, measurableHabitRepository, timeHabitRepository)
 	habitModificationPolicy := habits.NewModificationPolicy()
 	habitSavingPolicy := habitrecords.NewSavingPolicy()
@@ -141,7 +139,7 @@ func main() {
 		log.Fatalf("creating a refresh usecase: %v", err)
 	}
 
-	createJournalUsecase, err := create_journal.NewHandler(journalRepository, journalCreationPolicy)
+	createJournalUsecase, err := create_journal.NewHandler(journalRepository)
 	if err != nil {
 		log.Fatalf("creating a create-journal usecase: %v", err)
 	}
@@ -241,7 +239,7 @@ func main() {
 	server.Handle("POST /api/v1/users/register", middleware.WriteJSONResponse(registerUserEndpoint))
 	server.Handle("POST /api/v1/users/login", middleware.WriteJSONResponse(authenticateEndpoint))
 	server.Handle("POST /api/v1/users/refresh", middleware.WriteJSONResponse(refreshEndpoint))
-	server.Handle("POST /api/v1/journals", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createJournalEndpoint)))
+	server.Handle("POST /api/v1/journals/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createJournalEndpoint)))
 	server.Handle("POST /api/v1/habits/completable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createCompletableHabitEndpoint)))
 	server.Handle("POST /api/v1/habits/measurable", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createMeasurableHabitEndpoint)))
 	server.Handle("POST /api/v1/habits/time", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createTimeHabitEndpoint)))

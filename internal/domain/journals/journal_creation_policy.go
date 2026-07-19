@@ -1,4 +1,4 @@
-package journal
+package journals
 
 import (
 	"context"
@@ -10,11 +10,11 @@ import (
 
 // CreationPolicy checks whether a daily journal can be created.
 type CreationPolicy struct {
-	journals JournalRepository
+	journals Repository
 }
 
 // NewCreationPolicy returns a journal creation policy configured with the journal repository.
-func NewCreationPolicy(repository JournalRepository) *CreationPolicy {
+func NewCreationPolicy(repository Repository) *CreationPolicy {
 	return &CreationPolicy{journals: repository}
 }
 

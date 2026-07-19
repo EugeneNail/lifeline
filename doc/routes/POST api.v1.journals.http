@@ -1,10 +1,9 @@
 ### Create a valid daily journal
 
-POST localhost:30000/api/v1/journals
+POST localhost:30000/api/v1/journals/2026-07-19
 Authorization: Bearer {{loginToken}}
 
 {
-    "date":"2026-07-19",
     "note":"Productive day"
 }
 
@@ -12,10 +11,9 @@ Authorization: Bearer {{loginToken}}
 
 ### Reject a journal with domain validation errors
 
-POST localhost:30000/api/v1/journals
+POST localhost:30000/api/v1/journals/1999-12-31
 Authorization: Bearer {{loginToken}}
 
 {
-    "date":"1999-12-31",
     "note":"Invalid\u0008note"
 }

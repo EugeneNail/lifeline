@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/EugeneNail/lifeline/internal/application/usecases/journal/create_journal"
 	"net/http"
 	"time"
 
+	"github.com/EugeneNail/lifeline/internal/application/usecases/journal/create_journal"
 	"github.com/EugeneNail/lifeline/internal/domain"
-	"github.com/EugeneNail/lifeline/internal/domain/journal"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/authentication"
 )
 
@@ -26,7 +25,6 @@ func NewHandler(usecase *create_journal.Handler, identity authentication.Request
 
 // Payload represents the JSON request body for journal creation.
 type Payload struct {
-	Date string `json:"date"`
 	Note string `json:"note"`
 }
 
@@ -42,12 +40,12 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		return http.StatusBadRequest, fmt.Errorf("decoding request body: %w", err)
 	}
 
-	date, err := time.Parse(time.DateOnly, payload.Date)
+	date, err := time.Parse(time.DateOnly, request.PathValue("date"))
 	if err != nil {
 		return http.StatusBadRequest, fmt.Errorf("parsing date: %w", err)
 	}
 
-	id, err := handler.usecase.Handle(request.Context(), create_journal.Command{
+	err = handler.usecase.Handle(request.Context(), create_journal.Command{
 		Date:      date,
 		Note:      payload.Note,
 		AccountID: accountID,
@@ -58,12 +56,8 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 			return http.StatusUnprocessableEntity, violations.Violations()
 		}
 
-		if errors.Is(err, journal.ErrDateIsOccupied) {
-			return http.StatusConflict, nil
-		}
-
 		return http.StatusInternalServerError, fmt.Errorf("handling CreateJournal command: %w", err)
 	}
 
-	return http.StatusCreated, id.String()
+	return http.StatusNoContent, nil
 }
