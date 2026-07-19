@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/EugeneNail/lifeline/internal/application/usecases/authenticate"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/create_completable_habit"
@@ -51,6 +55,8 @@ import (
 	transportUpdate_time_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/update_time_habit"
 	"github.com/EugeneNail/lifeline/internal/presentation/http/middleware"
 )
+
+const frontendAssetsDir = "internal/presentation/http/web/dist"
 
 func main() {
 	// --- Section: Configuration ---
@@ -250,7 +256,67 @@ func main() {
 	server.Handle("PUT /api/v1/habits/completable/{uuid}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(updateCompletableHabitEndpoint)))
 	server.Handle("PUT /api/v1/habits/measurable/{uuid}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(updateMeasurableHabitEndpoint)))
 	server.Handle("PUT /api/v1/habits/time/{uuid}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(updateTimeHabitEndpoint)))
+	server.Handle("/", newPublicRoutesHandler(frontendAssetsDir))
 
 	// TODO handle the error
-	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", configuration.App.Port), server)
+	if err := http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", configuration.App.Port), server); err != nil {
+		log.Fatalf("serving HTTP server: %v", err)
+	}
+}
+
+// newPublicRoutesHandler returns an HTTP handler that serves the built frontend for public routes.
+func newPublicRoutesHandler(assetsDir string) http.Handler {
+	indexPath := filepath.Join(assetsDir, "index.html")
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		requestPath := normalizeFrontendRequestPath(r.URL.Path)
+		if requestPath == "index.html" {
+			http.ServeFile(w, r, indexPath)
+			return
+		}
+
+		assetPath := filepath.Join(assetsDir, filepath.FromSlash(requestPath))
+		if fileExists(assetPath) {
+			http.ServeFile(w, r, assetPath)
+			return
+		}
+
+		if isStaticAssetRequest(requestPath) {
+			http.NotFound(w, r)
+			return
+		}
+
+		http.ServeFile(w, r, indexPath)
+	})
+}
+
+// normalizeFrontendRequestPath converts a request path into a safe relative path within the frontend bundle.
+func normalizeFrontendRequestPath(requestPath string) string {
+	cleanedPath := path.Clean(strings.TrimPrefix(requestPath, "/"))
+	if cleanedPath == "." {
+		return "index.html"
+	}
+
+	if strings.HasPrefix(cleanedPath, "..") {
+		return "index.html"
+	}
+
+	return cleanedPath
+}
+
+// fileExists reports whether the given file exists on disk.
+func fileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return err == nil
+}
+
+// isStaticAssetRequest reports whether the request is looking for a direct static asset.
+func isStaticAssetRequest(requestPath string) bool {
+	baseName := path.Base(requestPath)
+	return strings.Contains(baseName, ".")
 }
