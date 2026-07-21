@@ -8,7 +8,7 @@ import (
 type Date time.Time
 
 // NewDate returns a validated journal date or a violation when the date is invalid.
-func NewDate(raw time.Time) (Date, error) {
+func NewDate(raw time.Time) (Date, Violation) {
 	if raw.IsZero() {
 		return Date{}, NewViolation("date is empty")
 	}

@@ -16,8 +16,8 @@ func (account *Account) Password() HashedPassword {
 	return account.password
 }
 
-// NewPassword validates and returns a password value when it satisfies the domain password policy.
-func NewPassword(rawPassword string) (Password, error) {
+// NewPassword validates and returns a password value or a violation when it violates the domain password policy.
+func NewPassword(rawPassword string) (Password, domain.Violation) {
 	if utf8.RuneCountInString(rawPassword) < 8 {
 		return "", domain.NewViolation("password must be at least 8 characters long")
 	}

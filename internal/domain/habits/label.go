@@ -12,8 +12,8 @@ const (
 	habitLabelMaxLength = 32
 )
 
-// NewLabel returns a normalized habit label or a domain error when the label violates domain rules.
-func NewLabel(rawLabel string) (string, error) {
+// NewLabel returns a normalized habit label or a violation when the label violates domain rules.
+func NewLabel(rawLabel string) (string, domain.Violation) {
 	label := strings.TrimSpace(rawLabel)
 	length := utf8.RuneCountInString(label)
 

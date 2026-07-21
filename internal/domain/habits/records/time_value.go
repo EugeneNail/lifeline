@@ -14,8 +14,8 @@ const (
 // TimeValue represents a time of day as minutes from 00:00 without date information.
 type TimeValue int
 
-// NewTimeValue returns a time value or a domain error when the minute is outside the supported range.
-func NewTimeValue(rawValue int) (TimeValue, error) {
+// NewTimeValue returns a time value or a violation when the minute is outside the supported range.
+func NewTimeValue(rawValue int) (TimeValue, domain.Violation) {
 	if rawValue < timeValueMinMinute || rawValue > timeValueMaxMinute {
 		return 0, domain.NewViolationf("time value must be between %d and %d minutes", timeValueMinMinute, timeValueMaxMinute)
 	}

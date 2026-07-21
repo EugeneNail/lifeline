@@ -1,11 +1,9 @@
 package records
 
 import (
-	"errors"
-	"fmt"
-	"github.com/EugeneNail/lifeline/internal/domain"
 	"time"
 
+	"github.com/EugeneNail/lifeline/internal/domain"
 	"github.com/EugeneNail/lifeline/internal/domain/habits"
 	"github.com/google/uuid"
 )
@@ -18,17 +16,12 @@ type MeasurableHabitRecord struct {
 	value             MeasurableValue
 }
 
-// NewMeasurableHabitRecord returns a measurable habit record with immutable habit, account, and date fields and a validated numeric value.
-func NewMeasurableHabitRecord(measurableHabitId uuid.UUID, accountId uuid.UUID, date time.Time, rawValue float32, step habits.MeasurementStep) (*MeasurableHabitRecord, error) {
+// NewMeasurableHabitRecord returns a measurable habit record with immutable habit, account, and date fields and a validated numeric value or domain validation violations.
+func NewMeasurableHabitRecord(measurableHabitId uuid.UUID, accountId uuid.UUID, date time.Time, rawValue float32, step habits.MeasurementStep) (*MeasurableHabitRecord, domain.Violations) {
 	violations := domain.NewViolations()
 
-	value, err := NewMeasurableValue(rawValue, step)
-	if err != nil {
-		var violation domain.Violation
-		if !errors.As(err, &violation) {
-			return nil, fmt.Errorf("creating a measurable value: %w", err)
-		}
-
+	value, violation := NewMeasurableValue(rawValue, step)
+	if violation != nil {
 		violations.Add("value", violation)
 	}
 
@@ -76,9 +69,9 @@ func (record *MeasurableHabitRecord) Value() MeasurableValue {
 
 // ChangeValue updates the record value after validating the provided raw numeric value against the step.
 func (record *MeasurableHabitRecord) ChangeValue(rawValue float32, step habits.MeasurementStep) domain.Violation {
-	value, err := NewMeasurableValue(rawValue, step)
-	if err != nil {
-		return err
+	value, violation := NewMeasurableValue(rawValue, step)
+	if violation != nil {
+		return violation
 	}
 
 	record.value = value

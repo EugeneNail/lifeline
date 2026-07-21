@@ -1,8 +1,6 @@
 package habits
 
 import (
-	"errors"
-	"fmt"
 	"time"
 
 	"github.com/EugeneNail/lifeline/internal/domain"
@@ -24,47 +22,27 @@ type MeasurableHabit struct {
 	accountId  uuid.UUID
 }
 
-// NewMeasurableHabit returns a measurable habit with validated fields or domain validation errors.
-func NewMeasurableHabit(rawLabel string, rawIcon int, rawStep float32, rawUnit string, accountId uuid.UUID) (*MeasurableHabit, error) {
+// NewMeasurableHabit returns a measurable habit with validated fields or domain validation violations.
+func NewMeasurableHabit(rawLabel string, rawIcon int, rawStep float32, rawUnit string, accountId uuid.UUID) (*MeasurableHabit, domain.Violations) {
 	violations := domain.NewViolations()
 
-	label, err := NewLabel(rawLabel)
-	if err != nil {
-		var violation domain.Violation
-		if !errors.As(err, &violation) {
-			return nil, fmt.Errorf("creating a measurable habit label: %w", err)
-		}
-
+	label, violation := NewLabel(rawLabel)
+	if violation != nil {
 		violations.Add("label", violation)
 	}
 
-	icon, err := NewIcon(rawIcon)
-	if err != nil {
-		var violation domain.Violation
-		if !errors.As(err, &violation) {
-			return nil, fmt.Errorf("creating a measurable habit icon: %w", err)
-		}
-
+	icon, violation := NewIcon(rawIcon)
+	if violation != nil {
 		violations.Add("icon", violation)
 	}
 
-	step, err := NewMeasurementStep(rawStep)
-	if err != nil {
-		var violation domain.Violation
-		if !errors.As(err, &violation) {
-			return nil, fmt.Errorf("creating a measurable habit step: %w", err)
-		}
-
+	step, violation := NewMeasurementStep(rawStep)
+	if violation != nil {
 		violations.Add("step", violation)
 	}
 
-	unit, err := NewMeasurableUnit(rawUnit)
-	if err != nil {
-		var violation domain.Violation
-		if !errors.As(err, &violation) {
-			return nil, fmt.Errorf("creating a measurable habit unit: %w", err)
-		}
-
+	unit, violation := NewMeasurableUnit(rawUnit)
+	if violation != nil {
 		violations.Add("unit", violation)
 	}
 

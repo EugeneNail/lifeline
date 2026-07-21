@@ -14,7 +14,7 @@ const noteMaxLength = 10000
 type Note string
 
 // NewNote returns a validated note or a violation when the note text is invalid.
-func NewNote(raw string) (Note, error) {
+func NewNote(raw string) (Note, domain.Violation) {
 	raw = normalizeNote(raw)
 
 	if !utf8.ValidString(raw) {

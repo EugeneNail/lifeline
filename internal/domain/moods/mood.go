@@ -27,8 +27,8 @@ func (mood Mood) IsValid() bool {
 	return ok
 }
 
-// New returns a validated mood value or an error when rawMood is outside the allowed range.
-func New(rawMood int) (Mood, error) {
+// New returns a validated mood value or a violation when rawMood is outside the allowed range.
+func New(rawMood int) (Mood, domain.Violation) {
 	if rawMood < int(Awful) || rawMood > int(Great) {
 		return 0, domain.NewViolationf("mood must be in range between %d and %d", Awful, Great)
 	}

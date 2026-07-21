@@ -25,22 +25,22 @@ func (account *Account) ChangeEmail(email Email) {
 	account.email = email
 }
 
-// NewEmail validates, normalizes, and returns a domain email value.
-func NewEmail(rawEmail string) (Email, error) {
-	normalizedEmail := strings.ToLower(strings.TrimSpace(rawEmail))
-	if normalizedEmail == "" {
+// NewEmail validates, normalizes, and returns a domain email value or a violation when the email is invalid.
+func NewEmail(rawEmail string) (Email, domain.Violation) {
+	email := strings.ToLower(strings.TrimSpace(rawEmail))
+	if email == "" {
 		return "", domain.NewViolation("email is empty")
 	}
 
 	// TODO extract into a constant and add as a placeholder into the error message
-	if len(normalizedEmail) > 200 {
+	if len(email) > 200 {
 		return "", domain.NewViolation("email length exceeds 200 characters")
 	}
 
-	parsedEmail, err := mail.ParseAddress(normalizedEmail)
-	if err != nil || parsedEmail.Address != normalizedEmail {
+	parsedEmail, err := mail.ParseAddress(email)
+	if err != nil || parsedEmail.Address != email {
 		return "", domain.NewViolation("email has invalid format")
 	}
 
-	return Email(normalizedEmail), nil
+	return Email(email), nil
 }

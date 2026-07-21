@@ -312,8 +312,8 @@ var iconNames = map[Icon]string{
 	IconCamping:                 "camping",
 }
 
-// NewIcon returns an icon enum value or an error when the raw value is unsupported.
-func NewIcon(rawIcon int) (Icon, error) {
+// NewIcon returns an icon enum value or a violation when the raw value is unsupported.
+func NewIcon(rawIcon int) (Icon, domain.Violation) {
 	icon := Icon(rawIcon)
 	if !icon.IsValid() {
 		return 0, domain.NewViolationf("icon must be in range between %d and %d", IconFavorite, IconCamping)

@@ -1,8 +1,6 @@
 package journals
 
 import (
-	"errors"
-	"fmt"
 	"time"
 
 	"github.com/EugeneNail/lifeline/internal/domain"
@@ -21,26 +19,16 @@ type Journal struct {
 
 // TODO rename raw constructors of the other domain models
 // NewFromRaw returns a validated journal or domain validation violations when construction fails.
-func NewFromRaw(rawDate time.Time, rawNote string, accountId auth.ID) (*Journal, error) {
+func NewFromRaw(rawDate time.Time, rawNote string, accountId auth.ID) (*Journal, domain.Violations) {
 	violations := domain.NewViolations()
 
-	date, err := domain.NewDate(rawDate)
-	if err != nil {
-		var violation domain.Violation
-		if !errors.As(err, &violation) {
-			return nil, fmt.Errorf("creating a date: %w", err)
-		}
-
+	date, violation := domain.NewDate(rawDate)
+	if violation != nil {
 		violations.Add("date", violation)
 	}
 
-	note, err := NewNote(rawNote)
-	if err != nil {
-		var violation domain.Violation
-		if !errors.As(err, &violation) {
-			return nil, fmt.Errorf("creating a note: %w", err)
-		}
-
+	note, violation := NewNote(rawNote)
+	if violation != nil {
 		violations.Add("note", violation)
 	}
 

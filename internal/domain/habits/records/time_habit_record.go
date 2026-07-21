@@ -1,8 +1,6 @@
 package records
 
 import (
-	"errors"
-	"fmt"
 	"time"
 
 	"github.com/EugeneNail/lifeline/internal/domain"
@@ -17,17 +15,12 @@ type TimeHabitRecord struct {
 	value       TimeValue
 }
 
-// NewTimeHabitRecord returns a time habit record with immutable habit, account, and date fields and a validated time value or domain validation errors.
-func NewTimeHabitRecord(timeHabitId uuid.UUID, accountId uuid.UUID, date time.Time, rawValue int) (*TimeHabitRecord, error) {
+// NewTimeHabitRecord returns a time habit record with immutable habit, account, and date fields and a validated time value or domain validation violations.
+func NewTimeHabitRecord(timeHabitId uuid.UUID, accountId uuid.UUID, date time.Time, rawValue int) (*TimeHabitRecord, domain.Violations) {
 	violations := domain.NewViolations()
 
-	value, err := NewTimeValue(rawValue)
-	if err != nil {
-		var violation domain.Violation
-		if !errors.As(err, &violation) {
-			return nil, fmt.Errorf("creating a time habit record value: %w", err)
-		}
-
+	value, violation := NewTimeValue(rawValue)
+	if violation != nil {
 		violations.Add("value", violation)
 	}
 
@@ -75,9 +68,9 @@ func (record *TimeHabitRecord) Value() TimeValue {
 
 // ChangeValue updates the record value after validating the provided raw minute count.
 func (record *TimeHabitRecord) ChangeValue(rawValue int) domain.Violation {
-	value, err := NewTimeValue(rawValue)
-	if err != nil {
-		return err
+	value, violation := NewTimeValue(rawValue)
+	if violation != nil {
+		return violation
 	}
 
 	record.value = value
