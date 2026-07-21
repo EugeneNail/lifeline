@@ -23,6 +23,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/application/usecases/journal/get_journal"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/moods/get_mood_record"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/moods/save_mood_record"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/transactions/create_transaction"
 	transportAuthenticate "github.com/EugeneNail/lifeline/internal/presentation/http/api/auth/authenticate"
 	transportRefresh "github.com/EugeneNail/lifeline/internal/presentation/http/api/auth/refresh"
 	transportRegister_user "github.com/EugeneNail/lifeline/internal/presentation/http/api/auth/register_user"
@@ -44,6 +45,7 @@ import (
 	transportCreate_journal "github.com/EugeneNail/lifeline/internal/presentation/http/api/journal/save_journal"
 	transportGet_mood_record "github.com/EugeneNail/lifeline/internal/presentation/http/api/moods/get_mood_record"
 	transportSave_mood_record "github.com/EugeneNail/lifeline/internal/presentation/http/api/moods/save_mood_record"
+	transportCreate_transaction "github.com/EugeneNail/lifeline/internal/presentation/http/api/transactions/create_transaction"
 	"log"
 	"net/http"
 	"os"
@@ -99,6 +101,11 @@ func main() {
 	moodRecordRepository, err := postgres.NewRecordRepository(db)
 	if err != nil {
 		log.Fatalf("creating a mood record repository: %v", err)
+	}
+
+	transactionRepository, err := postgres.NewTransactionRepository(db)
+	if err != nil {
+		log.Fatalf("creating a transaction repository: %v", err)
 	}
 
 	completableHabitRepository, err := postgres.NewCompletableHabitRepository(db)
@@ -163,6 +170,11 @@ func main() {
 	saveMoodRecordUsecase, err := save_mood_record.NewHandler(moodRecordRepository)
 	if err != nil {
 		log.Fatalf("creating a save-mood-record usecase: %v", err)
+	}
+
+	createTransactionUsecase, err := create_transaction.NewHandler(transactionRepository)
+	if err != nil {
+		log.Fatalf("creating a create-transaction usecase: %v", err)
 	}
 
 	getMoodRecordUsecase, err := get_mood_record.NewHandler(moodRecordRepository)
@@ -248,6 +260,7 @@ func main() {
 	getJournalEndpoint := transportGet_journal.NewHandler(getJournalUsecase, requestIdentity)
 	getMoodRecordEndpoint := transportGet_mood_record.NewHandler(getMoodRecordUsecase, requestIdentity)
 	saveMoodRecordEndpoint := transportSave_mood_record.NewHandler(saveMoodRecordUsecase, requestIdentity)
+	createTransactionEndpoint := transportCreate_transaction.NewHandler(createTransactionUsecase, requestIdentity)
 	createCompletableHabitEndpoint := transportCreate_completable_habit.NewHandler(createCompletableHabitUsecase, requestIdentity)
 	createMeasurableHabitEndpoint := transportCreate_measurable_habit.NewHandler(createMeasurableHabitUsecase, requestIdentity)
 	listHabitsEndpoint := transportList_habits.NewHandler(listHabitsUsecase, requestIdentity)
@@ -268,6 +281,7 @@ func main() {
 	server.Handle("POST /api/v1/users/register", middleware.WriteJSONResponse(registerUserEndpoint))
 	server.Handle("POST /api/v1/users/login", middleware.WriteJSONResponse(authenticateEndpoint))
 	server.Handle("POST /api/v1/users/refresh", middleware.WriteJSONResponse(refreshEndpoint))
+	server.Handle("POST /api/v1/transactions", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createTransactionEndpoint)))
 	server.Handle("GET /api/v1/journals/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getJournalEndpoint)))
 	server.Handle("POST /api/v1/journals/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createJournalEndpoint)))
 	server.Handle("GET /api/v1/moods/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getMoodRecordEndpoint)))
