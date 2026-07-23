@@ -1,0 +1,3 @@
+### Get transaction
+GET localhost:30000/api/v1/transactions/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{loginToken}}
