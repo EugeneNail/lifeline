@@ -29,10 +29,11 @@ func NewTransactionRepository(db *sql.DB) (*TransactionRepository, error) {
 func (repository *TransactionRepository) Add(ctx context.Context, transaction *transactions.Transaction) error {
 	_, err := repository.db.ExecContext(
 		ctx,
-		`INSERT INTO transactions (id, money, date, category, description, account_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+		`INSERT INTO transactions (id, money, date, direction, category, description, account_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 		transaction.ID(),
 		float32(transaction.Money()),
 		time.Time(transaction.Date()),
+		int(transaction.Direction()),
 		int(transaction.Category()),
 		string(transaction.Description()),
 		transaction.AccountId(),
@@ -62,7 +63,7 @@ func (repository *TransactionRepository) Find(ctx context.Context, filter transa
 
 // FindMany returns all transactions matching the provided filter.
 func (repository *TransactionRepository) FindMany(ctx context.Context, filter transactions.TransactionFilter) ([]*transactions.Transaction, error) {
-	query := `SELECT id, money, date, category, description, account_id, created_at, updated_at FROM transactions`
+	query := `SELECT id, money, date, direction, category, description, account_id, created_at, updated_at FROM transactions`
 	conditions, args := repository.buildConditions(filter)
 
 	if len(conditions) > 0 {
@@ -146,6 +147,7 @@ func (repository *TransactionRepository) scan(rows *sql.Rows) (*transactions.Tra
 		id          uuid.UUID
 		money       float32
 		rawDate     time.Time
+		direction   int
 		category    int
 		description string
 		accountID   uuid.UUID
@@ -153,9 +155,9 @@ func (repository *TransactionRepository) scan(rows *sql.Rows) (*transactions.Tra
 		updatedAt   time.Time
 	)
 
-	if err := rows.Scan(&id, &money, &rawDate, &category, &description, &accountID, &createdAt, &updatedAt); err != nil {
+	if err := rows.Scan(&id, &money, &rawDate, &direction, &category, &description, &accountID, &createdAt, &updatedAt); err != nil {
 		return nil, fmt.Errorf("scanning a SELECT sql result: %w", err)
 	}
 
-	return transactions.Restore(id, money, rawDate, category, description, accountID, createdAt, updatedAt), nil
+	return transactions.Restore(id, money, rawDate, direction, category, description, accountID, createdAt, updatedAt), nil
 }
