@@ -60,7 +60,9 @@ export function DailyTransactions({ dateKey, dateLabel, transactions }: DailyTra
             <div className="daily-transactions__summary">
                 <div className="daily-transactions__summary-cell">
                     <small>Expenses for the day</small>
-                    <strong>{formatSummaryAmount(totalMoney)}</strong>
+                    <strong className={`daily-transactions__summary-value daily-transactions__summary-value--${totalMoney >= 0 ? 'income' : 'expense'}`}>
+                        {formatSummaryAmount(totalMoney)}
+                    </strong>
                 </div>
                 <div className="daily-transactions__summary-cell">
                     <small>Transactions</small>
@@ -83,7 +85,9 @@ export function DailyTransactions({ dateKey, dateLabel, transactions }: DailyTra
                                 {description ? <p className="daily-transactions__item-meta">{category.title}</p> : null}
                             </div>
 
-                            <strong className="daily-transactions__amount">{formatTransactionAmount(transaction.money, transaction.direction)}</strong>
+                            <strong className={`daily-transactions__amount daily-transactions__amount--${transaction.direction === 2 ? 'income' : 'expense'}`}>
+                                {formatTransactionAmount(transaction.money, transaction.direction)}
+                            </strong>
 
                             <Link
                                 aria-label="Open transaction"

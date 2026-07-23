@@ -54,9 +54,15 @@
     letter-spacing: -0.02em
     font-variant-numeric: tabular-nums
 
+.daily-transactions__summary-value--income
+    color: var(--success)
+
+.daily-transactions__summary-value--expense
+    color: var(--error)
+
 .daily-transactions__list
     display: grid
-    gap: 8px
+    gap: 0
 
 .daily-transactions__item
     display: grid
@@ -65,14 +71,11 @@
     gap: 12px
     min-height: 72px
     padding: 12px
-    border: 1px solid transparent
-    border-radius: var(--radius-md)
-    background: var(--background)
-    transition: background 150ms ease, border-color 150ms ease
+    border-bottom: 1px solid var(--divider)
+    transition: border-color 150ms ease
 
 .daily-transactions__item:hover
     border-color: var(--divider)
-    background: var(--surface)
 
 .daily-transactions__icon
     display: grid
@@ -100,13 +103,21 @@
     margin: 0
     color: var(--text-secondary)
     font-size: 12px
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
 
 .daily-transactions__amount
-    color: var(--text-primary)
     font-size: 14px
     font-weight: 900
     letter-spacing: -0.02em
     font-variant-numeric: tabular-nums
+
+.daily-transactions__amount--income
+    color: var(--success)
+
+.daily-transactions__amount--expense
+    color: var(--error)
 
 .daily-transactions__menu
     display: grid
@@ -122,6 +133,9 @@
     background: var(--surface-secondary)
     color: var(--text-primary)
 
+.daily-transactions__item:last-child
+    border-bottom: 0
+
 @media (max-width: 560px)
     .daily-transactions
         padding: 18px
@@ -136,18 +150,15 @@
         grid-template-columns: 1fr
 
     .daily-transactions__item
-        grid-template-columns: auto minmax(0, 1fr)
-        grid-template-areas: "icon content" "amount menu"
-
-    .daily-transactions__icon
-        grid-area: icon
+        grid-template-columns: auto minmax(0, 1fr) auto auto
+        gap: 10px
 
     .daily-transactions__content
-        grid-area: content
+        min-width: 0
 
     .daily-transactions__amount
-        grid-area: amount
+        white-space: nowrap
 
     .daily-transactions__menu
-        grid-area: menu
         justify-self: end
+        flex-shrink: 0
