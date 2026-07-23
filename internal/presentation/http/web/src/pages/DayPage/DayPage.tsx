@@ -10,6 +10,7 @@ import {
     type DailyHabitsData,
     type DailyHabitRecords,
 } from '../../components/habits/DailyHabits'
+import { DailyTransactions, type DailyTransaction } from '../../components/transactions'
 import { Page, PageHeader } from '../../components/layout'
 import { Button, IconButton, Message } from '../../components/primitives'
 import { GoogleIcon, GoogleIcons } from '../../components/icons'
@@ -30,6 +31,10 @@ type MoodResponse = {
 
 type JournalResponse = {
     note: string
+}
+
+type TransactionsResponse = {
+    transactions: DailyTransaction[]
 }
 
 function resolvePageDate(rawDate: string | undefined) {
@@ -84,6 +89,7 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
     const [records, setRecords] = useState<RecordsResponse | null>(null)
     const [mood, setMood] = useState<MoodValue | null>(null)
     const [journal, setJournal] = useState<string | null>(null)
+    const [transactions, setTransactions] = useState<DailyTransaction[] | null>(null)
     const [isDateSelectorOpen, setDateSelectorOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
@@ -107,7 +113,13 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
             setLoadError('')
 
             try {
-                const [habitsResponse, recordsResponse, moodResponse, journalResponse] = await Promise.all([
+                const [
+                    habitsResponse,
+                    recordsResponse,
+                    moodResponse,
+                    journalResponse,
+                    transactionsResponse,
+                ] = await Promise.all([
                     apiClient.get<HabitsResponse>('habits'),
                     apiClient.get<RecordsResponse>(`habits/${dateKey}`),
                     apiClient.get<MoodResponse>(`moods/${dateKey}`).catch((error) => {
@@ -124,6 +136,7 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
 
                         throw error
                     }),
+                    apiClient.get<TransactionsResponse>(`transactions?from=${dateKey}&to=${dateKey}`),
                 ])
 
                 if (!isActive) {
@@ -134,6 +147,7 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
                 setRecords(recordsResponse.data)
                 setMood(moodResponse?.data.mood ?? null)
                 setJournal(journalResponse?.data.note ?? null)
+                setTransactions(transactionsResponse.data.transactions)
             } catch (error) {
                 if (!isActive) {
                     return
@@ -190,7 +204,7 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
             <PageHeader
                 eyebrow={isToday ? 'Today' : 'Day overview'}
                 title={pageTitle}
-                subtitle="Mood, journal, and habits for the selected day."
+                subtitle="Mood, journal, habits, and expenses for the selected day."
                 actions={
                     <div className="day-page__header-actions">
                         <IconButton
@@ -233,7 +247,16 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
                 ) : loadError ? (
                     <Message variant="error">{loadError}</Message>
                 ) : habits && records ? (
-                    <DailyHabits date={pageDate} dateKey={dateKey} habits={habits} records={records} />
+                    <>
+                        <DailyHabits date={pageDate} dateKey={dateKey} habits={habits} records={records} />
+                        {transactions ? (
+                            <DailyTransactions
+                                dateKey={dateKey}
+                                dateLabel={pageDateLabel}
+                                transactions={transactions}
+                            />
+                        ) : null}
+                    </>
                 ) : null}
             </div>
 

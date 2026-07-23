@@ -1,0 +1,153 @@
+.daily-transactions
+    display: grid
+    gap: 20px
+    padding: 24px
+    border: 1px solid var(--divider)
+    border-radius: var(--radius-lg)
+    background: var(--surface)
+    box-shadow: var(--shadow)
+
+.daily-transactions__header
+    display: flex
+    align-items: start
+    justify-content: space-between
+    gap: 16px
+
+.daily-transactions__title
+    margin: 0
+    font-size: 20px
+    letter-spacing: -0.02em
+
+.daily-transactions__subtitle
+    margin: 6px 0 0
+    color: var(--text-secondary)
+    font-size: 13px
+    line-height: 1.5
+
+.daily-transactions__add-button
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    min-height: 42px
+    white-space: nowrap
+
+.daily-transactions__summary
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 10px
+
+.daily-transactions__summary-cell
+    padding: 12px
+    border-radius: var(--radius-md)
+    background: var(--surface-secondary)
+
+.daily-transactions__summary-cell small
+    display: block
+    margin-bottom: 4px
+    color: var(--text-secondary)
+    font-size: 11px
+    font-weight: 750
+
+.daily-transactions__summary-cell strong
+    font-size: 18px
+    font-weight: 900
+    letter-spacing: -0.02em
+    font-variant-numeric: tabular-nums
+
+.daily-transactions__list
+    display: grid
+    gap: 8px
+
+.daily-transactions__item
+    display: grid
+    grid-template-columns: auto minmax(0, 1fr) auto auto
+    align-items: center
+    gap: 12px
+    min-height: 72px
+    padding: 12px
+    border: 1px solid transparent
+    border-radius: var(--radius-md)
+    background: var(--background)
+    transition: background 150ms ease, border-color 150ms ease
+
+.daily-transactions__item:hover
+    border-color: var(--divider)
+    background: var(--surface)
+
+.daily-transactions__icon
+    display: grid
+    place-items: center
+    width: 44px
+    height: 44px
+    border-radius: 14px
+    background: var(--primary-container)
+    color: var(--primary)
+    font-size: 18px
+    font-weight: 900
+
+.daily-transactions__content
+    min-width: 0
+
+.daily-transactions__item-title
+    margin: 0 0 4px
+    font-size: 14px
+    font-weight: 820
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.daily-transactions__item-meta
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 12px
+
+.daily-transactions__amount
+    color: var(--text-primary)
+    font-size: 14px
+    font-weight: 900
+    letter-spacing: -0.02em
+    font-variant-numeric: tabular-nums
+
+.daily-transactions__menu
+    display: grid
+    place-items: center
+    width: 34px
+    height: 34px
+    border-radius: 12px
+    color: var(--text-secondary)
+    font-size: 22px
+    line-height: 1
+
+.daily-transactions__menu:hover
+    background: var(--surface-secondary)
+    color: var(--text-primary)
+
+@media (max-width: 560px)
+    .daily-transactions
+        padding: 18px
+
+    .daily-transactions__header
+        flex-direction: column
+
+    .daily-transactions__add-button
+        width: 100%
+
+    .daily-transactions__summary
+        grid-template-columns: 1fr
+
+    .daily-transactions__item
+        grid-template-columns: auto minmax(0, 1fr)
+        grid-template-areas: "icon content" "amount menu"
+
+    .daily-transactions__icon
+        grid-area: icon
+
+    .daily-transactions__content
+        grid-area: content
+
+    .daily-transactions__amount
+        grid-area: amount
+
+    .daily-transactions__menu
+        grid-area: menu
+        justify-self: end
