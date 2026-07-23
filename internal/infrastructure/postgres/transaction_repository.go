@@ -94,7 +94,7 @@ func (repository *TransactionRepository) FindMany(ctx context.Context, filter tr
 
 // buildConditions converts the provided transaction filter into SQL WHERE fragments and arguments.
 func (repository *TransactionRepository) buildConditions(filter transactions.TransactionFilter) ([]string, []any) {
-	conditions := make([]string, 0, 3)
+	conditions := make([]string, 0, 5)
 	args := make([]any, 0)
 
 	if len(filter.AccountIds) > 0 {
@@ -125,6 +125,16 @@ func (repository *TransactionRepository) buildConditions(filter transactions.Tra
 		}
 
 		conditions = append(conditions, fmt.Sprintf("date IN (%s)", strings.Join(placeholders, ", ")))
+	}
+
+	if filter.From != nil {
+		args = append(args, *filter.From)
+		conditions = append(conditions, fmt.Sprintf("date >= $%d", len(args)))
+	}
+
+	if filter.To != nil {
+		args = append(args, *filter.To)
+		conditions = append(conditions, fmt.Sprintf("date <= $%d", len(args)))
 	}
 
 	return conditions, args

@@ -11,6 +11,8 @@ type TransactionFilter struct {
 	TransactionIds []uuid.UUID
 	AccountIds     []uuid.UUID
 	Dates          []time.Time
+	From           *time.Time
+	To             *time.Time
 }
 
 // NewTransactionFilter returns an empty transaction filter.
@@ -32,11 +34,18 @@ func (filter TransactionFilter) WithAccountIds(accountIds ...uuid.UUID) Transact
 	return filter
 }
 
-// WithDates returns a filter with the provided dates truncated to whole days.
-func (filter TransactionFilter) WithDates(dates ...time.Time) TransactionFilter {
-	for _, date := range dates {
-		filter.Dates = append(filter.Dates, date.Truncate(time.Hour*24))
-	}
+// WithFrom returns a filter that includes transactions from the provided date inclusive.
+func (filter TransactionFilter) WithFrom(from time.Time) TransactionFilter {
+	date := from.Truncate(time.Hour * 24)
+	filter.From = &date
+
+	return filter
+}
+
+// WithTo returns a filter that includes transactions up to the provided date inclusive.
+func (filter TransactionFilter) WithTo(to time.Time) TransactionFilter {
+	date := to.Truncate(time.Hour * 24)
+	filter.To = &date
 
 	return filter
 }
