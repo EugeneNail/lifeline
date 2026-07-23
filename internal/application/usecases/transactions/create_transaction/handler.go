@@ -27,6 +27,7 @@ func NewHandler(transactionsRepository transactions.Repository) (*Handler, error
 type Command struct {
 	Money       float32
 	Date        time.Time
+	Direction   int
 	Category    int
 	Description string
 	AccountID   uuid.UUID
@@ -34,7 +35,7 @@ type Command struct {
 
 // Handle validates the command, stores a new transaction, and returns the transaction identifier or field validation violations.
 func (handler *Handler) Handle(ctx context.Context, command Command) (uuid.UUID, error) {
-	transaction, violations := transactions.NewFromRaw(command.Money, command.Date, command.Category, command.Description, command.AccountID)
+	transaction, violations := transactions.NewFromRaw(command.Money, command.Date, command.Direction, command.Category, command.Description, command.AccountID)
 	if violations != nil {
 		return uuid.Nil, violations
 	}

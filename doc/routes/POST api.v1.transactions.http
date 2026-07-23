@@ -6,6 +6,7 @@ Content-Type: application/json
 {
   "money": 1250.5,
   "date": "2000-01-01",
+  "direction": 1,
   "category": 2,
   "description": "Coffee with team"
 }

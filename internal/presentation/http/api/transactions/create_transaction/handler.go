@@ -27,6 +27,7 @@ func NewHandler(usecase *create_transaction.Handler, identity authentication.Req
 type Payload struct {
 	Money       float32 `json:"money"`
 	Date        string  `json:"date"`
+	Direction   int     `json:"direction"`
 	Category    int     `json:"category"`
 	Description string  `json:"description"`
 }
@@ -51,6 +52,7 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 	id, err := handler.usecase.Handle(request.Context(), create_transaction.Command{
 		Money:       payload.Money,
 		Date:        date,
+		Direction:   payload.Direction,
 		Category:    payload.Category,
 		Description: payload.Description,
 		AccountID:   accountID.Uuid(),
