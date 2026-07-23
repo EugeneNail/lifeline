@@ -31,6 +31,7 @@ type Transaction struct {
 	ID          string  `json:"id"`
 	Money       float32 `json:"money"`
 	Date        string  `json:"date"`
+	Direction   int     `json:"direction"`
 	Category    int     `json:"category"`
 	Description string  `json:"description"`
 }
@@ -73,6 +74,7 @@ func mapTransactions(transactionsList []*transactions.Transaction) []Transaction
 			ID:          transaction.ID().String(),
 			Money:       float32(transaction.Money()),
 			Date:        time.Time(transaction.Date()).Format(time.DateOnly),
+			Direction:   int(transaction.Direction()),
 			Category:    int(transaction.Category()),
 			Description: string(transaction.Description()),
 		})
