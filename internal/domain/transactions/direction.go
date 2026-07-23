@@ -24,7 +24,7 @@ func NewDirection(value int) (Direction, domain.Violation) {
 	minimum := Expense
 	maximum := Income
 	if value < minimum || value > maximum {
-		return 0, domain.NewViolationf("mood must be in range between %d and %d", minimum, maximum)
+		return 0, domain.NewViolationf("direction must be in range between %d and %d", minimum, maximum)
 	}
 
 	return Direction(value), nil

@@ -12,6 +12,7 @@ type Transaction struct {
 	id          uuid.UUID
 	money       Money
 	date        domain.Date
+	direction   Direction
 	category    Category
 	description Description
 	accountId   uuid.UUID
@@ -20,13 +21,14 @@ type Transaction struct {
 }
 
 // New returns a transaction with trusted values.
-func New(money Money, date domain.Date, category Category, description Description, accountId uuid.UUID) *Transaction {
+func New(money Money, date domain.Date, direction Direction, category Category, description Description, accountId uuid.UUID) *Transaction {
 	now := time.Now()
 
 	return &Transaction{
 		id:          generateId(),
 		money:       money,
 		date:        date,
+		direction:   direction,
 		category:    category,
 		description: description,
 		accountId:   accountId,
@@ -36,7 +38,7 @@ func New(money Money, date domain.Date, category Category, description Descripti
 }
 
 // NewFromRaw returns a transaction with validated fields or domain validation violations.
-func NewFromRaw(rawMoney float32, rawDate time.Time, rawCategory int, rawDescription string, accountId uuid.UUID) (*Transaction, domain.Violations) {
+func NewFromRaw(rawMoney float32, rawDate time.Time, rawDirection int, rawCategory int, rawDescription string, accountId uuid.UUID) (*Transaction, domain.Violations) {
 	violations := domain.NewViolations()
 
 	money, violation := NewMoney(rawMoney)
@@ -47,6 +49,11 @@ func NewFromRaw(rawMoney float32, rawDate time.Time, rawCategory int, rawDescrip
 	date, violation := domain.NewDate(rawDate)
 	if violation != nil {
 		violations.Add("date", violation)
+	}
+
+	direction, violation := NewDirection(rawDirection)
+	if violation != nil {
+		violations.Add("direction", violation)
 	}
 
 	category, violation := NewCategory(rawCategory)
@@ -63,15 +70,16 @@ func NewFromRaw(rawMoney float32, rawDate time.Time, rawCategory int, rawDescrip
 		return nil, violations
 	}
 
-	return New(money, date, category, description, accountId), nil
+	return New(money, date, direction, category, description, accountId), nil
 }
 
 // Restore returns a transaction reconstructed from persisted primitive values without validating or changing them.
-func Restore(id uuid.UUID, money float32, date time.Time, category int, description string, accountId uuid.UUID, createdAt time.Time, updatedAt time.Time) *Transaction {
+func Restore(id uuid.UUID, money float32, date time.Time, direction int, category int, description string, accountId uuid.UUID, createdAt time.Time, updatedAt time.Time) *Transaction {
 	return &Transaction{
 		id:          id,
 		money:       Money(money),
 		date:        domain.Date(date),
+		direction:   Direction(direction),
 		category:    Category(category),
 		description: Description(description),
 		accountId:   accountId,
@@ -114,6 +122,17 @@ func (transaction *Transaction) Date() domain.Date {
 // ChangeDate updates the transaction date and refreshes the modification timestamp.
 func (transaction *Transaction) ChangeDate(date domain.Date) {
 	transaction.date = date
+	transaction.updatedAt = time.Now()
+}
+
+// Direction returns the transaction direction.
+func (transaction *Transaction) Direction() Direction {
+	return transaction.direction
+}
+
+// ChangeDirection updates the transaction direction and refreshes the modification timestamp.
+func (transaction *Transaction) ChangeDirection(direction Direction) {
+	transaction.direction = direction
 	transaction.updatedAt = time.Now()
 }
 
