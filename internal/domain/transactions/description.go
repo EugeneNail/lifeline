@@ -6,10 +6,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/domain"
 )
 
-const (
-	descriptionMinLength = 1
-	descriptionMaxLength = 32
-)
+const descriptionMaxLength = 32
 
 // Description is a validated transaction description.
 type Description string
@@ -17,10 +14,9 @@ type Description string
 // NewDescription returns a validated transaction description or a violation when the description is invalid.
 func NewDescription(rawDescription string) (Description, domain.Violation) {
 	length := utf8.RuneCountInString(rawDescription)
-	if length < descriptionMinLength || length > descriptionMaxLength {
+	if length > descriptionMaxLength {
 		return "", domain.NewViolationf(
-			"description length must be between %d and %d characters",
-			descriptionMinLength,
+			"description length must not be more than %d characters",
 			descriptionMaxLength,
 		)
 	}
