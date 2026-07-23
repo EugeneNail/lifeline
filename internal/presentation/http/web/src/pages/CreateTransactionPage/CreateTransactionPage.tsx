@@ -122,11 +122,12 @@ export function CreateTransactionPage() {
             .post('transactions', {
                 money: normalizedAmount,
                 date: formatDateFieldValue(selectedDate),
+                direction: direction === 'income' ? 2 : 1,
                 category: selectedCategory,
                 description,
             })
             .then(() => {
-                navigate(`/dates/${formatDateFieldValue(selectedDate)}`)
+                navigate(`/dates/${formatDateFieldValue(selectedDate)}#transactions`)
             })
             .catch((error) => {
                 if (axios.isAxiosError(error) && error.response?.status === 422) {
