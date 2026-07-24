@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { DayPage } from './pages/DayPage/DayPage'
 import { CreateHabitPage } from './pages/CreateHabitPage/CreateHabitPage'
 import { CreateTransactionPage } from './pages/CreateTransactionPage/CreateTransactionPage'
+import { EditTransactionPage } from './pages/EditTransactionPage/EditTransactionPage'
 import { HabitsPage } from './pages/HabitsPage/HabitsPage'
 import { EditHabitPage } from './pages/EditHabitPage/EditHabitPage'
 import { LoginPage } from './pages/LoginPage/LoginPage'
@@ -14,6 +15,7 @@ function App() {
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/habits/new" element={<CreateHabitPage />} />
             <Route path="/transactions/new" element={<CreateTransactionPage />} />
+            <Route path="/transactions/:id" element={<EditTransactionPage />} />
             <Route path="/habits/:type/:id" element={<EditHabitPage />} />
             <Route path="/dates/:date" element={<DayPage />} />
             <Route path="/login" element={<LoginPage />} />
