@@ -47,6 +47,36 @@ func (repository *TransactionRepository) Add(ctx context.Context, transaction *t
 	return nil
 }
 
+// Update stores the provided transaction state in PostgreSQL.
+func (repository *TransactionRepository) Update(ctx context.Context, transaction *transactions.Transaction) error {
+	result, err := repository.db.ExecContext(
+		ctx,
+		`UPDATE transactions SET money = $1, date = $2, direction = $3, category = $4, description = $5, account_id = $6, updated_at = $7 WHERE id = $8`,
+		float32(transaction.Money()),
+		time.Time(transaction.Date()),
+		int(transaction.Direction()),
+		int(transaction.Category()),
+		string(transaction.Description()),
+		transaction.AccountId(),
+		transaction.UpdatedAt(),
+		transaction.ID(),
+	)
+	if err != nil {
+		return fmt.Errorf("executing an UPDATE sql query for transaction %s: %w", transaction.ID(), err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("counting updated rows for transaction %s: %w", transaction.ID(), err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("updating a transaction %s affected no rows", transaction.ID())
+	}
+
+	return nil
+}
+
 // Find returns the first transaction matching the provided filter or nil when no row exists.
 func (repository *TransactionRepository) Find(ctx context.Context, filter transactions.TransactionFilter) (*transactions.Transaction, error) {
 	foundTransactions, err := repository.FindMany(ctx, filter)
