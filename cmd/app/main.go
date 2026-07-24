@@ -26,6 +26,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/application/usecases/transactions/create_transaction"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/transactions/get_transaction"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/transactions/list_transactions"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/transactions/update_transaction"
 	transportAuthenticate "github.com/EugeneNail/lifeline/internal/presentation/http/api/auth/authenticate"
 	transportRefresh "github.com/EugeneNail/lifeline/internal/presentation/http/api/auth/refresh"
 	transportRegister_user "github.com/EugeneNail/lifeline/internal/presentation/http/api/auth/register_user"
@@ -50,6 +51,7 @@ import (
 	transportCreate_transaction "github.com/EugeneNail/lifeline/internal/presentation/http/api/transactions/create_transaction"
 	transportGet_transaction "github.com/EugeneNail/lifeline/internal/presentation/http/api/transactions/get_transaction"
 	transportList_transactions "github.com/EugeneNail/lifeline/internal/presentation/http/api/transactions/list_transactions"
+	transportUpdate_transaction "github.com/EugeneNail/lifeline/internal/presentation/http/api/transactions/update_transaction"
 	"log"
 	"net/http"
 	"os"
@@ -186,6 +188,11 @@ func main() {
 		log.Fatalf("creating a get-transaction usecase: %v", err)
 	}
 
+	updateTransactionUsecase, err := update_transaction.NewHandler(transactionRepository)
+	if err != nil {
+		log.Fatalf("creating an update-transaction usecase: %v", err)
+	}
+
 	listTransactionsUsecase, err := list_transactions.NewHandler(transactionRepository)
 	if err != nil {
 		log.Fatalf("creating a list-transactions usecase: %v", err)
@@ -276,6 +283,7 @@ func main() {
 	saveMoodRecordEndpoint := transportSave_mood_record.NewHandler(saveMoodRecordUsecase, requestIdentity)
 	createTransactionEndpoint := transportCreate_transaction.NewHandler(createTransactionUsecase, requestIdentity)
 	getTransactionEndpoint := transportGet_transaction.NewHandler(getTransactionUsecase, requestIdentity)
+	updateTransactionEndpoint := transportUpdate_transaction.NewHandler(updateTransactionUsecase, requestIdentity)
 	listTransactionsEndpoint := transportList_transactions.NewHandler(listTransactionsUsecase, requestIdentity)
 	createCompletableHabitEndpoint := transportCreate_completable_habit.NewHandler(createCompletableHabitUsecase, requestIdentity)
 	createMeasurableHabitEndpoint := transportCreate_measurable_habit.NewHandler(createMeasurableHabitUsecase, requestIdentity)
@@ -300,6 +308,7 @@ func main() {
 	server.Handle("POST /api/v1/transactions", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createTransactionEndpoint)))
 	server.Handle("GET /api/v1/transactions/{id}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getTransactionEndpoint)))
 	server.Handle("GET /api/v1/transactions", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(listTransactionsEndpoint)))
+	server.Handle("PUT /api/v1/transactions/{id}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(updateTransactionEndpoint)))
 	server.Handle("GET /api/v1/journals/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getJournalEndpoint)))
 	server.Handle("POST /api/v1/journals/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createJournalEndpoint)))
 	server.Handle("GET /api/v1/moods/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getMoodRecordEndpoint)))

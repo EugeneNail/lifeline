@@ -1,0 +1,12 @@
+### Update transaction
+PUT localhost:30000/api/v1/transactions/019f90f5-13e9-7311-a6d4-72bd10b66439
+Authorization: Bearer {{loginToken}}
+Content-Type: application/json
+
+{
+  "money": 1250.5,
+  "date": "2000-01-01",
+  "direction": 1,
+  "category": 2,
+  "description": "Coffee with team"
+}
