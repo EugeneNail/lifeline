@@ -43,7 +43,7 @@ export function DailyTransactions({ dateKey, dateLabel, transactions }: DailyTra
     }, 0)
 
     return (
-        <section className="daily-transactions" id="transactions">
+        <section className="daily-transactions">
             <div className="daily-transactions__header">
                 <div>
                     <h2 className="daily-transactions__title">Expenses</h2>

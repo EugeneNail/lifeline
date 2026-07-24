@@ -127,7 +127,7 @@ export function CreateTransactionPage() {
                 description,
             })
             .then(() => {
-                navigate(`/dates/${formatDateFieldValue(selectedDate)}#transactions`)
+                navigate(`/dates/${formatDateFieldValue(selectedDate)}`)
             })
             .catch((error) => {
                 if (axios.isAxiosError(error) && error.response?.status === 422) {
@@ -228,9 +228,6 @@ export function CreateTransactionPage() {
                                 <GoogleIcon icon={GoogleIcons.CalendarMonth} size={18}/>
                                 {selectedDateLabel}
                             </Button>
-                            <div className="create-transaction-page__helper-text">
-                                {formatDateFieldValue(selectedDate)}
-                            </div>
                         </Section>
 
                         <Section>
