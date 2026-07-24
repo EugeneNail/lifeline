@@ -241,23 +241,24 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
             <div className="day-page__content">
                 <DailyMood dateKey={dateKey} dateLabel={pageDateLabel} initialMood={mood} />
                 <DailyJournal dateKey={dateKey} dateLabel={pageDateLabel} initialNote={journal} />
+                <DailyHabits
+                    date={pageDate}
+                    dateKey={dateKey}
+                    habits={habits ?? emptyHabitsResponse}
+                    records={records ?? emptyHabitRecords}
+                />
 
                 {isLoading ? (
                     <Message variant="info">Loading day data...</Message>
                 ) : loadError ? (
                     <Message variant="error">{loadError}</Message>
-                ) : habits && records ? (
-                    <>
-                        <DailyHabits date={pageDate} dateKey={dateKey} habits={habits} records={records} />
-                        {transactions ? (
-                            <DailyTransactions
-                                dateKey={dateKey}
-                                dateLabel={pageDateLabel}
-                                transactions={transactions}
-                            />
-                        ) : null}
-                    </>
                 ) : null}
+
+                <DailyTransactions
+                    dateKey={dateKey}
+                    dateLabel={pageDateLabel}
+                    transactions={transactions ?? []}
+                />
             </div>
 
             <AppNavigation />
@@ -313,4 +314,16 @@ function navigateForDate(date: Date, navigate: (path: string) => void, todayKey:
     }
 
     navigate(`/dates/${selectedKey}`)
+}
+
+const emptyHabitsResponse: HabitsResponse = {
+    completable: [],
+    measurable: [],
+    time: [],
+}
+
+const emptyHabitRecords: RecordsResponse = {
+    completable: [],
+    measurable: [],
+    time: [],
 }
