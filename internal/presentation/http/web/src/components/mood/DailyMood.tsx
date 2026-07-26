@@ -78,9 +78,6 @@ export function DailyMood({ dateKey, dateLabel, initialMood }: DailyMoodProps) {
                 <div className="daily-mood__header">
                     <div className="daily-mood__heading">
                         <h2 className="daily-mood__title">How did the day go?</h2>
-                        <p className="daily-mood__subtitle">
-                            Track the mood that belongs to {dateLabel}.
-                        </p>
                     </div>
                     <SavingStatus status={status} className="daily-mood__status" />
                 </div>

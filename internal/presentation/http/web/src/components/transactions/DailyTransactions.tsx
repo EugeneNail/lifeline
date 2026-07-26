@@ -47,9 +47,6 @@ export function DailyTransactions({ dateKey, dateLabel, transactions }: DailyTra
             <div className="daily-transactions__header">
                 <div>
                     <h2 className="daily-transactions__title">Expenses</h2>
-                    <p className="daily-transactions__subtitle">
-                        Track the spending that belongs to {dateLabel}.
-                    </p>
                 </div>
 
                 <Link className="button button--primary daily-transactions__add-button" to={`/transactions/new?date=${dateKey}`}>

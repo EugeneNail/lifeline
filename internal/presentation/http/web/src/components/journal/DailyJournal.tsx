@@ -71,9 +71,6 @@ export function DailyJournal({ dateKey, dateLabel, initialNote }: DailyJournalPr
                 <div className="daily-journal__header">
                     <div className="daily-journal__heading">
                         <h2 className="daily-journal__title">Journal</h2>
-                        <p className="daily-journal__subtitle">
-                            Capture the notes that belong to {dateLabel}.
-                        </p>
                     </div>
                     <SavingStatus status={status} className="daily-journal__status" />
                 </div>
