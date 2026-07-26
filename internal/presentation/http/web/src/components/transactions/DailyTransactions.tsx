@@ -12,7 +12,6 @@ export type DailyTransaction = {
 
 type DailyTransactionsProps = {
     dateKey: string
-    dateLabel: string
     transactions: DailyTransaction[]
 }
 
@@ -37,7 +36,7 @@ const transactionCategories: Record<number, TransactionCategory> = {
 }
 
 // DailyTransactions renders the expenses section for the selected day and returns a transaction list view.
-export function DailyTransactions({ dateKey, dateLabel, transactions }: DailyTransactionsProps) {
+export function DailyTransactions({ dateKey, transactions }: DailyTransactionsProps) {
     const totalMoney = transactions.reduce((sum, transaction) => {
         return sum + (transaction.direction === 2 ? transaction.money : -transaction.money)
     }, 0)

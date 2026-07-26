@@ -96,7 +96,6 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
     const todayKey = useMemo(() => formatDateKey(startOfDay(new Date())), [])
     const isToday = dateKey === todayKey
     const pageTitle = pageDate ? formatPageTitle(pageDate) : ''
-    const pageDateLabel = pageDate ? formatPageLabel(pageDate) : ''
 
     useEffect(() => {
         let isActive = true
@@ -239,8 +238,8 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
             />
 
             <div className="day-page__content">
-                <DailyMood dateKey={dateKey} dateLabel={pageDateLabel} initialMood={mood} />
-                <DailyJournal dateKey={dateKey} dateLabel={pageDateLabel} initialNote={journal} />
+                <DailyMood dateKey={dateKey} initialMood={mood} />
+                <DailyJournal dateKey={dateKey} initialNote={journal} />
                 <DailyHabits
                     date={pageDate}
                     dateKey={dateKey}
@@ -256,7 +255,6 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
 
                 <DailyTransactions
                     dateKey={dateKey}
-                    dateLabel={pageDateLabel}
                     transactions={transactions ?? []}
                 />
             </div>
@@ -278,15 +276,6 @@ function formatPageTitle(date: Date) {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
-    }).format(date)
-}
-
-function formatPageLabel(date: Date) {
-    return new Intl.DateTimeFormat('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
     }).format(date)
 }
 

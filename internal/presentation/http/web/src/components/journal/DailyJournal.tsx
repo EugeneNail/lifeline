@@ -9,12 +9,11 @@ type JournalSavingStatus = 'saved' | 'saving' | 'error'
 
 type DailyJournalProps = {
     dateKey: string
-    dateLabel: string
     initialNote: string | null
 }
 
 // DailyJournal renders the day journal panel and saves the note independently from habits.
-export function DailyJournal({ dateKey, dateLabel, initialNote }: DailyJournalProps) {
+export function DailyJournal({ dateKey, initialNote }: DailyJournalProps) {
     const apiClient = useApiClient()
     const [note, setNote] = useState('')
     const [status, setStatus] = useState<JournalSavingStatus>('saved')

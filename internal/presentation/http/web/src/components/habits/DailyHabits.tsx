@@ -697,15 +697,6 @@ function clearMeasurableHoldTimers(
     delete timersRef.current[habitId]
 }
 
-function formatPageDate(date: Date) {
-    return new Intl.DateTimeFormat('en-US', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    }).format(date)
-}
-
 function buildRecordedHabitIds(records: DailyHabitRecords) {
     return [...records.completable, ...records.time, ...records.measurable].reduce<Record<string, boolean>>(
         (accumulator, record) => {
