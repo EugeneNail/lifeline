@@ -35,7 +35,20 @@
     align-items: center
     justify-content: flex-end
     gap: 10px
-    flex-wrap: wrap
+    flex-wrap: nowrap
+
+.daily-habits__manage-button
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    width: 34px
+    height: 34px
+    padding: 0
+    color: var(--text-secondary)
+    line-height: 0
+
+.daily-habits__manage-button .google-icon
+    display: block
 
 .daily-habits__footer
     display: flex
@@ -73,7 +86,7 @@
     display: block
     height: 100%
     border-radius: inherit
-    background: var(--success)
+    background: var(--primary)
     transition: width 180ms ease
 
 .daily-habits__status
@@ -81,77 +94,84 @@
 
 .daily-habits__list
     display: grid
-    gap: 10px
+    row-gap: 0
+    column-gap: 0
 
 .daily-habit
     display: grid
-    grid-template-columns: 60px minmax(0, 1fr) auto
+    grid-template-columns: 32px minmax(0, 1fr) auto
     align-items: center
-    gap: 14px
-    min-height: 88px
-    padding: 14px
-    border-radius: var(--radius-md)
-    background: var(--surface-secondary)
+    gap: 16px
+    min-height: 76px
+    padding: 0
+    border: 0
+    border-radius: 0
+    background: transparent
+    text-align: left
+
+.daily-habit--completable
+    cursor: pointer
+
+@media (hover: hover) and (pointer: fine)
+    .daily-habit--completable:hover .daily-habit-checkbox__box
+        border-color: var(--primary)
 
 .daily-habit__icon
     display: grid
     place-items: center
-    width: 60px
+    width: 32px
     height: 60px
-    border-radius: 18px
-    border: 1px solid var(--divider)
-    background: var(--primary-container)
+    border-radius: 10px
     color: var(--primary)
 
 .daily-habit__content
     min-width: 0
 
 .daily-habit__title
-    margin: 0 0 4px
+    margin: 0
+    min-width: 0
     overflow: hidden
     color: var(--text-primary)
-    font-size: 17px
+    font-size: 16px
     font-weight: 800
     letter-spacing: -0.02em
     text-overflow: ellipsis
     white-space: nowrap
 
 .daily-habit__meta
-    margin: 0
+    overflow: hidden
+    margin: 4px 0 0
     color: var(--text-secondary)
     font-size: 12px
+    line-height: 1.4
+    text-overflow: ellipsis
+    white-space: nowrap
 
 .daily-habit__control
     justify-self: end
+    min-width: 0
+
+.daily-habit__control--completion
+    display: grid
+    place-items: center
+    width: 40px
+    justify-self: end
 
 .daily-habit-checkbox
-    display: inline-flex
-    align-items: center
-    gap: 8px
-    min-height: 42px
-    padding: 0 12px
-    border: 1px solid var(--outline)
-    border-radius: 13px
-    background: var(--surface)
-    color: var(--text-secondary)
-    font-size: 13px
-    font-weight: 780
+    display: grid
+    place-items: center
 
 .daily-habit-checkbox__box
     display: grid
     place-items: center
-    width: 20px
-    height: 20px
+    width: 40px
+    height: 40px
     border: 2px solid var(--outline)
-    border-radius: 7px
+    border-radius: 50%
     color: transparent
     font-size: 14px
     line-height: 1
-
-.daily-habit-checkbox--checked
-    border-color: var(--success)
-    background: var(--success-container)
-    color: var(--success)
+    transition: border-color 160ms ease, background 160ms ease, color 160ms ease
 
 .daily-habit-checkbox--checked .daily-habit-checkbox__box
     border-color: var(--success)
@@ -160,19 +180,29 @@
 
 .daily-habit-stepper
     display: flex
-    align-items: center
-    flex-wrap: wrap
+    align-items: stretch
+    flex-wrap: nowrap
     overflow: hidden
     border: 1px solid var(--outline)
     border-radius: 13px
     background: var(--surface)
+    height: 40px
 
 .daily-habit-stepper__button
-    min-height: 42px
-    min-width: 40px
+    height: 100%
+    min-height: 0
+    padding-block: 0
     padding-inline: 0
     border-radius: 0
-    font-size: 13px
+    font-size: 18px
+
+.daily-habit-stepper__button:first-child
+    padding-left: 12px
+    padding-right: 4px
+
+.daily-habit-stepper__button:last-child
+    padding-left: 4px
+    padding-right: 12px
 
 .daily-habit-stepper__button.button--secondary
     background: transparent
@@ -184,8 +214,7 @@
 .daily-habit-stepper__value
     display: grid
     place-items: center
-    min-width: 84px
-    padding: 0 12px
+    min-width: 80px
     font-size: 13px
     font-weight: 780
     font-variant-numeric: tabular-nums
@@ -200,6 +229,8 @@
     border: 1px solid var(--outline)
     border-radius: 13px
     background: var(--surface)
+    justify-content: space-between
+    width: 100%
 
 .daily-habit-time__icon
     display: grid
@@ -226,71 +257,7 @@
 
 @media (max-width: 860px)
     .daily-habits__header
-        flex-direction: column
+        align-items: center
 
     .daily-habits__header-actions
-        justify-content: flex-start
-
-@media (min-width: 861px)
-    .daily-habits__list
-        grid-template-columns: 1fr 1fr
-
-@media (max-width: 720px)
-    .daily-habit
-        grid-template-columns: 64px minmax(0, 1fr)
-        gap: 10px
-        min-height: 76px
-        padding: 12px
-
-    .daily-habit__icon
-        width: 64px
-        height: 64px
-        border-radius: 16px
-
-    .daily-habit__title
-        font-size: 16px
-
-    .daily-habit__control
-        grid-column: 1 / -1
-        padding-left: 74px
-
-    .daily-habit-stepper__value
-        min-width: 80px
-
-@media (max-width: 560px)
-    .daily-habits__body
-        gap: 18px
-
-    .daily-habits__subtitle
-        font-size: 13px
-
-    .daily-habit
-        padding: 10px
-
-    .daily-habit__control
-        padding-left: 62px
-
-    .daily-habit-checkbox,
-    .daily-habit-time
-        width: 100%
-
-    .daily-habit-time
-        justify-content: space-between
-
-    .daily-habit-time__select
-        flex: 1 1 auto
-
-    .daily-habit-stepper
-        width: 100%
-
-    .daily-habit-stepper__value
-        flex: 1 1 auto
-
-    .daily-habits__footer
-        flex-wrap: wrap
-
-    .daily-habits__count-bar
-        width: 72px
-
-    .daily-habits__status
-        margin-left: 0
+        flex: 0 0 auto

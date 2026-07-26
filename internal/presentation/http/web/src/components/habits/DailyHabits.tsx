@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { GoogleIcon, GoogleIcons } from '../icons'
+import { EmojiIcon, GoogleIcon, GoogleIcons } from '../icons'
 import { Button, SavingStatus } from '../primitives'
 import { Panel, PanelBody } from '../layout'
 import { useApiClient } from '../../hooks/useApiClient'
@@ -308,14 +308,15 @@ export function DailyHabits({ date, dateKey, habits, records }: DailyHabitsProps
                 <div className="daily-habits__header">
                     <div className="daily-habits__heading">
                         <h2 className="daily-habits__title">Habits</h2>
-                        <p className="daily-habits__subtitle">
-                            Track the habits that belong to {formatPageDate(date)}.
-                        </p>
                     </div>
 
                     <div className="daily-habits__header-actions">
-                        <Link className="button button--secondary" to="/habits">
-                            Manage
+                        <Link
+                            aria-label="Manage habits"
+                            className="button daily-habits__manage-button"
+                            to="/habits"
+                        >
+                            <GoogleIcon icon="settings" size={20} />
                         </Link>
                     </div>
                 </div>
@@ -323,43 +324,41 @@ export function DailyHabits({ date, dateKey, habits, records }: DailyHabitsProps
                 <div className="daily-habits__list">
                     {rows.map((habit) =>
                         habit.kind === 'completable' ? (
-                            <article className="daily-habit" key={habit.id}>
+                            <button
+                                aria-pressed={habit.checked}
+                                className={`daily-habit daily-habit--completable ${habit.checked ? 'daily-habit--checked' : ''}`}
+                                key={habit.id}
+                                onClick={() => handleCompletableToggle(habit.id, !habit.checked)}
+                                type="button"
+                            >
                                 <div className="daily-habit__icon">
-                                    <GoogleIcon icon={habit.icon} size={28} />
+                                    <EmojiIcon icon={habit.icon} size={28} />
                                 </div>
 
                                 <div className="daily-habit__content">
                                     <h3 className="daily-habit__title">{habit.title}</h3>
-                                    <p className="daily-habit__meta">Completion</p>
+                                    <p className="daily-habit__meta">Every day</p>
                                 </div>
 
-                                <div className="daily-habit__control daily-habit__control--completion">
-                                    <button
-                                        aria-pressed={habit.checked}
+                                <div className="daily-habit__control daily-habit__control--completion" aria-hidden="true">
+                                    <span
                                         className={`daily-habit-checkbox ${habit.checked ? 'daily-habit-checkbox--checked' : ''}`}
-                                        onClick={() => handleCompletableToggle(habit.id, !habit.checked)}
-                                        type="button"
                                     >
-                                        <span className="daily-habit-checkbox__box" aria-hidden="true">
+                                        <span className="daily-habit-checkbox__box">
                                             {habit.checked ? '✓' : ''}
                                         </span>
-                                        <span className="daily-habit-checkbox__label">
-                                            {habit.checked ? 'Done' : 'Pending'}
-                                        </span>
-                                    </button>
+                                    </span>
                                 </div>
-                            </article>
+                            </button>
                         ) : habit.kind === 'measurable' ? (
                             <article className="daily-habit" key={habit.id}>
                                 <div className="daily-habit__icon">
-                                    <GoogleIcon icon={habit.icon} size={28} />
+                                    <EmojiIcon icon={habit.icon} size={28} />
                                 </div>
 
                                 <div className="daily-habit__content">
                                     <h3 className="daily-habit__title">{habit.title}</h3>
-                                    <p className="daily-habit__meta">
-                                        Quantity · step {formatMeasuredValue(habit.step)} {habit.unit}
-                                    </p>
+                                    <p className="daily-habit__meta">n of m {habit.unit}</p>
                                 </div>
 
                                 <div className="daily-habit__control daily-habit__control--measurable">
@@ -390,7 +389,7 @@ export function DailyHabits({ date, dateKey, habits, records }: DailyHabitsProps
                                             -
                                         </Button>
                                         <span className="daily-habit-stepper__value">
-                                            {formatMeasuredValue(habit.value, habit.step)} {habit.unit}
+                                            {formatMeasuredValue(habit.value, habit.step)}
                                         </span>
                                         <Button
                                             aria-label={`Increase ${habit.title}`}
@@ -423,18 +422,18 @@ export function DailyHabits({ date, dateKey, habits, records }: DailyHabitsProps
                         ) : (
                             <article className="daily-habit" key={habit.id}>
                                 <div className="daily-habit__icon">
-                                    <GoogleIcon icon={habit.icon} size={28} />
+                                    <EmojiIcon icon={habit.icon} size={28} />
                                 </div>
 
                                 <div className="daily-habit__content">
                                     <h3 className="daily-habit__title">{habit.title}</h3>
-                                    <p className="daily-habit__meta">Time</p>
+                                    <p className="daily-habit__meta">Not recorded</p>
                                 </div>
 
                                 <div className="daily-habit__control daily-habit__control--time">
                                     <div className="daily-habit-time">
                                         <span className="daily-habit-time__icon" aria-hidden="true">
-                                            <GoogleIcon icon={GoogleIcons.Schedule} size={18} />
+                                            <GoogleIcon icon="schedule" size={18} />
                                         </span>
                                         <select
                                             aria-label={`Select hour for ${habit.title}`}
