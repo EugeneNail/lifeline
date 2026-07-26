@@ -13,7 +13,7 @@ import {
 import { DailyTransactions, type DailyTransaction } from '../../components/transactions'
 import { Page, PageHeader } from '../../components/layout'
 import { Button, IconButton, Message } from '../../components/primitives'
-import { GoogleIcon, GoogleIcons } from '../../components/icons'
+import { GoogleIcon } from '../../components/icons'
 import { useApiClient } from '../../hooks/useApiClient'
 import './DayPage.sass'
 
@@ -222,7 +222,7 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
                             type="button"
                             onClick={() => setDateSelectorOpen(true)}
                         >
-                            <GoogleIcon icon={GoogleIcons.CalendarMonth} size={18} />
+                            <GoogleIcon icon="calendar_month" size={18} />
                             Change date
                         </Button>
 

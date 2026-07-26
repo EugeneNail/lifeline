@@ -1,3 +1,4 @@
+export { EmojiIcon } from './EmojiIcon'
 export { GoogleIcon } from './GoogleIcon'
-export { GoogleIcons } from './googleIconCatalog'
+export { EmojiIcons, GoogleIcons } from './emojiIconCatalog'
 export { IconSelector } from './IconSelector'

@@ -1,26 +1,28 @@
 import type { HTMLAttributes } from 'react'
+import { emojiIconNames } from './emojiIconCatalog'
+import type { EmojiIcon as EmojiIconValue } from './emojiIconCatalog'
 import './GoogleIcon.sass'
 
-type GoogleIconProps = HTMLAttributes<HTMLSpanElement> & {
-    icon: string
+type EmojiIconProps = HTMLAttributes<HTMLSpanElement> & {
+    icon: EmojiIconValue
     size: number
     title?: string
 }
 
-// GoogleIcon renders a literal icon string without depending on a shared catalog.
-export function GoogleIcon({ icon, size, title, className, style, ...props }: GoogleIconProps) {
+// EmojiIcon renders one emoji from the local icon catalog.
+export function EmojiIcon({ icon, size, title, className, style, ...props }: EmojiIconProps) {
     const iconSize = `${size}px`
 
     return (
         <span
             aria-hidden={title ? undefined : true}
             aria-label={title}
-            className={joinClassNames('google-icon', 'material-symbols-rounded', className)}
+            className={joinClassNames('google-icon', 'emoji-icon', className)}
             role={title ? 'img' : undefined}
             style={{ ...style, width: iconSize, height: iconSize, fontSize: iconSize }}
             {...props}
         >
-            {icon}
+            {emojiIconNames[icon]}
         </span>
     )
 }

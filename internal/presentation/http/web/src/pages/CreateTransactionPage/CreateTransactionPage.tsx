@@ -4,7 +4,7 @@ import {useEffect, useMemo, useState} from 'react'
 import {useNavigate, useSearchParams} from 'react-router-dom'
 import {DateSelector} from '../../components/date'
 import {AppNavigation} from '../../components/navigation'
-import {GoogleIcon, GoogleIcons} from '../../components/icons'
+import { GoogleIcon } from '../../components/icons'
 import {Button, Message} from '../../components/primitives'
 import {Page, PageHeader, Panel, PanelBody, Section, SectionHeader} from '../../components/layout'
 import {useApiClient} from '../../hooks/useApiClient'
@@ -225,7 +225,7 @@ export function CreateTransactionPage() {
                                 variant="secondary"
                                 onClick={() => setDateSelectorOpen(true)}
                             >
-                                <GoogleIcon icon={GoogleIcons.CalendarMonth} size={18}/>
+                                <GoogleIcon icon="calendar_month" size={18} />
                                 {selectedDateLabel}
                             </Button>
                         </Section>

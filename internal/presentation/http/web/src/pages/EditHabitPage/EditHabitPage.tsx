@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { AppNavigation } from '../../components/navigation'
-import { GoogleIcon, GoogleIcons, IconSelector } from '../../components/icons'
+import { EmojiIcon, GoogleIcons, IconSelector } from '../../components/icons'
 import { Button, Message, TextField } from '../../components/primitives'
 import { Page, PageHeader, Panel, PanelBody, Section, SectionHeader } from '../../components/layout'
 import { useApiClient } from '../../hooks/useApiClient'
@@ -295,7 +295,7 @@ export function EditHabitPage() {
                                     disabled={isSubmitting}
                                     aria-label={isSubmitting ? 'Saving habit' : 'Save habit'}
                                 >
-                                    <GoogleIcon icon={icon} size={18} />
+                                    <EmojiIcon icon={icon} size={18} />
                                     <span
                                         className="edit-habit-submit-label"
                                         data-submitting={isSubmitting}

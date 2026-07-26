@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { GoogleIcons } from '../icons'
-import { GoogleIcon } from '../icons'
+import { EmojiIcon } from '../icons'
 import { Switch } from '../primitives'
 import './HabitCard.sass'
 
@@ -27,7 +27,7 @@ export function HabitCard({
     return (
         <article className="habit-card">
             <div className="habit-card__icon">
-                <GoogleIcon icon={icon} size={22} />
+                <EmojiIcon icon={icon} size={22} />
             </div>
 
             <div className="habit-card__content">
