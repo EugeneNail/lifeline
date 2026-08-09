@@ -8,6 +8,7 @@ import { HabitsPage } from './pages/HabitsPage/HabitsPage'
 import { EditHabitPage } from './pages/EditHabitPage/EditHabitPage'
 import { LoginPage } from './pages/LoginPage/LoginPage'
 import { SignupPage } from './pages/SignupPage/SignupPage'
+import { TransactionStatisticsPage } from './pages/TransactionStatisticsPage/TransactionStatisticsPage'
 
 function App() {
     return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/habits/new" element={<CreateHabitPage />} />
             <Route path="/transactions/new" element={<CreateTransactionPage />} />
             <Route path="/transactions/:id" element={<EditTransactionPage />} />
+            <Route path="/transactions/statistics" element={<TransactionStatisticsPage />} />
             <Route path="/habits/:type/:id" element={<EditHabitPage />} />
             <Route path="/dates/:date" element={<DayPage />} />
             <Route path="/journals" element={<JournalsPage />} />
