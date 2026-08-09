@@ -151,7 +151,7 @@ func calculateOverview(transactionsList []*transactions.Transaction) Overview {
 		}
 	}
 
-	overview.NetChange = math.Abs(overview.Incomes - overview.Expenses)
+	overview.NetChange = overview.Incomes - overview.Expenses
 
 	return overview
 }
