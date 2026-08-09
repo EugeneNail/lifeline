@@ -13,6 +13,7 @@ services:
       - lifeline
     volumes:
       - lifeline-postgres-data:/var/lib/postgresql
+    restart: always
 
   lifeline-app:
     container_name: lifeline-app
@@ -28,6 +29,7 @@ services:
       - lifeline
     depends_on:
       - lifeline-db
+    restart: always
 
   lifeline-react-dev:
     container_name: lifeline-react-dev
@@ -49,6 +51,7 @@ services:
     volumes:
       - ../internal/presentation/http/web:/app
       - lifeline-react-dev-node-modules:/app/node_modules
+    restart: always
 
 volumes:
   lifeline-postgres-data:
