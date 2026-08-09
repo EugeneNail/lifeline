@@ -1,0 +1,4 @@
+interface:
+  display_name: "Make Commits"
+  short_description: "Plan semantic git commits from the current worktree"
+  default_prompt: "Use this skill when asked to create git commits. Inspect the current git status and recent changes, group edits into semantic commits, order dependent commits first, and create Conventional Commits-style messages in natural conversational English."
