@@ -21,6 +21,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/application/usecases/habit/update_time_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/journal/create_journal"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/journal/get_journal"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/journal/list_journals"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/moods/get_mood_record"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/moods/save_mood_record"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/transactions/create_transaction"
@@ -45,6 +46,7 @@ import (
 	transportUpdate_measurable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/update_measurable_habit"
 	transportUpdate_time_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/update_time_habit"
 	transportGet_journal "github.com/EugeneNail/lifeline/internal/presentation/http/api/journal/get_journal"
+	transportList_journals "github.com/EugeneNail/lifeline/internal/presentation/http/api/journal/list_journals"
 	transportCreate_journal "github.com/EugeneNail/lifeline/internal/presentation/http/api/journal/save_journal"
 	transportGet_mood_record "github.com/EugeneNail/lifeline/internal/presentation/http/api/moods/get_mood_record"
 	transportSave_mood_record "github.com/EugeneNail/lifeline/internal/presentation/http/api/moods/save_mood_record"
@@ -173,6 +175,11 @@ func main() {
 		log.Fatalf("creating a get-journal usecase: %v", err)
 	}
 
+	listJournalsUsecase, err := list_journals.NewHandler(journalRepository)
+	if err != nil {
+		log.Fatalf("creating a list-journals usecase: %v", err)
+	}
+
 	saveMoodRecordUsecase, err := save_mood_record.NewHandler(moodRecordRepository)
 	if err != nil {
 		log.Fatalf("creating a save-mood-record usecase: %v", err)
@@ -279,6 +286,7 @@ func main() {
 	refreshEndpoint := transportRefresh.NewHandler(refreshUsecase)
 	createJournalEndpoint := transportCreate_journal.NewHandler(createJournalUsecase, requestIdentity)
 	getJournalEndpoint := transportGet_journal.NewHandler(getJournalUsecase, requestIdentity)
+	listJournalsEndpoint := transportList_journals.NewHandler(listJournalsUsecase, requestIdentity)
 	getMoodRecordEndpoint := transportGet_mood_record.NewHandler(getMoodRecordUsecase, requestIdentity)
 	saveMoodRecordEndpoint := transportSave_mood_record.NewHandler(saveMoodRecordUsecase, requestIdentity)
 	createTransactionEndpoint := transportCreate_transaction.NewHandler(createTransactionUsecase, requestIdentity)
@@ -309,6 +317,7 @@ func main() {
 	server.Handle("GET /api/v1/transactions/{id}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getTransactionEndpoint)))
 	server.Handle("GET /api/v1/transactions", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(listTransactionsEndpoint)))
 	server.Handle("PUT /api/v1/transactions/{id}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(updateTransactionEndpoint)))
+	server.Handle("GET /api/v1/journals", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(listJournalsEndpoint)))
 	server.Handle("GET /api/v1/journals/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getJournalEndpoint)))
 	server.Handle("POST /api/v1/journals/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(createJournalEndpoint)))
 	server.Handle("GET /api/v1/moods/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getMoodRecordEndpoint)))
