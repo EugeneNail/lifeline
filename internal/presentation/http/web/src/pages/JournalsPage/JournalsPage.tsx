@@ -47,6 +47,13 @@ const weekdayFormatter = new Intl.DateTimeFormat('en-GB', {
 })
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000
+const JOURNALS_CACHE_PREFIX = 'journals-page-cache:'
+const JOURNALS_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000
+
+type JournalsCacheRecord = {
+    savedAt: number
+    journals: JournalResource[]
+}
 
 function startOfDay(date: Date) {
     const nextDate = new Date(date)
@@ -167,6 +174,87 @@ function splitJournalNote(note: string) {
         .filter((paragraph) => paragraph.length > 0)
 }
 
+function getJournalsCacheKey(fromKey: string, toKey: string) {
+    return `${JOURNALS_CACHE_PREFIX}${fromKey}:${toKey}`
+}
+
+function isCacheExpired(savedAt: number) {
+    return Date.now() - savedAt > JOURNALS_CACHE_TTL_MS
+}
+
+function cleanupExpiredJournalsCache() {
+    if (typeof window === 'undefined') {
+        return
+    }
+
+    const cacheKeys: string[] = []
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+        const key = window.localStorage.key(index)
+        if (!key || !key.startsWith(JOURNALS_CACHE_PREFIX)) {
+            continue
+        }
+
+        cacheKeys.push(key)
+    }
+
+    for (const key of cacheKeys) {
+        const rawValue = window.localStorage.getItem(key)
+        if (!rawValue) {
+            continue
+        }
+
+        try {
+            const parsed = JSON.parse(rawValue) as Partial<JournalsCacheRecord>
+            if (!parsed.savedAt || isCacheExpired(parsed.savedAt)) {
+                window.localStorage.removeItem(key)
+            }
+        } catch {
+            window.localStorage.removeItem(key)
+        }
+    }
+}
+
+function readCachedJournals(cacheKey: string) {
+    if (typeof window === 'undefined') {
+        return null
+    }
+
+    const rawValue = window.localStorage.getItem(cacheKey)
+    if (!rawValue) {
+        return null
+    }
+
+    try {
+        const parsed = JSON.parse(rawValue) as Partial<JournalsCacheRecord>
+        if (!parsed.savedAt || !Array.isArray(parsed.journals) || isCacheExpired(parsed.savedAt)) {
+            window.localStorage.removeItem(cacheKey)
+            return null
+        }
+
+        return parsed.journals
+    } catch {
+        window.localStorage.removeItem(cacheKey)
+        return null
+    }
+}
+
+function saveCachedJournals(cacheKey: string, journals: JournalResource[]) {
+    if (typeof window === 'undefined') {
+        return
+    }
+
+    const record: JournalsCacheRecord = {
+        savedAt: Date.now(),
+        journals,
+    }
+
+    try {
+        window.localStorage.setItem(cacheKey, JSON.stringify(record))
+    } catch {
+        // Ignore storage quota and privacy mode errors.
+    }
+}
+
 function renderJournalParagraph(paragraph: string, paragraphIndex: number) {
     return paragraph.split('\n').map((line, index) => (
         <span key={`${paragraphIndex}-${index}`}>
@@ -198,9 +286,12 @@ export function JournalsPage() {
     const selectedRangeLabel = formatSelectedRange(range)
     const fromKey = formatDateKey(range.startDate)
     const toKey = formatDateKey(range.endDate)
+    const cacheKey = getJournalsCacheKey(fromKey, toKey)
 
     useEffect(() => {
         let isActive = true
+
+        cleanupExpiredJournalsCache()
 
         async function loadJournals() {
             setIsLoading(true)
@@ -219,9 +310,21 @@ export function JournalsPage() {
                     .map(mapJournalEntry)
                     .filter((entry): entry is JournalEntry => entry !== null)
 
+                saveCachedJournals(cacheKey, response.data.journals)
                 setJournals(sortJournalEntries(mappedEntries))
             } catch (error) {
                 if (!isActive) {
+                    return
+                }
+
+                const cachedJournals = readCachedJournals(cacheKey)
+                if (cachedJournals) {
+                    const mappedEntries = cachedJournals
+                        .map(mapJournalEntry)
+                        .filter((entry): entry is JournalEntry => entry !== null)
+
+                    setJournals(sortJournalEntries(mappedEntries))
+                    setLoadError('')
                     return
                 }
 
@@ -242,7 +345,7 @@ export function JournalsPage() {
         return () => {
             isActive = false
         }
-    }, [apiClient, fromKey, toKey])
+    }, [apiClient, cacheKey, fromKey, toKey])
 
     useEffect(() => {
         let frameId = 0
