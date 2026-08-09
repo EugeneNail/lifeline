@@ -1,4 +1,62 @@
 .date-selector
+    display: inline-flex
+    align-items: stretch
+    min-width: 0
+    border: 1px solid var(--divider)
+    border-radius: 14px
+    background: rgba(255, 255, 255, 0.78)
+    overflow: hidden
+    box-shadow: 0 10px 28px rgba(38, 49, 43, 0.04)
+
+.date-selector__step-button
+    display: grid
+    flex: 0 0 auto
+    width: 40px
+    min-height: 40px
+    place-items: center
+    border: 0
+    background: transparent
+    color: var(--text-secondary)
+    cursor: pointer
+    font-size: 20px
+    font-weight: 700
+    line-height: 1
+    transition: background 140ms ease, color 140ms ease
+
+    &:hover
+        background: var(--surface-secondary)
+        color: var(--text-primary)
+
+.date-selector__value-button
+    display: flex
+    flex: 1 1 auto
+    align-items: center
+    justify-content: center
+    min-width: 0
+    border: 0
+    border-inline: 1px solid var(--divider)
+    background: transparent
+    color: var(--text-primary)
+    cursor: pointer
+    padding: 0 16px
+    transition: background 140ms ease
+
+    &:hover
+        background: rgba(255, 255, 255, 0.72)
+
+.date-selector__value-label
+    display: block
+    min-width: 0
+    overflow: hidden
+    color: inherit
+    font-size: 12px
+    font-weight: 700
+    line-height: 1
+    text-align: center
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.date-selector__overlay
     position: fixed
     inset: 0
     z-index: 50
@@ -162,6 +220,9 @@
 
 @media (max-width: 560px)
     .date-selector
+        width: 100%
+
+    .date-selector__overlay
         padding: 8px
 
     .date-selector__surface

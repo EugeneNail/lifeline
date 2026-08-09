@@ -12,8 +12,7 @@ import {
 } from '../../components/habits/DailyHabits'
 import { DailyTransactions, type DailyTransaction } from '../../components/transactions'
 import { Page, PageHeader } from '../../components/layout'
-import { Button, IconButton, Message } from '../../components/primitives'
-import { GoogleIcon } from '../../components/icons'
+import { Message } from '../../components/primitives'
 import { useApiClient } from '../../hooks/useApiClient'
 import './DayPage.sass'
 
@@ -90,7 +89,6 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
     const [mood, setMood] = useState<MoodValue | null>(null)
     const [journal, setJournal] = useState<string | null>(null)
     const [transactions, setTransactions] = useState<DailyTransaction[] | null>(null)
-    const [isDateSelectorOpen, setDateSelectorOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
     const todayKey = useMemo(() => formatDateKey(startOfDay(new Date())), [])
@@ -176,11 +174,8 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
         return <Navigate replace to="/habits" />
     }
 
-    const currentPageDate = pageDate
-
     function handleDateSelect(selectedDate: Date) {
         const selectedKey = formatDateKey(selectedDate)
-        setDateSelectorOpen(false)
 
         if (selectedKey === todayKey) {
             navigate('/')
@@ -190,51 +185,13 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
         navigate(`/dates/${selectedKey}`)
     }
 
-    function handlePreviousDay() {
-        navigateForDate(addDays(currentPageDate, -1), navigate, todayKey)
-    }
-
-    function handleNextDay() {
-        navigateForDate(addDays(currentPageDate, 1), navigate, todayKey)
-    }
-
     return (
         <Page className="day-page">
             <PageHeader
                 eyebrow={isToday ? 'Today' : 'Day overview'}
                 title={pageTitle}
                 subtitle="Mood, journal, habits, and expenses for the selected day."
-                actions={
-                    <div className="day-page__header-actions">
-                        <IconButton
-                            aria-label="Previous day"
-                            className="day-page__date-step-button"
-                            type="button"
-                            onClick={handlePreviousDay}
-                        >
-                            ←
-                        </IconButton>
-
-                        <Button
-                            className="day-page__date-button"
-                            variant="secondary"
-                            type="button"
-                            onClick={() => setDateSelectorOpen(true)}
-                        >
-                            <GoogleIcon icon="calendar_month" size={18} />
-                            Change date
-                        </Button>
-
-                        <IconButton
-                            aria-label="Next day"
-                            className="day-page__date-step-button"
-                            type="button"
-                            onClick={handleNextDay}
-                        >
-                            →
-                        </IconButton>
-                    </div>
-                }
+                actions={<DateSelector mode="single" value={pageDate} onChange={handleDateSelect} />}
             />
 
             <div className="day-page__content">
@@ -258,15 +215,7 @@ export function DayPage({ date: explicitDate }: DayPageProps) {
                     transactions={transactions ?? []}
                 />
             </div>
-
             <AppNavigation />
-            <DateSelector
-                mode="single"
-                open={isDateSelectorOpen}
-                value={pageDate}
-                onChange={handleDateSelect}
-                onClose={() => setDateSelectorOpen(false)}
-            />
         </Page>
     )
 }
@@ -284,25 +233,6 @@ function startOfDay(date: Date) {
     copy.setHours(0, 0, 0, 0)
 
     return copy
-}
-
-function addDays(date: Date, delta: number) {
-    const nextDate = new Date(date)
-    nextDate.setDate(nextDate.getDate() + delta)
-    nextDate.setHours(0, 0, 0, 0)
-
-    return nextDate
-}
-
-function navigateForDate(date: Date, navigate: (path: string) => void, todayKey: string) {
-    const selectedKey = formatDateKey(date)
-
-    if (selectedKey === todayKey) {
-        navigate('/')
-        return
-    }
-
-    navigate(`/dates/${selectedKey}`)
 }
 
 const emptyHabitsResponse: HabitsResponse = {

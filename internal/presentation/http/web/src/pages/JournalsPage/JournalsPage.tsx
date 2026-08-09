@@ -270,7 +270,6 @@ export function JournalsPage() {
     const today = useMemo(() => startOfDay(new Date()), [])
     const defaultRange = useMemo(() => buildRange(30, today), [today])
     const [searchParams, setSearchParams] = useSearchParams()
-    const [isDateSelectorOpen, setDateSelectorOpen] = useState(false)
     const [journals, setJournals] = useState<JournalEntry[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
@@ -387,7 +386,6 @@ export function JournalsPage() {
             },
             { replace: true },
         )
-        setDateSelectorOpen(false)
     }
 
     function handleCustomRangeChange(nextRange: DateRange) {
@@ -403,7 +401,6 @@ export function JournalsPage() {
             },
             { replace: true },
         )
-        setDateSelectorOpen(false)
     }
 
     return (
@@ -443,18 +440,15 @@ export function JournalsPage() {
                         ))}
                     </div>
 
-                    <button
-                        aria-pressed={!activePreset}
-                        className={
-                            !activePreset
-                                ? 'journals-page__custom-button journals-page__custom-button--active'
-                                : 'journals-page__custom-button'
-                        }
-                        type="button"
-                        onClick={() => setDateSelectorOpen(true)}
-                    >
-                        Custom range
-                    </button>
+                    <DateSelector
+                        className="journals-page__date-selector"
+                        mode="range"
+                        value={{
+                            startDate: range.startDate,
+                            endDate: range.endDate,
+                        }}
+                        onChange={handleCustomRangeChange}
+                    />
                 </div>
 
                 <p className="journals-page__range-label">{selectedRangeLabel}</p>
@@ -507,16 +501,6 @@ export function JournalsPage() {
                     </div>
                 </div>
             ) : null}
-            <DateSelector
-                mode="range"
-                open={isDateSelectorOpen}
-                value={{
-                    startDate: range.startDate,
-                    endDate: range.endDate,
-                }}
-                onChange={handleCustomRangeChange}
-                onClose={() => setDateSelectorOpen(false)}
-            />
         </main>
     )
 }

@@ -8,20 +8,21 @@ export type DateRange = {
     endDate: Date
 }
 
-type DateSelectorSingleProps = {
-    mode: 'single'
-    open: boolean
-    value: Date | null
-    onChange: (date: Date) => void
-    onClose: () => void
+type DateSelectorCommonProps = {
+    className?: string
+    step?: number
 }
 
-type DateSelectorRangeProps = {
+type DateSelectorSingleProps = DateSelectorCommonProps & {
+    mode: 'single'
+    value: Date | null
+    onChange: (date: Date) => void
+}
+
+type DateSelectorRangeProps = DateSelectorCommonProps & {
     mode: 'range'
-    open: boolean
     value: DateRange | null
     onChange: (range: DateRange) => void
-    onClose: () => void
 }
 
 type DateSelectorProps = DateSelectorSingleProps | DateSelectorRangeProps
@@ -36,9 +37,25 @@ const weekdayNames = Array.from({ length: 7 }, (_, index) =>
     new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(new Date(2026, 7, 2 + index)),
 )
 
-// DateSelector renders a full-screen calendar overlay that supports single-date and date-range selection.
+const singleDateLabelFormatter = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+})
+
+const rangeMonthYearLabelFormatter = new Intl.DateTimeFormat('en-GB', {
+    month: 'long',
+    year: 'numeric',
+})
+
+const rangeStartMonthLabelFormatter = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+})
+
+// DateSelector renders an inline date switcher and an attached calendar overlay.
 export function DateSelector(props: DateSelectorProps) {
-    const { open, onClose } = props
+    const [isOpen, setIsOpen] = useState(false)
     const [viewMode, setViewMode] = useState<ViewMode>('days')
     const [visibleDate, setVisibleDate] = useState(() =>
         props.mode === 'single'
@@ -48,7 +65,7 @@ export function DateSelector(props: DateSelectorProps) {
     const [rangeAnchor, setRangeAnchor] = useState<Date | null>(null)
 
     useEffect(() => {
-        if (!open) {
+        if (!isOpen) {
             setRangeAnchor(null)
             return
         }
@@ -60,16 +77,16 @@ export function DateSelector(props: DateSelectorProps) {
                 : resolveInitialVisibleDate(props.value, 'range'),
         )
         setRangeAnchor(null)
-    }, [open, props.mode, props.value])
+    }, [isOpen, props.mode, props.value])
 
     useEffect(() => {
-        if (!open) {
+        if (!isOpen) {
             return
         }
 
         function handleKeyDown(event: KeyboardEvent) {
             if (event.key === 'Escape') {
-                onClose()
+                setIsOpen(false)
             }
         }
 
@@ -78,185 +95,242 @@ export function DateSelector(props: DateSelectorProps) {
         return () => {
             window.removeEventListener('keydown', handleKeyDown)
         }
-    }, [open, onClose])
+    }, [isOpen])
 
-    const selectedRange =
-        props.mode === 'single'
-            ? props.value
-                ? {
-                      startDate: normalizeDate(props.value),
-                      endDate: normalizeDate(props.value),
-                  }
-                : null
-            : props.value
+    const step = props.step ?? (props.mode === 'range' && props.value ? getRangeLength(props.value) : 1)
+    const label = props.mode === 'single' ? formatSingleDateLabel(props.value) : formatRangeDateLabel(props.value)
 
-    if (!open) {
+    function handleShift(direction: number) {
+        const delta = step * direction
+
+        if (props.mode === 'single') {
+            const currentDate = normalizeDate(props.value ?? new Date())
+            props.onChange(addDays(currentDate, delta))
+            return
+        }
+
+        const currentRange = props.value ?? {
+            startDate: normalizeDate(new Date()),
+            endDate: normalizeDate(new Date()),
+        }
+
+        props.onChange({
+            startDate: addDays(normalizeDate(currentRange.startDate), delta),
+            endDate: addDays(normalizeDate(currentRange.endDate), delta),
+        })
+    }
+
+    if (!label) {
         return null
     }
 
-    return createPortal(
-        <div
-            className="date-selector"
-            onMouseDown={(event) => {
-                if (event.target === event.currentTarget) {
-                    onClose()
-                }
-            }}
-            role="presentation"
-        >
-            <section className="date-selector__surface" role="dialog" aria-modal="true">
-                <header className="date-selector__header">
-                    <div className="date-selector__header-main">
-                        <Button
-                            className="date-selector__mode-button"
-                            variant="secondary"
-                            type="button"
-                            onClick={() => setViewMode('months')}
-                        >
-                            {monthNames[visibleDate.getMonth()]}
-                        </Button>
-                        <Button
-                            className="date-selector__mode-button"
-                            variant="secondary"
-                            type="button"
-                            onClick={() => setViewMode('years')}
-                        >
-                            {visibleDate.getFullYear()}
-                        </Button>
-                    </div>
+    return (
+        <>
+            <div className={joinClassNames('date-selector', props.className)}>
+                <button
+                    aria-label={props.mode === 'single' ? 'Previous day' : 'Previous range'}
+                    className="date-selector__step-button"
+                    type="button"
+                    onClick={() => handleShift(-1)}
+                >
+                    ‹
+                </button>
+                <button
+                    aria-label={props.mode === 'single' ? 'Open date selector' : 'Open date selector'}
+                    className="date-selector__value-button"
+                    type="button"
+                    onClick={() => setIsOpen(true)}
+                >
+                    <span className="date-selector__value-label">{label}</span>
+                </button>
+                <button
+                    aria-label={props.mode === 'single' ? 'Next day' : 'Next range'}
+                    className="date-selector__step-button"
+                    type="button"
+                    onClick={() => handleShift(1)}
+                >
+                    ›
+                </button>
+            </div>
 
-                    <div className="date-selector__header-actions">
-                        <IconButton
-                            aria-label="Previous period"
-                            className="date-selector__nav-button"
-                            type="button"
-                            onClick={() => shiftVisibleDate(setVisibleDate, viewMode, -1)}
-                        >
-                            ←
-                        </IconButton>
-                        <IconButton
-                            aria-label="Next period"
-                            className="date-selector__nav-button"
-                            type="button"
-                            onClick={() => shiftVisibleDate(setVisibleDate, viewMode, 1)}
-                        >
-                            →
-                        </IconButton>
-                        <IconButton
-                            aria-label="Close date selector"
-                            className="date-selector__close-button"
-                            type="button"
-                            onClick={onClose}
-                        >
-                            ×
-                        </IconButton>
-                    </div>
-                </header>
+            {isOpen
+                ? createPortal(
+                      <div
+                          className="date-selector__overlay"
+                          onMouseDown={(event) => {
+                              if (event.target === event.currentTarget) {
+                                  setIsOpen(false)
+                              }
+                          }}
+                          role="presentation"
+                      >
+                          <section className="date-selector__surface" role="dialog" aria-modal="true">
+                              <header className="date-selector__header">
+                                  <div className="date-selector__header-main">
+                                      <Button
+                                          className="date-selector__mode-button"
+                                          variant="secondary"
+                                          type="button"
+                                          onClick={() => setViewMode('months')}
+                                      >
+                                          {monthNames[visibleDate.getMonth()]}
+                                      </Button>
+                                      <Button
+                                          className="date-selector__mode-button"
+                                          variant="secondary"
+                                          type="button"
+                                          onClick={() => setViewMode('years')}
+                                      >
+                                          {visibleDate.getFullYear()}
+                                      </Button>
+                                  </div>
 
-                <div className="date-selector__toolbar">
-                    <p className="date-selector__eyebrow">
-                        {props.mode === 'single' ? 'Single date' : 'Date range'}
-                    </p>
-                    <p className="date-selector__subtitle">
-                        {viewMode === 'days'
-                            ? 'Choose a day, or switch month and year from the buttons above.'
-                            : viewMode === 'months'
-                              ? 'Choose a month to continue.'
-                              : 'Choose a year between 2000 and 2099.'}
-                    </p>
-                </div>
+                                  <div className="date-selector__header-actions">
+                                      <IconButton
+                                          aria-label="Previous period"
+                                          className="date-selector__nav-button"
+                                          type="button"
+                                          onClick={() => shiftVisibleDate(setVisibleDate, viewMode, -1)}
+                                      >
+                                          ←
+                                      </IconButton>
+                                      <IconButton
+                                          aria-label="Next period"
+                                          className="date-selector__nav-button"
+                                          type="button"
+                                          onClick={() => shiftVisibleDate(setVisibleDate, viewMode, 1)}
+                                      >
+                                          →
+                                      </IconButton>
+                                      <IconButton
+                                          aria-label="Close date selector"
+                                          className="date-selector__close-button"
+                                          type="button"
+                                          onClick={() => setIsOpen(false)}
+                                      >
+                                          ×
+                                      </IconButton>
+                                  </div>
+                              </header>
 
-                {viewMode === 'days' ? (
-                    <div className="date-selector__calendar">
-                        <div className="date-selector__weekdays">
-                            {weekdayNames.map((weekday) => (
-                                <span className="date-selector__weekday" key={weekday}>
-                                    {weekday}
-                                </span>
-                            ))}
-                        </div>
+                              <div className="date-selector__toolbar">
+                                  <p className="date-selector__eyebrow">
+                                      {props.mode === 'single' ? 'Single date' : 'Date range'}
+                                  </p>
+                                  <p className="date-selector__subtitle">
+                                      {viewMode === 'days'
+                                          ? 'Choose a day, or switch month and year from the buttons above.'
+                                          : viewMode === 'months'
+                                            ? 'Choose a month to continue.'
+                                            : 'Choose a year between 2000 and 2099.'}
+                                  </p>
+                              </div>
 
-                        <div className="date-selector__days">
-                            {buildMonthCells(visibleDate).map((day, index) =>
-                                day ? (
-                                    <button
-                                        aria-pressed={isDaySelected(day, selectedRange, rangeAnchor)}
-                                        className={joinClassNames(
-                                            'date-selector__day',
-                                            isDaySelected(day, selectedRange, rangeAnchor)
-                                                ? 'date-selector__day--selected'
-                                                : undefined,
-                                            isDayInRange(day, selectedRange, rangeAnchor)
-                                                ? 'date-selector__day--in-range'
-                                                : undefined,
-                                            isSameDay(day, normalizeDate(new Date()))
-                                                ? 'date-selector__day--today'
-                                                : undefined,
-                                        )}
-                                        key={formatDayKey(day)}
-                                        type="button"
-                                        onClick={() => handleDayClick(props, day, rangeAnchor, setRangeAnchor)}
-                                    >
-                                        {day.getDate()}
-                                    </button>
-                                ) : (
-                                    <span className="date-selector__day date-selector__day--empty" key={`empty-${index}`} />
-                                ),
-                            )}
-                        </div>
-                    </div>
-                ) : viewMode === 'months' ? (
-                    <div className="date-selector__picker-grid date-selector__picker-grid--months">
-                        {monthNames.map((monthName, index) => (
-                            <button
-                                aria-pressed={visibleDate.getMonth() === index}
-                                className={joinClassNames(
-                                    'date-selector__picker-button',
-                                    visibleDate.getMonth() === index
-                                        ? 'date-selector__picker-button--selected'
-                                        : undefined,
-                                )}
-                                key={monthName}
-                                type="button"
-                                onClick={() => {
-                                    const nextDate = new Date(visibleDate)
-                                    nextDate.setMonth(index, 1)
-                                    setVisibleDate(normalizeDate(nextDate))
-                                    setViewMode('days')
-                                }}
-                            >
-                                {monthName}
-                            </button>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="date-selector__picker-grid date-selector__picker-grid--years">
-                        {Array.from({ length: 100 }, (_, index) => 2000 + index).map((year) => (
-                            <button
-                                aria-pressed={visibleDate.getFullYear() === year}
-                                className={joinClassNames(
-                                    'date-selector__picker-button',
-                                    visibleDate.getFullYear() === year
-                                        ? 'date-selector__picker-button--selected'
-                                        : undefined,
-                                )}
-                                key={year}
-                                type="button"
-                                onClick={() => {
-                                    const nextDate = new Date(visibleDate)
-                                    nextDate.setFullYear(year)
-                                    setVisibleDate(normalizeDate(nextDate))
-                                    setViewMode('days')
-                                }}
-                            >
-                                {year}
-                            </button>
-                        ))}
-                    </div>
-                )}
-            </section>
-        </div>,
-        document.body,
+                              {viewMode === 'days' ? (
+                                  <div className="date-selector__calendar">
+                                      <div className="date-selector__weekdays">
+                                          {weekdayNames.map((weekday) => (
+                                              <span className="date-selector__weekday" key={weekday}>
+                                                  {weekday}
+                                              </span>
+                                          ))}
+                                      </div>
+
+                                      <div className="date-selector__days">
+                                          {buildMonthCells(visibleDate).map((day, index) =>
+                                              day ? (
+                                                  <button
+                                                      aria-pressed={isDaySelected(day, props.value, rangeAnchor)}
+                                                      className={joinClassNames(
+                                                          'date-selector__day',
+                                                          isDaySelected(day, props.value, rangeAnchor)
+                                                              ? 'date-selector__day--selected'
+                                                              : undefined,
+                                                          isDayInRange(day, props.value, rangeAnchor)
+                                                              ? 'date-selector__day--in-range'
+                                                              : undefined,
+                                                          isSameDay(day, normalizeDate(new Date()))
+                                                              ? 'date-selector__day--today'
+                                                              : undefined,
+                                                      )}
+                                                      key={formatDayKey(day)}
+                                                      type="button"
+                                                      onClick={() =>
+                                                          handleDayClick(
+                                                              props,
+                                                              day,
+                                                              rangeAnchor,
+                                                              setRangeAnchor,
+                                                              () => setIsOpen(false),
+                                                          )
+                                                      }
+                                                  >
+                                                      {day.getDate()}
+                                                  </button>
+                                              ) : (
+                                                  <span
+                                                      className="date-selector__day date-selector__day--empty"
+                                                      key={`empty-${index}`}
+                                                  />
+                                              ),
+                                          )}
+                                      </div>
+                                  </div>
+                              ) : viewMode === 'months' ? (
+                                  <div className="date-selector__picker-grid date-selector__picker-grid--months">
+                                      {monthNames.map((monthName, index) => (
+                                          <button
+                                              aria-pressed={visibleDate.getMonth() === index}
+                                              className={joinClassNames(
+                                                  'date-selector__picker-button',
+                                                  visibleDate.getMonth() === index
+                                                      ? 'date-selector__picker-button--selected'
+                                                      : undefined,
+                                              )}
+                                              key={monthName}
+                                              type="button"
+                                              onClick={() => {
+                                                  const nextDate = new Date(visibleDate)
+                                                  nextDate.setMonth(index, 1)
+                                                  setVisibleDate(normalizeDate(nextDate))
+                                                  setViewMode('days')
+                                              }}
+                                          >
+                                              {monthName}
+                                          </button>
+                                      ))}
+                                  </div>
+                              ) : (
+                                  <div className="date-selector__picker-grid date-selector__picker-grid--years">
+                                      {Array.from({ length: 100 }, (_, index) => 2000 + index).map((year) => (
+                                          <button
+                                              aria-pressed={visibleDate.getFullYear() === year}
+                                              className={joinClassNames(
+                                                  'date-selector__picker-button',
+                                                  visibleDate.getFullYear() === year
+                                                      ? 'date-selector__picker-button--selected'
+                                                      : undefined,
+                                              )}
+                                              key={year}
+                                              type="button"
+                                              onClick={() => {
+                                                  const nextDate = new Date(visibleDate)
+                                                  nextDate.setFullYear(year)
+                                                  setVisibleDate(normalizeDate(nextDate))
+                                                  setViewMode('days')
+                                              }}
+                                          >
+                                              {year}
+                                          </button>
+                                      ))}
+                                  </div>
+                              )}
+                          </section>
+                      </div>,
+                      document.body,
+                  )
+                : null}
+        </>
     )
 }
 
@@ -265,10 +339,11 @@ function handleDayClick(
     day: Date,
     rangeAnchor: Date | null,
     setRangeAnchor: (date: Date | null) => void,
+    close: () => void,
 ) {
     if (props.mode === 'single') {
         props.onChange(normalizeDate(day))
-        props.onClose()
+        close()
         return
     }
 
@@ -286,10 +361,10 @@ function handleDayClick(
         endDate,
     })
     setRangeAnchor(null)
-    props.onClose()
+    close()
 }
 
-function isDaySelected(day: Date, selectedRange: DateRange | null, rangeAnchor: Date | null) {
+function isDaySelected(day: Date, selectedRange: Date | DateRange | null, rangeAnchor: Date | null) {
     if (!selectedRange) {
         return false
     }
@@ -298,15 +373,19 @@ function isDaySelected(day: Date, selectedRange: DateRange | null, rangeAnchor: 
         return true
     }
 
+    if (selectedRange instanceof Date) {
+        return isSameDay(day, selectedRange)
+    }
+
     return isSameDay(day, selectedRange.startDate) || isSameDay(day, selectedRange.endDate)
 }
 
-function isDayInRange(day: Date, selectedRange: DateRange | null, rangeAnchor: Date | null) {
+function isDayInRange(day: Date, selectedRange: Date | DateRange | null, rangeAnchor: Date | null) {
     if (rangeAnchor) {
         return isSameDay(day, rangeAnchor)
     }
 
-    if (!selectedRange) {
+    if (!selectedRange || selectedRange instanceof Date) {
         return false
     }
 
@@ -386,6 +465,52 @@ function isSameDay(left: Date, right: Date) {
 
 function formatDayKey(date: Date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+function getRangeLength(range: DateRange) {
+    const from = normalizeDate(range.startDate)
+    const to = normalizeDate(range.endDate)
+    return Math.floor((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000)) + 1
+}
+
+function addDays(date: Date, days: number) {
+    const nextDate = new Date(date)
+    nextDate.setDate(nextDate.getDate() + days)
+    return normalizeDate(nextDate)
+}
+
+function formatSingleDateLabel(date: Date | null) {
+    if (!date) {
+        return 'Select date'
+    }
+
+    return singleDateLabelFormatter.format(normalizeDate(date))
+}
+
+function formatRangeDateLabel(range: DateRange | null) {
+    if (!range) {
+        return 'Select range'
+    }
+
+    const startDate = normalizeDate(range.startDate)
+    const endDate = normalizeDate(range.endDate)
+
+    if (startDate.getTime() === endDate.getTime()) {
+        return singleDateLabelFormatter.format(startDate)
+    }
+
+    if (
+        startDate.getFullYear() === endDate.getFullYear() &&
+        startDate.getMonth() === endDate.getMonth()
+    ) {
+        return `${startDate.getDate()}–${endDate.getDate()} ${rangeMonthYearLabelFormatter.format(endDate)}`
+    }
+
+    if (startDate.getFullYear() === endDate.getFullYear()) {
+        return `${rangeStartMonthLabelFormatter.format(startDate)} – ${singleDateLabelFormatter.format(endDate)}`
+    }
+
+    return `${singleDateLabelFormatter.format(startDate)} – ${singleDateLabelFormatter.format(endDate)}`
 }
 
 function joinClassNames(...classNames: Array<string | undefined>) {

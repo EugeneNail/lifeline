@@ -4,7 +4,6 @@ import {useEffect, useMemo, useState} from 'react'
 import {useNavigate, useSearchParams} from 'react-router-dom'
 import {DateSelector} from '../../components/date'
 import {AppNavigation} from '../../components/navigation'
-import { GoogleIcon } from '../../components/icons'
 import {Button, Message} from '../../components/primitives'
 import {Page, PageHeader, Panel, PanelBody, Section, SectionHeader} from '../../components/layout'
 import {useApiClient} from '../../hooks/useApiClient'
@@ -65,15 +64,6 @@ function resolveQueryDate(rawDate: string | null) {
     return startOfDay(date)
 }
 
-function formatDateLabel(date: Date) {
-    return new Intl.DateTimeFormat('en-US', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    }).format(date)
-}
-
 function formatDateFieldValue(date: Date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
@@ -96,7 +86,6 @@ export function CreateTransactionPage() {
     const [selectedCategory, setSelectedCategory] = useState<number>(1)
     const [amount, setAmount] = useState('')
     const [description, setDescription] = useState('')
-    const [isDateSelectorOpen, setDateSelectorOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [formError, setFormError] = useState('')
 
@@ -144,8 +133,6 @@ export function CreateTransactionPage() {
                 setIsSubmitting(false)
             })
     }
-
-    const selectedDateLabel = selectedDate.getTime() === today.getTime() ? 'Today' : formatDateLabel(selectedDate)
 
     useEffect(() => {
         const queryDate = resolveQueryDate(queryDateValue)
@@ -219,15 +206,12 @@ export function CreateTransactionPage() {
                         </Section>
 
                         <Section>
-                            <Button
-                                className="create-transaction-page__date-button"
-                                type="button"
-                                variant="secondary"
-                                onClick={() => setDateSelectorOpen(true)}
-                            >
-                                <GoogleIcon icon="calendar_month" size={18} />
-                                {selectedDateLabel}
-                            </Button>
+                            <DateSelector
+                                className="create-transaction-page__date-selector"
+                                mode="single"
+                                value={selectedDate}
+                                onChange={(date) => setSelectedDate(startOfDay(date))}
+                            />
                         </Section>
 
                         <Section>
@@ -281,19 +265,7 @@ export function CreateTransactionPage() {
                     </form>
                 </PanelBody>
             </Panel>
-
             <AppNavigation/>
-
-            <DateSelector
-                mode="single"
-                open={isDateSelectorOpen}
-                value={selectedDate}
-                onChange={(date) => {
-                    setSelectedDate(startOfDay(date))
-                    setDateSelectorOpen(false)
-                }}
-                onClose={() => setDateSelectorOpen(false)}
-            />
         </Page>
     )
 }
