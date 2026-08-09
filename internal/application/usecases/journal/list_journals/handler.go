@@ -48,16 +48,25 @@ func (handler *Handler) Handle(ctx context.Context, query Query) ([]*journals.Jo
 		return nil, fmt.Errorf("finding journals: %w", err)
 	}
 
-	sort.Slice(foundJournals, func(i, j int) bool {
-		leftDate := time.Time(foundJournals[i].Date())
-		rightDate := time.Time(foundJournals[j].Date())
+	filteredJournals := foundJournals[:0]
+	for _, journal := range foundJournals {
+		if journal == nil || len(journal.Note()) == 0 {
+			continue
+		}
+
+		filteredJournals = append(filteredJournals, journal)
+	}
+
+	sort.Slice(filteredJournals, func(i, j int) bool {
+		leftDate := time.Time(filteredJournals[i].Date())
+		rightDate := time.Time(filteredJournals[j].Date())
 
 		if leftDate.Equal(rightDate) {
-			return foundJournals[i].CreatedAt().After(foundJournals[j].CreatedAt())
+			return filteredJournals[i].CreatedAt().After(filteredJournals[j].CreatedAt())
 		}
 
 		return leftDate.After(rightDate)
 	})
 
-	return foundJournals, nil
+	return filteredJournals, nil
 }
