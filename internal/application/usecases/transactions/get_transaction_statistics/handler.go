@@ -55,7 +55,7 @@ func (handler *Handler) Handle(ctx context.Context, query Query) (Result, error)
 			continue
 		}
 
-		transactionDate := time.Time(transaction.Date())
+		transactionDate := dateKey(time.Time(transaction.Date()))
 		switch {
 		case targetDateSet[transactionDate]:
 			targetTransactions = append(targetTransactions, transaction)
@@ -110,13 +110,18 @@ func mergeDates(dateGroups ...[]time.Time) []time.Time {
 }
 
 // toDateSet returns a lookup set for the provided dates.
-func toDateSet(dates []time.Time) map[time.Time]bool {
-	set := make(map[time.Time]bool, len(dates))
+func toDateSet(dates []time.Time) map[string]bool {
+	set := make(map[string]bool, len(dates))
 	for _, date := range dates {
-		set[date] = true
+		set[dateKey(date)] = true
 	}
 
 	return set
+}
+
+// dateKey returns the provided time normalized to a date-only lookup key.
+func dateKey(date time.Time) string {
+	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC).Format(time.DateOnly)
 }
 
 // calculateTarget returns aggregated transaction statistics and the top five expense transactions for the provided transactions.
