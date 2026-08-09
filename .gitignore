@@ -2,3 +2,4 @@
 /.idea
 docker/.env
 doc/routes/http-client.env.json
+app
