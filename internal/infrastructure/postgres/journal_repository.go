@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -72,8 +71,55 @@ func (repository *JournalRepository) Update(ctx context.Context, journalEntry *j
 
 // Find returns the first journal matching the provided filter or nil when no row exists.
 func (repository *JournalRepository) Find(ctx context.Context, filter journals.Filter) (*journals.Journal, error) {
+	foundJournals, err := repository.FindMany(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("finding journals: %w", err)
+	}
+
+	if len(foundJournals) == 0 {
+		return nil, nil
+	}
+
+	return foundJournals[0], nil
+}
+
+// FindMany returns all journals matching the provided filter.
+func (repository *JournalRepository) FindMany(ctx context.Context, filter journals.Filter) ([]*journals.Journal, error) {
 	query := `SELECT date, note, created_at, updated_at, account_id FROM journals`
-	conditions := make([]string, 0, 3)
+	conditions, args := buildJournalConditions(filter)
+
+	if len(conditions) > 0 {
+		query = fmt.Sprintf("%s WHERE %s", query, strings.Join(conditions, " AND "))
+	}
+
+	query = fmt.Sprintf("%s ORDER BY date DESC, created_at DESC", query)
+
+	rows, err := repository.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("executing a SELECT sql query for journals: %w", err)
+	}
+	defer rows.Close()
+
+	foundJournals := make([]*journals.Journal, 0)
+	for rows.Next() {
+		journalEntry, err := scanJournal(rows)
+		if err != nil {
+			return nil, fmt.Errorf("scanning a journal row: %w", err)
+		}
+
+		foundJournals = append(foundJournals, journalEntry)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating journal rows: %w", err)
+	}
+
+	return foundJournals, nil
+}
+
+// buildJournalConditions converts the provided journal filter into SQL WHERE fragments and arguments.
+func buildJournalConditions(filter journals.Filter) ([]string, []any) {
+	conditions := make([]string, 0, 2)
 	args := make([]any, 0)
 
 	if len(filter.AccountIds) > 0 {
@@ -96,14 +142,11 @@ func (repository *JournalRepository) Find(ctx context.Context, filter journals.F
 		conditions = append(conditions, fmt.Sprintf("date IN (%s)", strings.Join(placeholders, ", ")))
 	}
 
-	if len(conditions) > 0 {
-		query = fmt.Sprintf("%s WHERE %s", query, strings.Join(conditions, " AND "))
-	}
+	return conditions, args
+}
 
-	query = fmt.Sprintf("%s LIMIT 1", query)
-
-	row := repository.db.QueryRowContext(ctx, query, args...)
-
+// scanJournal converts the current SQL row into a journal model or returns an error when reconstruction fails.
+func scanJournal(rows *sql.Rows) (*journals.Journal, error) {
 	var (
 		date      time.Time
 		note      string
@@ -112,15 +155,9 @@ func (repository *JournalRepository) Find(ctx context.Context, filter journals.F
 		accountId uuid.UUID
 	)
 
-	if err := row.Scan(&date, &note, &createdAt, &updatedAt, &accountId); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-
-		return nil, fmt.Errorf("executing a SELECT sql query: %w", err)
+	if err := rows.Scan(&date, &note, &createdAt, &updatedAt, &accountId); err != nil {
+		return nil, fmt.Errorf("scanning a SELECT sql result: %w", err)
 	}
 
-	journalEntry := journals.Restore(date, note, createdAt, updatedAt, accountId)
-
-	return journalEntry, nil
+	return journals.Restore(date, note, createdAt, updatedAt, accountId), nil
 }

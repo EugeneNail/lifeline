@@ -25,10 +25,18 @@ func (filter Filter) WithAccountIds(accountIds ...auth.ID) Filter {
 }
 
 // WithDates returns a filter with the provided dates truncated to day precision.
-func (filter Filter) WithDates(dates ...time.Time) Filter {
-	for _, date := range dates {
-		filter.Dates = append(filter.Dates, date.Truncate(time.Hour*24))
-	}
+func (filter Filter) WithDates(dates []time.Time) Filter {
+	filter.Dates = append(filter.Dates, truncateJournalDates(dates)...)
 
 	return filter
+}
+
+// truncateJournalDates returns the provided dates normalized to YYYY-MM-DD.
+func truncateJournalDates(dates []time.Time) []time.Time {
+	truncated := make([]time.Time, 0, len(dates))
+	for _, date := range dates {
+		truncated = append(truncated, time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location()))
+	}
+
+	return truncated
 }

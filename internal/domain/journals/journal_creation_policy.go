@@ -23,7 +23,7 @@ func (policy *CreationPolicy) Check(ctx context.Context, accountID auth.ID, date
 	date = date.Truncate(time.Hour * 24)
 	filter := NewFilter().
 		WithAccountIds(accountID).
-		WithDates(date)
+		WithDates([]time.Time{date})
 
 	journalEntry, err := policy.journals.Find(ctx, filter)
 	if err != nil {

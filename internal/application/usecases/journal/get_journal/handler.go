@@ -33,7 +33,7 @@ type Query struct {
 func (handler *Handler) Handle(ctx context.Context, query Query) (*journals.Journal, error) {
 	journalEntry, err := handler.journals.Find(ctx, journals.NewFilter().
 		WithAccountIds(query.AccountID).
-		WithDates(query.Date),
+		WithDates([]time.Time{query.Date}),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("finding a journal by account id %q and date %q: %w", query.AccountID, query.Date, err)

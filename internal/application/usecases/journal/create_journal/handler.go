@@ -62,7 +62,7 @@ func (handler *Handler) Handle(ctx context.Context, command Command) error {
 
 	journal, err := handler.journals.Find(ctx, journals.NewFilter().
 		WithAccountIds(command.AccountID).
-		WithDates(time.Time(date)),
+		WithDates([]time.Time{time.Time(date)}),
 	)
 	if err != nil {
 		return fmt.Errorf("finding a journal by account id %q and date %q: %w", command.AccountID, time.Time(date), err)
