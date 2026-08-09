@@ -19,7 +19,7 @@ description: Plan and create semantic git commits from the current worktree. Use
 ## Commit Selection Rules
 
 - Prefer the smallest commit that still leaves a coherent change.
-- If the user provided a decomposition, follow it exactly.
+- If a decomposition has already been made for the current commit run, treat it as binding: create commits strictly according to that split, without regrouping, merging, or inventing extra commits.
 - If one change only makes sense after another, commit the dependency first.
 - Do not mix unrelated cleanup with feature work.
 - Leave stray or user-owned changes untouched unless the user explicitly asked to include them.
