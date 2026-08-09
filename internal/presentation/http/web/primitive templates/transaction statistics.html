@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transaction Statistics Dashboard</title>
+  <style>
+
+:root {
+  --canvas: #f4f5ef;
+  --surface: #ffffff;
+  --surface-subtle: #f8f8f4;
+  --ink: #17201c;
+  --muted: #738078;
+  --line: #e3e7df;
+  --green: #426858;
+  --green-soft: #e5eee9;
+  --coral: #d66f51;
+  --coral-soft: #faece7;
+  --gold: #d4a94c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--canvas);
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 10;
+  display: flex;
+  width: 248px;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.82);
+  padding: 30px 20px 24px;
+  backdrop-filter: blur(18px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 760;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 15px;
+}
+
+.primary-nav {
+  display: grid;
+  gap: 6px;
+  margin-top: 48px;
+}
+
+.nav-item {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 13px;
+  border-radius: 13px;
+  padding: 0 13px;
+  color: #69756e;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.nav-item:hover {
+  background: #f0f2ed;
+  color: var(--ink);
+}
+
+.nav-item.active {
+  background: var(--green-soft);
+  color: #2f5948;
+}
+
+.nav-icon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.sidebar-footer {
+  display: grid;
+  gap: 18px;
+}
+
+.profile {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding: 20px 6px 0;
+}
+
+.avatar {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  background: #d8e4dc;
+  color: #345645;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.profile strong,
+.profile span {
+  display: block;
+}
+
+.profile strong {
+  font-size: 13px;
+}
+
+.profile span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.more-button,
+.ghost-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.main-content {
+  min-width: 900px;
+  margin-left: 248px;
+  padding: 42px clamp(36px, 4.2vw, 72px) 72px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  margin: 0 auto 30px;
+  max-width: 1440px;
+}
+
+.eyebrow,
+.panel-kicker {
+  margin: 0 0 8px;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 9px;
+  font-size: clamp(34px, 3vw, 46px);
+  font-weight: 720;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.page-subtitle {
+  max-width: 570px;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.period-tabs,
+.date-switcher {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.period-tabs {
+  gap: 3px;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.period-tabs button {
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  padding: 7px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.period-tabs button.selected {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(23, 32, 28, 0.12);
+}
+
+.date-switcher {
+  min-width: 245px;
+  justify-content: space-between;
+  border-radius: 12px;
+}
+
+.date-switcher button {
+  width: 40px;
+  height: 38px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.date-switcher span {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.summary-grid,
+.primary-grid,
+.secondary-grid {
+  display: grid;
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 1440px;
+}
+
+.summary-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.summary-card,
+.panel {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 16px 45px rgba(38, 49, 43, 0.045);
+}
+
+.summary-card {
+  position: relative;
+  min-height: 164px;
+  overflow: hidden;
+  border-radius: 19px;
+  padding: 22px 24px;
+}
+
+.summary-card::after {
+  position: absolute;
+  right: -24px;
+  bottom: -32px;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: var(--card-accent);
+  content: "";
+  opacity: 0.5;
+}
+
+.expense-card { --card-accent: var(--coral-soft); }
+.income-card { --card-accent: var(--green-soft); }
+.net-card { --card-accent: #f1ebda; }
+
+.summary-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.summary-icon {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.expense-icon { background: var(--coral-soft); color: var(--coral); }
+.income-icon { background: var(--green-soft); color: var(--green); }
+.net-icon { background: #f2ead6; color: #9c7626; }
+
+.summary-value {
+  display: block;
+  margin-top: 18px;
+  font-size: clamp(26px, 2.5vw, 35px);
+  font-weight: 720;
+  letter-spacing: -0.045em;
+}
+
+.positive-value {
+  color: var(--green);
+}
+
+.comparison {
+  display: flex;
+  gap: 7px;
+  margin-top: 11px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.comparison span:first-child {
+  font-weight: 800;
+}
+
+.comparison.increase span:first-child { color: var(--coral); }
+.comparison.positive span:first-child { color: var(--green); }
+.comparison.neutral span:first-child { color: #8f6a21; }
+
+.primary-grid {
+  grid-template-columns: minmax(0, 1.7fr) minmax(340px, 0.8fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.secondary-grid {
+  grid-template-columns: minmax(0, 1.45fr) minmax(390px, 0.95fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.panel {
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.panel-header.compact {
+  align-items: center;
+}
+
+.panel h2 {
+  margin-bottom: 0;
+  font-size: 18px;
+  font-weight: 740;
+  letter-spacing: -0.025em;
+}
+
+.panel-total {
+  text-align: right;
+}
+
+.panel-total span,
+.panel-total strong {
+  display: block;
+}
+
+.panel-total span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.panel-total strong {
+  margin-top: 4px;
+  font-size: 16px;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 290px;
+  margin-top: 26px;
+  padding: 8px 0 28px 48px;
+}
+
+.grid-line {
+  position: absolute;
+  right: 0;
+  left: 48px;
+  height: 1px;
+  background: #edf0ea;
+}
+
+.top-line { top: 8px; }
+.middle-line { top: 50%; }
+.bottom-line { bottom: 28px; }
+
+.y-label {
+  position: absolute;
+  left: 0;
+  color: #99a29c;
+  font-size: 9px;
+}
+
+.y-top { top: 2px; }
+.y-middle { top: calc(50% - 5px); }
+.y-bottom { bottom: 23px; }
+
+.average-line {
+  position: absolute;
+  right: 0;
+  bottom: 46%;
+  left: 48px;
+  z-index: 2;
+  border-top: 1px dashed #9aafa4;
+}
+
+.average-line span {
+  position: absolute;
+  top: -18px;
+  right: 0;
+  color: #789084;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.bars {
+  position: absolute;
+  inset: 8px 0 28px 48px;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(3px, 0.42vw, 7px);
+}
+
+.bar-slot {
+  position: relative;
+  display: flex;
+  height: 100%;
+  min-width: 3px;
+  flex: 1;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 100%;
+  min-height: 3px;
+  border-radius: 4px 4px 2px 2px;
+  background: #e5b09f;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.bar:hover,
+.bar.peak {
+  background: var(--coral);
+  transform: translateY(-2px);
+}
+
+.x-label {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  color: #98a19b;
+  font-size: 9px;
+  transform: translateX(-50%);
+}
+
+.donut-layout {
+  display: grid;
+  place-items: center;
+  margin-top: 22px;
+}
+
+.donut {
+  position: relative;
+  display: grid;
+  width: 178px;
+  height: 178px;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(
+    #426858 0 31%,
+    #d4a94c 31% 56%,
+    #d66f51 56% 73%,
+    #7890a2 73% 84%,
+    #927fa4 84% 92%,
+    #d8ddd8 92% 100%
+  );
+}
+
+.donut::before {
+  position: absolute;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: var(--surface);
+  content: "";
+}
+
+.donut-center {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.donut-center strong,
+.donut-center span {
+  display: block;
+}
+
+.donut-center strong {
+  font-size: 20px;
+  letter-spacing: -0.04em;
+}
+
+.donut-center span {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.legend {
+  display: grid;
+  width: 100%;
+  gap: 10px;
+  margin-top: 23px;
+}
+
+.legend-row,
+.legend-name {
+  display: flex;
+  align-items: center;
+}
+
+.legend-row {
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.legend-name {
+  gap: 9px;
+}
+
+.legend-row strong {
+  color: var(--ink);
+  font-size: 11px;
+}
+
+.legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.legend-dot.food { background: #426858; }
+.legend-dot.home { background: #d4a94c; }
+.legend-dot.utilities { background: #d66f51; }
+.legend-dot.transport { background: #7890a2; }
+.legend-dot.entertainment { background: #927fa4; }
+.legend-dot.other { background: #d8ddd8; }
+
+.panel-note {
+  border-radius: 999px;
+  background: var(--surface-subtle);
+  padding: 7px 10px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.ranking-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 25px;
+}
+
+.ranking-row {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.category-icon,
+.transaction-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.category-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.category-icon.food,
+.transaction-icon.food { background: #e3ece7; color: #426858; }
+.category-icon.home,
+.transaction-icon.home { background: #f4ead1; color: #9b762b; }
+.category-icon.utilities,
+.transaction-icon.utilities { background: #f7e6e0; color: #bd5c41; }
+.category-icon.transport,
+.transaction-icon.transport { background: #e5ecf0; color: #637f91; }
+.category-icon.entertainment,
+.transaction-icon.entertainment { background: #ece7f0; color: #806b90; }
+.category-icon.health { background: #e2eeee; color: #3f7777; }
+.category-icon.shopping { background: #f1e8eb; color: #8c6472; }
+.category-icon.subscriptions { background: #e9ebf4; color: #687296; }
+.category-icon.education { background: #e7efe2; color: #617e4c; }
+.category-icon.gifts { background: #f5e9e4; color: #a9664d; }
+.category-icon.other { background: #eceeec; color: #778078; }
+
+.category-data {
+  min-width: 0;
+}
+
+.category-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.category-meta div {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.category-meta strong {
+  font-size: 11px;
+}
+
+.category-meta small {
+  min-width: 30px;
+  color: var(--muted);
+  font-size: 9px;
+  text-align: right;
+}
+
+.category-track {
+  height: 5px;
+  overflow: hidden;
+  margin-top: 7px;
+  border-radius: 99px;
+  background: #edf0eb;
+}
+
+.category-fill {
+  min-width: 4px;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.category-fill.food { background: #426858; }
+.category-fill.home { background: #d4a94c; }
+.category-fill.utilities { background: #d66f51; }
+.category-fill.transport { background: #7890a2; }
+.category-fill.entertainment { background: #927fa4; }
+.category-fill.health { background: #5e9997; }
+.category-fill.shopping { background: #a77b89; }
+.category-fill.subscriptions { background: #828aaa; }
+.category-fill.education { background: #779761; }
+.category-fill.gifts { background: #c78469; }
+.category-fill.other { background: #afb6b0; }
+
+.text-button {
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.transaction-list {
+  margin-top: 19px;
+}
+
+.transaction-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 68px;
+  border-bottom: 1px solid #edf0eb;
+}
+
+.transaction-icon {
+  width: 38px;
+  height: 38px;
+}
+
+.transaction-copy {
+  min-width: 0;
+}
+
+.transaction-copy strong,
+.transaction-copy span {
+  display: block;
+}
+
+.transaction-copy strong {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transaction-copy span {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.transaction-amount {
+  color: var(--coral);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.transaction-footer {
+  margin-top: 22px;
+}
+
+.transaction-footer > span {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.footer-line {
+  height: 3px;
+  overflow: hidden;
+  margin-top: 9px;
+  border-radius: 99px;
+  background: #edf0eb;
+}
+
+.footer-line span {
+  display: block;
+  width: 19%;
+  height: 100%;
+  border-radius: inherit;
+  background: #8aa093;
+}
+
+@media (max-width: 1120px) {
+  .main-content {
+    min-width: 0;
+    padding-right: 28px;
+    padding-left: 28px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    align-items: flex-start;
+    flex-direction: row;
+  }
+
+  .primary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .secondary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .donut-layout {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .legend {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 24px 16px 48px;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .period-tabs,
+  .date-switcher {
+    width: 100%;
+  }
+
+  .period-tabs button {
+    flex: 1;
+  }
+
+  .donut-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .legend {
+    margin-top: 22px;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div>
+        <a class="brand" href="#"><span class="brand-mark">L</span><span>Lifeline</span></a>
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <a class="nav-item" href="#"><span class="nav-icon">⌂</span><span>Today</span></a>
+          <a class="nav-item" href="#"><span class="nav-icon">✎</span><span>Diary</span></a>
+          <a class="nav-item" href="#"><span class="nav-icon">✓</span><span>Habits</span></a>
+          <a class="nav-item active" href="#"><span class="nav-icon">↕</span><span>Transactions</span></a>
+        </nav>
+      </div>
+      <div class="sidebar-footer">
+        <a class="nav-item" href="#"><span class="nav-icon">⚙</span><span>Settings</span></a>
+        <div class="profile"><div class="avatar">JN</div><div><strong>Juno Nail</strong><span>Personal space</span></div><button class="more-button">•••</button></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="page-header">
+        <div><p class="eyebrow">Money overview</p><h1>Transaction statistics</h1><p class="page-subtitle">A clear view of where your money went and how this period compares.</p></div>
+        <div class="header-actions">
+          <div class="period-tabs"><button>Week</button><button class="selected">Month</button><button>Year</button><button>Custom</button></div>
+          <div class="date-switcher"><button>‹</button><span>1–31 July 2026</span><button>›</button></div>
+        </div>
+      </header>
+
+      <section class="summary-grid">
+        <article class="summary-card expense-card"><div class="summary-heading"><span class="summary-icon expense-icon">↗</span><span>Expenses</span></div><strong class="summary-value">$48,230</strong><div class="comparison increase"><span>↑ 12.4%</span><span>vs. 3-period average</span></div></article>
+        <article class="summary-card income-card"><div class="summary-heading"><span class="summary-icon income-icon">↙</span><span>Income</span></div><strong class="summary-value">$83,000</strong><div class="comparison positive"><span>↑ 4.8%</span><span>vs. 3-period average</span></div></article>
+        <article class="summary-card net-card"><div class="summary-heading"><span class="summary-icon net-icon">=</span><span>Net change</span></div><strong class="summary-value positive-value">+$34,770</strong><div class="comparison neutral"><span>41.9%</span><span>of income retained</span></div></article>
+      </section>
+
+      <section class="primary-grid">
+        <article class="panel spending-panel">
+          <div class="panel-header"><div><p class="panel-kicker">Daily totals</p><h2>Expense dynamics</h2></div><div class="panel-total"><span>Daily average</span><strong>$1,556</strong></div></div>
+          <div class="chart-wrap"><div class="y-label y-top">$3k</div><div class="y-label y-middle">$1.5k</div><div class="y-label y-bottom">$0</div><div class="grid-line top-line"></div><div class="grid-line middle-line"></div><div class="grid-line bottom-line"></div><div class="average-line"><span>3-period avg.</span></div><div class="bars">
+      <div class="bar-slot">
+        <div class="bar" style="height:28%" title="July 1: $1037"></div>
+        <span class="x-label">1</span>
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:18%" title="July 2: $667"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:44%" title="July 3: $1630"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:24%" title="July 4: $889"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:62%" title="July 5: $2296"></div>
+        <span class="x-label">5</span>
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:36%" title="July 6: $1333"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:22%" title="July 7: $815"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:50%" title="July 8: $1852"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:31%" title="July 9: $1148"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:76%" title="July 10: $2815"></div>
+        <span class="x-label">10</span>
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:29%" title="July 11: $1074"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:42%" title="July 12: $1556"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:18%" title="July 13: $667"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:66%" title="July 14: $2445"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:34%" title="July 15: $1259"></div>
+        <span class="x-label">15</span>
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:48%" title="July 16: $1778"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:22%" title="July 17: $815"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:38%" title="July 18: $1408"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar peak" style="height:81%" title="July 19: $3000"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:40%" title="July 20: $1482"></div>
+        <span class="x-label">20</span>
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:27%" title="July 21: $1000"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:55%" title="July 22: $2037"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:32%" title="July 23: $1185"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:70%" title="July 24: $2593"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:37%" title="July 25: $1370"></div>
+        <span class="x-label">25</span>
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:20%" title="July 26: $741"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:46%" title="July 27: $1704"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:30%" title="July 28: $1111"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:58%" title="July 29: $2148"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:25%" title="July 30: $926"></div>
+        
+      </div>
+      <div class="bar-slot">
+        <div class="bar" style="height:43%" title="July 31: $1593"></div>
+        <span class="x-label">31</span>
+      </div></div></div>
+        </article>
+
+        <article class="panel donut-panel">
+          <div class="panel-header compact"><div><p class="panel-kicker">Share of expenses</p><h2>By category</h2></div><button class="ghost-button">•••</button></div>
+          <div class="donut-layout"><div class="donut"><div class="donut-center"><strong>$48.2k</strong><span>Total spent</span></div></div>
+            <div class="legend">
+              <div class="legend-row"><div class="legend-name"><span class="legend-dot food"></span><span>Food</span></div><strong>31%</strong></div>
+              <div class="legend-row"><div class="legend-name"><span class="legend-dot home"></span><span>Home</span></div><strong>25%</strong></div>
+              <div class="legend-row"><div class="legend-name"><span class="legend-dot utilities"></span><span>Utilities</span></div><strong>17%</strong></div>
+              <div class="legend-row"><div class="legend-name"><span class="legend-dot transport"></span><span>Transport</span></div><strong>11%</strong></div>
+              <div class="legend-row"><div class="legend-name"><span class="legend-dot entertainment"></span><span>Entertainment</span></div><strong>8%</strong></div>
+              <div class="legend-row"><div class="legend-name"><span class="legend-dot other"></span><span>Other</span></div><strong>8%</strong></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="secondary-grid">
+        <article class="panel ranking-panel"><div class="panel-header compact"><div><p class="panel-kicker">Ranked by total spent</p><h2>Category breakdown</h2></div><span class="panel-note">11 categories</span></div><div class="ranking-list">
+      <div class="ranking-row">
+        <div class="category-icon food">F</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Food</span><div><strong>$14,951</strong><small>31%</small></div></div>
+          <div class="category-track"><div class="category-fill food" style="width:100%"></div></div>
+        </div>
+      </div>
+      <div class="ranking-row">
+        <div class="category-icon home">H</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Home</span><div><strong>$12,058</strong><small>25%</small></div></div>
+          <div class="category-track"><div class="category-fill home" style="width:81%"></div></div>
+        </div>
+      </div>
+      <div class="ranking-row">
+        <div class="category-icon utilities">U</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Utilities</span><div><strong>$8,199</strong><small>17%</small></div></div>
+          <div class="category-track"><div class="category-fill utilities" style="width:55%"></div></div>
+        </div>
+      </div>
+      <div class="ranking-row">
+        <div class="category-icon transport">T</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Transport</span><div><strong>$5,305</strong><small>11%</small></div></div>
+          <div class="category-track"><div class="category-fill transport" style="width:36%"></div></div>
+        </div>
+      </div>
+      <div class="ranking-row">
+        <div class="category-icon entertainment">E</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Entertainment</span><div><strong>$3,859</strong><small>8%</small></div></div>
+          <div class="category-track"><div class="category-fill entertainment" style="width:26%"></div></div>
+        </div>
+      </div>
+      <div class="ranking-row">
+        <div class="category-icon health">+</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Health</span><div><strong>$1,447</strong><small>3%</small></div></div>
+          <div class="category-track"><div class="category-fill health" style="width:10%"></div></div>
+        </div>
+      </div>
+      <div class="ranking-row">
+        <div class="category-icon shopping">S</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Shopping</span><div><strong>$965</strong><small>2%</small></div></div>
+          <div class="category-track"><div class="category-fill shopping" style="width:7%"></div></div>
+        </div>
+      </div>
+      <div class="ranking-row">
+        <div class="category-icon subscriptions">R</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Subscriptions</span><div><strong>$579</strong><small>1.2%</small></div></div>
+          <div class="category-track"><div class="category-fill subscriptions" style="width:4%"></div></div>
+        </div>
+      </div>
+      <div class="ranking-row">
+        <div class="category-icon education">A</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Education</span><div><strong>$386</strong><small>0.8%</small></div></div>
+          <div class="category-track"><div class="category-fill education" style="width:3%"></div></div>
+        </div>
+      </div>
+      <div class="ranking-row">
+        <div class="category-icon gifts">G</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Gifts</span><div><strong>$289</strong><small>0.6%</small></div></div>
+          <div class="category-track"><div class="category-fill gifts" style="width:2%"></div></div>
+        </div>
+      </div>
+      <div class="ranking-row">
+        <div class="category-icon other">O</div>
+        <div class="category-data">
+          <div class="category-meta"><span>Other</span><div><strong>$193</strong><small>0.4%</small></div></div>
+          <div class="category-track"><div class="category-fill other" style="width:1.5%"></div></div>
+        </div>
+      </div></div></article>
+        <article class="panel transactions-panel"><div class="panel-header compact"><div><p class="panel-kicker">Highest individual expenses</p><h2>Largest transactions</h2></div><button class="text-button">View all</button></div><div class="transaction-list">
+      <div class="transaction-row">
+        <div class="transaction-icon home">H</div>
+        <div class="transaction-copy"><strong>Rent payment</strong><span>Home · 1 July</span></div>
+        <strong class="transaction-amount">−$11,500</strong>
+      </div>
+      <div class="transaction-row">
+        <div class="transaction-icon food">F</div>
+        <div class="transaction-copy"><strong>Weekly groceries</strong><span>Food · 19 July</span></div>
+        <strong class="transaction-amount">−$3,480</strong>
+      </div>
+      <div class="transaction-row">
+        <div class="transaction-icon utilities">U</div>
+        <div class="transaction-copy"><strong>Electricity bill</strong><span>Utilities · 7 July</span></div>
+        <strong class="transaction-amount">−$2,890</strong>
+      </div>
+      <div class="transaction-row">
+        <div class="transaction-icon transport">T</div>
+        <div class="transaction-copy"><strong>Flight tickets</strong><span>Transport · 12 July</span></div>
+        <strong class="transaction-amount">−$2,450</strong>
+      </div>
+      <div class="transaction-row">
+        <div class="transaction-icon home">H</div>
+        <div class="transaction-copy"><strong>Annual insurance</strong><span>Home · 27 July</span></div>
+        <strong class="transaction-amount">−$1,980</strong>
+      </div></div><div class="transaction-footer"><span>5 of 128 expenses</span><div class="footer-line"><span></span></div></div></article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
