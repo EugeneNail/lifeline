@@ -11,7 +11,7 @@ type NavigationLink = {
 
 const navigationLinks: NavigationLink[] = [
     { icon: '●', label: 'Today', to: '/', end: true },
-    { icon: '▤', label: 'Journal', to: '/journal' },
+    { icon: '▤', label: 'Journals', to: '/journals' },
     { icon: '◷', label: 'Habits', to: '/habits' },
     { icon: '⌁', label: 'Stats', to: '/stats' },
 ]

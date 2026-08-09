@@ -87,6 +87,7 @@
     display: grid
     grid-template-columns: repeat(7, minmax(0, 1fr))
     gap: 6px
+    min-height: calc((54px * 6) + (6px * 5))
     overflow: auto
 
 .date-selector__day
@@ -175,3 +176,6 @@
     .date-selector__day
         min-height: 46px
         border-radius: 14px
+
+    .date-selector__days
+        min-height: calc((46px * 6) + (6px * 5))

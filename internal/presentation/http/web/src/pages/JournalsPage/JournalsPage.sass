@@ -1,0 +1,232 @@
+.journals-page
+    min-height: 100svh
+    padding: 32px 24px 88px
+    background: #ffffff
+    color: var(--text-primary)
+
+.journals-page__progress
+    position: fixed
+    top: 0
+    right: 0
+    left: 0
+    z-index: 60
+    height: 3px
+    background: rgba(85, 86, 216, 0.08)
+    pointer-events: none
+
+.journals-page__progress-fill
+    height: 100%
+    background: var(--primary)
+    transition: width 80ms linear
+
+.journals-page__loading-overlay
+    position: fixed
+    inset: 0
+    z-index: 70
+    display: grid
+    place-items: center
+    padding: 24px
+    background: rgba(255, 255, 255, 0.74)
+    backdrop-filter: blur(2px)
+
+.journals-page__loading-box
+    display: grid
+    justify-items: center
+    gap: 14px
+    text-align: center
+
+.journals-page__loading-spinner
+    width: 34px
+    height: 34px
+    border: 3px solid rgba(85, 86, 216, 0.16)
+    border-top-color: var(--primary)
+    border-radius: 50%
+    animation: journals-page-spin 800ms linear infinite
+
+.journals-page__loading-text
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 14px
+    font-weight: 650
+    letter-spacing: -0.01em
+
+.journals-page__shell
+    display: grid
+    gap: 18px
+    width: min(101ch, 100%)
+    margin: 0 auto
+
+.journals-page__header
+    display: grid
+    gap: 6px
+
+.journals-page__eyebrow
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 12px
+    font-weight: 800
+    letter-spacing: 0.14em
+    text-transform: uppercase
+
+.journals-page__title
+    margin: 0
+    font-size: clamp(2rem, 4vw, 3.6rem)
+    font-weight: 900
+    letter-spacing: -0.06em
+    line-height: 0.96
+
+.journals-page__subtitle
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 14px
+    line-height: 1.6
+
+.journals-page__controls
+    display: flex
+    flex-wrap: wrap
+    gap: 10px
+    align-items: center
+
+.journals-page__preset-list
+    display: flex
+    flex-wrap: wrap
+    gap: 8px
+
+.journals-page__preset-button,
+.journals-page__custom-button
+    border: 0
+    border-radius: 999px
+    padding: 9px 14px
+    background: transparent
+    color: var(--text-secondary)
+    font-size: 13px
+    font-weight: 750
+    letter-spacing: -0.01em
+    transition: background 160ms ease, color 160ms ease, transform 160ms ease
+
+    &:hover
+        background: var(--surface-secondary)
+        color: var(--text-primary)
+        transform: translateY(-1px)
+
+.journals-page__preset-button--active,
+.journals-page__custom-button--active
+    background: var(--primary-container)
+    color: var(--on-primary-container)
+
+.journals-page__range-label
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 13px
+    line-height: 1.5
+
+.journals-page__status
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 14px
+    line-height: 1.6
+
+.journals-page__status--error
+    color: var(--error)
+
+.journals-page__entries
+    display: grid
+    gap: 76px
+    padding-top: 10px
+
+.journals-page__entry
+    display: grid
+    gap: 18px
+
+.journals-page__entry-header
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: 12px
+
+.journals-page__date-link
+    color: var(--text-primary)
+    font-size: clamp(1.5rem, 2.75vw, 2.35rem)
+    font-weight: 900
+    letter-spacing: -0.06em
+    line-height: 1
+    text-decoration: none
+
+    &:hover
+        text-decoration: underline
+        text-decoration-thickness: 0.08em
+        text-underline-offset: 0.12em
+
+.journals-page__weekday
+    color: var(--text-secondary)
+    font-size: clamp(1rem, 1.4vw, 1.18rem)
+    font-weight: 650
+    line-height: 1.4
+
+.journals-page__edit-link
+    margin-left: auto
+    display: inline-grid
+    place-items: center
+    width: 30px
+    height: 30px
+    border-radius: 8px
+    color: var(--text-disabled)
+    text-decoration: none
+    transition: background 160ms ease, color 160ms ease, opacity 160ms ease
+
+    &:hover
+        background: var(--surface-secondary)
+        color: var(--primary)
+
+    .google-icon
+        opacity: 0.75
+
+.journals-page__note
+    display: grid
+    gap: 16px
+    font-size: clamp(1.26rem, 1.06vw + 0.96rem, 1.38rem)
+    line-height: 1.82
+    text-align: justify
+    text-justify: inter-word
+    hyphens: auto
+    overflow-wrap: anywhere
+
+.journals-page__paragraph
+    margin: 0
+
+@media (orientation: landscape)
+    .journals-page__progress
+        height: 4px
+
+    .journals-page
+        padding-left: 236px
+        padding-bottom: 64px
+
+    .journals-page__shell
+        width: min(101ch, calc(100vw - 96px))
+
+@media (orientation: portrait)
+    .journals-page
+        padding-left: 20px
+        padding-right: 20px
+        padding-bottom: 100px
+
+    .journals-page__shell
+        width: 100%
+
+    .journals-page__note
+        font-size: clamp(1.07rem, 0.9vw + 0.8rem, 1.17rem)
+
+@media (max-width: 640px)
+    .journals-page
+        padding-top: 20px
+
+    .journals-page__controls
+        align-items: flex-start
+
+    .journals-page__entry
+        gap: 16px
+
+@keyframes journals-page-spin
+    to
+        transform: rotate(360deg)
