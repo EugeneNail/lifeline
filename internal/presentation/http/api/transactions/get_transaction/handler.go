@@ -1,11 +1,13 @@
 package get_transaction
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/EugeneNail/lifeline/internal/application/usecases/transactions/get_transaction"
+	"github.com/EugeneNail/lifeline/internal/domain/transactions"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/authentication"
 	"github.com/google/uuid"
 )
@@ -48,6 +50,14 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		ID:        transactionID,
 	})
 	if err != nil {
+		if errors.Is(err, transactions.ErrTransactionNotFound) {
+			return http.StatusNotFound, nil
+		}
+
+		if errors.Is(err, transactions.ErrTransactionBelongsToAnotherUser) {
+			return http.StatusNotFound, nil
+		}
+
 		return http.StatusInternalServerError, fmt.Errorf("handling GetTransaction query: %w", err)
 	}
 

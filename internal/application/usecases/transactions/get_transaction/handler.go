@@ -28,14 +28,19 @@ type Query struct {
 	ID        uuid.UUID
 }
 
-// Handle returns the transaction matching the query or nil when no transaction exists, or an error when lookup fails.
+// Handle returns the transaction matching the query, ErrTransactionNotFound when no transaction exists, ErrTransactionBelongsToAnotherUser when the transaction belongs to another user, or an error when lookup fails.
 func (handler *Handler) Handle(ctx context.Context, query Query) (*transactions.Transaction, error) {
-	transaction, err := handler.transactions.Find(ctx, transactions.NewTransactionFilter().
-		WithAccountIds(query.AccountID).
-		WithIds(query.ID),
-	)
+	transaction, err := handler.transactions.Find(ctx, transactions.NewTransactionFilter().WithIds(query.ID))
 	if err != nil {
-		return nil, fmt.Errorf("finding a transaction by account id %q and id %q: %w", query.AccountID, query.ID, err)
+		return nil, fmt.Errorf("finding a transaction by id %q: %w", query.ID, err)
+	}
+
+	if transaction == nil {
+		return nil, transactions.ErrTransactionNotFound
+	}
+
+	if transaction.AccountId() != query.AccountID {
+		return nil, transactions.ErrTransactionBelongsToAnotherUser
 	}
 
 	return transaction, nil
