@@ -21,3 +21,8 @@ func NewQuery(accountID auth.ID, from time.Time, to time.Time) Query {
 		To:        toDate(to),
 	}
 }
+
+// toDate returns the provided time normalized to YYYY-MM-DD.
+func toDate(date time.Time) time.Time {
+	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+}

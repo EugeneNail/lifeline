@@ -23,11 +23,6 @@ func NewHandler(journalsRepository journals.Repository) (*Handler, error) {
 	return &Handler{journals: journalsRepository}, nil
 }
 
-// toDate returns the provided time normalized to YYYY-MM-DD.
-func toDate(date time.Time) time.Time {
-	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-}
-
 // Handle loads journals for the provided account and date range and returns them or an error when lookup fails, including ErrInvalidDateRange when the from date is after the to date.
 func (handler *Handler) Handle(ctx context.Context, query Query) ([]*journals.Journal, error) {
 	if query.From.After(query.To) {
