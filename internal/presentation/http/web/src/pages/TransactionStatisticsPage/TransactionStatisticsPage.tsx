@@ -1,5 +1,7 @@
 import axios from 'axios'
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { DateSelector, type DateRange } from '../../components/date'
 import { AppNavigation } from '../../components/navigation'
 import { GoogleIcon } from '../../components/icons'
 import { Message } from '../../components/primitives'
@@ -53,8 +55,56 @@ function addDays(date: Date, days: number) {
     return startOfDay(nextDate)
 }
 
+function buildRange(days: number, endDate: Date) {
+    const end = startOfDay(endDate)
+    return {
+        from: addDays(end, -(days - 1)),
+        to: end,
+    }
+}
+
 function formatDateKey(date: Date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+function parseDateKey(dateKey: string) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateKey)
+    if (!match) {
+        return null
+    }
+
+    const year = Number(match[1])
+    const month = Number(match[2]) - 1
+    const day = Number(match[3])
+    const date = new Date(year, month, day)
+
+    if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month ||
+        date.getDate() !== day
+    ) {
+        return null
+    }
+
+    return startOfDay(date)
+}
+
+function resolveRangeFromSearchParams(searchParams: URLSearchParams, fallbackRange: { from: Date; to: Date }) {
+    const from = parseDateKey(searchParams.get('from') ?? '')
+    const to = parseDateKey(searchParams.get('to') ?? '')
+
+    if (!from || !to) {
+        return fallbackRange
+    }
+
+    if (from.getTime() > to.getTime()) {
+        return fallbackRange
+    }
+
+    return {
+        from,
+        to,
+    }
 }
 
 function formatCurrency(value: number) {
@@ -119,6 +169,30 @@ function calculatePercentDifference(value: number, baselineValue: number) {
     return ((value - baselineValue) / baselineValue) * 100
 }
 
+function resolvePercentTone(cardKey: SummaryCard['key'], percentDifference: number) {
+    if (cardKey === 'expenses') {
+        if (percentDifference < 0) {
+            return 'positive'
+        }
+
+        if (percentDifference > 0) {
+            return 'negative'
+        }
+
+        return null
+    }
+
+    if (percentDifference > 0) {
+        return 'positive'
+    }
+
+    if (percentDifference < 0) {
+        return 'negative'
+    }
+
+    return null
+}
+
 function getRangeLabel(fromDate: Date, toDate: Date) {
     return `${dateFormatter.format(fromDate)} – ${dateFormatter.format(toDate)}`
 }
@@ -126,16 +200,42 @@ function getRangeLabel(fromDate: Date, toDate: Date) {
 // TransactionStatisticsPage renders the transaction statistics overview dashboard.
 export function TransactionStatisticsPage() {
     const apiClient = useApiClient()
+    const [searchParams, setSearchParams] = useSearchParams()
     const today = useMemo(() => startOfDay(new Date()), [])
-    const range = useMemo(() => {
-        const from = addDays(today, -29)
-        return { from, to: today }
-    }, [today])
+    const defaultRange = useMemo(() => buildRange(30, today), [today])
+    const range = useMemo(() => resolveRangeFromSearchParams(searchParams, defaultRange), [defaultRange, searchParams])
     const [statistics, setStatistics] = useState<TransactionStatisticsResponse | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
 
     const summaryCards = useMemo(() => buildSummaryCards(statistics), [statistics])
+
+    function handleRangeChange(nextRange: DateRange) {
+        setSearchParams(
+            {
+                from: formatDateKey(startOfDay(nextRange.startDate)),
+                to: formatDateKey(startOfDay(nextRange.endDate)),
+            },
+            { replace: true },
+        )
+    }
+
+    useEffect(() => {
+        const fromKey = formatDateKey(range.from)
+        const toKey = formatDateKey(range.to)
+
+        if (searchParams.get('from') === fromKey && searchParams.get('to') === toKey) {
+            return
+        }
+
+        setSearchParams(
+            {
+                from: fromKey,
+                to: toKey,
+            },
+            { replace: true },
+        )
+    }, [range.from, range.to, searchParams, setSearchParams])
 
     useEffect(() => {
         let isActive = true
@@ -186,6 +286,17 @@ export function TransactionStatisticsPage() {
                     eyebrow="Transactions"
                     title="Transaction statistics"
                     subtitle={`Overview for ${getRangeLabel(range.from, range.to)}. The first pass focuses on the three overview metrics only.`}
+                    actions={
+                        <DateSelector
+                            className="transaction-statistics-page__date-selector"
+                            mode="range"
+                            value={{
+                                startDate: range.from,
+                                endDate: range.to,
+                            }}
+                            onChange={handleRangeChange}
+                        />
+                    }
                 />
 
                 {isLoading ? (
@@ -196,8 +307,7 @@ export function TransactionStatisticsPage() {
                     <div className="transaction-statistics-page__overview-grid">
                         {summaryCards.map((card) => {
                             const percentDifference = calculatePercentDifference(card.value, card.baselineValue)
-                            const isPositive = percentDifference > 0
-                            const isNegative = percentDifference < 0
+                            const percentTone = resolvePercentTone(card.key, percentDifference)
                             const isNetChange = card.key === 'netChange'
                             const netChangeIsPositive = card.value >= 0
 
@@ -240,8 +350,12 @@ export function TransactionStatisticsPage() {
                                         <span
                                             className={[
                                                 'transaction-statistics-page__card-delta-value',
-                                                isPositive ? 'transaction-statistics-page__card-delta-value--positive' : undefined,
-                                                isNegative ? 'transaction-statistics-page__card-delta-value--negative' : undefined,
+                                                percentTone === 'positive'
+                                                    ? 'transaction-statistics-page__card-delta-value--positive'
+                                                    : undefined,
+                                                percentTone === 'negative'
+                                                    ? 'transaction-statistics-page__card-delta-value--negative'
+                                                    : undefined,
                                             ]
                                                 .filter(Boolean)
                                                 .join(' ')}
