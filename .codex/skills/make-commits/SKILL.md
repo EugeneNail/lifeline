@@ -15,10 +15,12 @@ description: Plan and create semantic git commits from the current worktree. Use
 6. Create one commit per semantic group.
 7. Use Conventional Commits format: `type(scope): short message`.
 8. Write the message in plain conversational English. Keep it direct and specific. Do not optimize for git folklore about imperative mood or 72-character limits.
+9. Do not compress a large or mixed change set into an artificial 2-3 commit split. If the work is naturally split into 5, 8, or 10 semantic commits, make that many commits.
 
 ## Commit Selection Rules
 
 - Prefer the smallest commit that still leaves a coherent change.
+- Prefer correct semantic separation over minimizing the commit count.
 - If a decomposition has already been made for the current commit run, treat it as binding: create commits strictly according to that split, without regrouping, merging, or inventing extra commits.
 - If one change only makes sense after another, commit the dependency first.
 - Do not mix unrelated cleanup with feature work.
