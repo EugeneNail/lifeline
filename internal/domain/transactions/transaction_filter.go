@@ -10,6 +10,7 @@ import (
 type TransactionFilter struct {
 	TransactionIds []uuid.UUID
 	AccountIds     []uuid.UUID
+	Categories     []Category
 	Dates          []time.Time
 	From           *time.Time
 	To             *time.Time
@@ -30,6 +31,13 @@ func (filter TransactionFilter) WithIds(ids ...uuid.UUID) TransactionFilter {
 // WithAccountIds returns a filter with the provided account identifiers.
 func (filter TransactionFilter) WithAccountIds(accountIds ...uuid.UUID) TransactionFilter {
 	filter.AccountIds = append(filter.AccountIds, accountIds...)
+
+	return filter
+}
+
+// WithCategories returns a filter with the provided transaction categories.
+func (filter TransactionFilter) WithCategories(categories ...Category) TransactionFilter {
+	filter.Categories = append(filter.Categories, categories...)
 
 	return filter
 }

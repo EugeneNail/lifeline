@@ -4,9 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	application "github.com/EugeneNail/lifeline/internal/application/usecases/transactions/get_transaction_statistics"
+	"github.com/EugeneNail/lifeline/internal/domain"
 	"github.com/EugeneNail/lifeline/internal/domain/transactions"
 	"github.com/EugeneNail/lifeline/internal/infrastructure/authentication"
 	"github.com/EugeneNail/lifeline/internal/presentation/http/api/transactions/resource"
@@ -40,10 +43,20 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		return http.StatusBadRequest, fmt.Errorf("parsing a 'to' date: %w", err)
 	}
 
-	result, err := handler.usecase.Handle(request.Context(), application.NewQuery(accountID.Uuid(), from, to))
+	categories, err := parseCategories(request.URL.Query()["categories"])
+	if err != nil {
+		return http.StatusBadRequest, fmt.Errorf("parsing 'categories': %w", err)
+	}
+
+	result, err := handler.usecase.Handle(request.Context(), application.NewQuery(accountID.Uuid(), from, to, categories...))
 	if err != nil {
 		if errors.Is(err, application.ErrInvalidDateRange) {
 			return http.StatusBadRequest, err
+		}
+
+		var violations domain.Violations
+		if errors.As(err, &violations) {
+			return http.StatusUnprocessableEntity, violations.Violations()
 		}
 
 		return http.StatusInternalServerError, fmt.Errorf("handling GetTransactionStatistics query: %w", err)
@@ -53,6 +66,29 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 		Target:   mapTarget(result.Target),
 		Baseline: mapBaseline(result.Baseline),
 	}
+}
+
+// parseCategories returns integer category identifiers parsed from repeated or comma-separated query values, or an error when a value is empty or not an integer.
+func parseCategories(rawValues []string) ([]int, error) {
+	categories := make([]int, 0, len(rawValues))
+
+	for _, rawValue := range rawValues {
+		for _, value := range strings.Split(rawValue, ",") {
+			value = strings.TrimSpace(value)
+			if value == "" {
+				return nil, fmt.Errorf("category must not be empty")
+			}
+
+			category, err := strconv.Atoi(value)
+			if err != nil {
+				return nil, fmt.Errorf("category %q must be an integer: %w", value, err)
+			}
+
+			categories = append(categories, category)
+		}
+	}
+
+	return categories, nil
 }
 
 // mapTarget converts the target statistics to transport output.

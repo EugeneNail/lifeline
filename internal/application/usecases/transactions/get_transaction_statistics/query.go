@@ -6,19 +6,21 @@ import (
 	"github.com/google/uuid"
 )
 
-// Query carries the account identifier and date range required to load transaction statistics.
+// Query carries the account identifier, date range, and optional category filters required to load transaction statistics.
 type Query struct {
-	AccountID uuid.UUID
-	From      time.Time
-	To        time.Time
+	AccountID  uuid.UUID
+	From       time.Time
+	To         time.Time
+	Categories []int
 }
 
-// NewQuery returns a query with the provided account identifier and date range normalized to YYYY-MM-DD.
-func NewQuery(accountID uuid.UUID, from time.Time, to time.Time) Query {
+// NewQuery returns a query with the provided account identifier, normalized date range, and transaction categories.
+func NewQuery(accountID uuid.UUID, from time.Time, to time.Time, categories ...int) Query {
 	return Query{
-		AccountID: accountID,
-		From:      toDate(from),
-		To:        toDate(to),
+		AccountID:  accountID,
+		From:       toDate(from),
+		To:         toDate(to),
+		Categories: append([]int(nil), categories...),
 	}
 }
 

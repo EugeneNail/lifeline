@@ -7,6 +7,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/EugeneNail/lifeline/internal/domain"
 	"github.com/EugeneNail/lifeline/internal/domain/transactions"
 )
 
@@ -32,12 +33,18 @@ func (handler *Handler) Handle(ctx context.Context, query Query) (Result, error)
 		return Result{}, ErrInvalidDateRange
 	}
 
+	categories, violations := validateCategories(query.Categories)
+	if violations.HasViolations() {
+		return Result{}, violations
+	}
+
 	targetDates := buildDateRange(query.From, query.To)
 	baselineDates := buildBaselineDates(query.From, len(targetDates))
 	allDates := mergeDates(targetDates, baselineDates)
 
 	filter := transactions.NewTransactionFilter().
-		WithAccountIds(query.AccountID)
+		WithAccountIds(query.AccountID).
+		WithCategories(categories...)
 	filter.Dates = allDates
 
 	foundTransactions, err := handler.transactions.FindMany(ctx, filter)
@@ -70,6 +77,24 @@ func (handler *Handler) Handle(ctx context.Context, query Query) (Result, error)
 		Target:   target,
 		Baseline: calculateBaseline(baselineTransactions),
 	}, nil
+}
+
+// validateCategories returns validated transaction categories and any violations found in the raw category values.
+func validateCategories(rawCategories []int) ([]transactions.Category, domain.Violations) {
+	categories := make([]transactions.Category, 0, len(rawCategories))
+	violations := domain.NewViolations()
+
+	for _, rawCategory := range rawCategories {
+		category, violation := transactions.NewCategory(rawCategory)
+		if violation != nil {
+			violations.Add("categories", violation)
+			continue
+		}
+
+		categories = append(categories, category)
+	}
+
+	return categories, violations
 }
 
 // buildBaselineDates returns the three intervals that precede the target date range.
