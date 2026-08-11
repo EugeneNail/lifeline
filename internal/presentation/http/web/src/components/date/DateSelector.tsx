@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Button, IconButton } from '../primitives'
 import './DateSelector.sass'
@@ -6,6 +6,10 @@ import './DateSelector.sass'
 export type DateRange = {
     startDate: Date
     endDate: Date
+}
+
+export type DateSelectorHandle = {
+    open: () => void
 }
 
 type DateSelectorCommonProps = {
@@ -54,7 +58,7 @@ const rangeStartMonthLabelFormatter = new Intl.DateTimeFormat('en-GB', {
 })
 
 // DateSelector renders an inline date switcher and an attached calendar overlay.
-export function DateSelector(props: DateSelectorProps) {
+export const DateSelector = forwardRef<DateSelectorHandle, DateSelectorProps>(function DateSelector(props, ref) {
     const [isOpen, setIsOpen] = useState(false)
     const [viewMode, setViewMode] = useState<ViewMode>('days')
     const [visibleDate, setVisibleDate] = useState(() =>
@@ -63,6 +67,12 @@ export function DateSelector(props: DateSelectorProps) {
             : resolveInitialVisibleDate(props.value, 'range'),
     )
     const [rangeAnchor, setRangeAnchor] = useState<Date | null>(null)
+
+    useImperativeHandle(ref, () => ({
+        open() {
+            setIsOpen(true)
+        },
+    }), [])
 
     useEffect(() => {
         if (!isOpen) {
@@ -332,7 +342,7 @@ export function DateSelector(props: DateSelectorProps) {
                 : null}
         </>
     )
-}
+})
 
 function handleDayClick(
     props: DateSelectorProps,
