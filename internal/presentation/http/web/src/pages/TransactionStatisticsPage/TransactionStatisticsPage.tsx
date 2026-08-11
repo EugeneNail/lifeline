@@ -1,13 +1,14 @@
 import axios from 'axios'
-import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { DateSelector, type DateRange } from '../../components/date'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { DateSelector, type DateRange, type DateSelectorHandle } from '../../components/date'
 import { AppNavigation } from '../../components/navigation'
 import { GoogleIcon } from '../../components/icons'
 import { Message } from '../../components/primitives'
 import { Page, PageHeader } from '../../components/layout'
 import { useApiClient } from '../../hooks/useApiClient'
 import { TransactionCategorySelector } from './TransactionCategorySelector'
+import { TransactionPeriodSelector } from './TransactionPeriodSelector'
 import { readStoredTransactionCategories, transactionCategories } from './transactionCategories'
 import './TransactionStatisticsPage.sass'
 
@@ -21,10 +22,20 @@ type TransactionStatisticsResponse = {
     target: {
         overview: OverviewResource
         categories: CategoryExpenseResource[]
+        topFive: TransactionResource[]
     }
     baseline: {
         overview: OverviewResource
     }
+}
+
+type TransactionResource = {
+    category: number
+    date: string
+    description: string
+    direction: number
+    id: string
+    money: number
 }
 
 type CategoryExpenseResource = {
@@ -54,6 +65,12 @@ type SummaryCard = {
 const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'short',
+    year: 'numeric',
+})
+
+const transactionDateFormatter = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
     year: 'numeric',
 })
 
@@ -172,6 +189,16 @@ function formatSignedCurrency(value: number) {
     const normalized = amountFormatter.format(Math.abs(value))
     const sign = value < 0 ? '−' : '+'
     return `${sign}${normalized} ₽`
+}
+
+function formatTransactionCurrency(value: number, direction: number) {
+    const sign = direction === 2 ? '+' : '−'
+    return `${sign}${amountFormatter.format(Math.abs(value))} ₽`
+}
+
+function formatTransactionDate(dateKey: string) {
+    const date = parseDateKey(dateKey)
+    return date ? transactionDateFormatter.format(date) : dateKey
 }
 
 function formatPercentChange(value: number) {
@@ -327,6 +354,7 @@ export function TransactionStatisticsPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
     const [selectedCategories, setSelectedCategories] = useState<number[]>(readStoredTransactionCategories)
+    const dateSelectorRef = useRef<DateSelectorHandle>(null)
 
     const summaryCards = useMemo(() => buildSummaryCards(statistics), [statistics])
     const chartCategories = useMemo(
@@ -423,9 +451,16 @@ export function TransactionStatisticsPage() {
 
                 <div className="transaction-statistics-page__filters">
                     <TransactionCategorySelector onChange={setSelectedCategories} />
+                    <TransactionPeriodSelector
+                        today={today}
+                        value={{ startDate: range.from, endDate: range.to }}
+                        onChange={handleRangeChange}
+                        onCustomClick={() => dateSelectorRef.current?.open()}
+                    />
                     <DateSelector
                         className="transaction-statistics-page__date-selector"
                         mode="range"
+                        ref={dateSelectorRef}
                         value={{
                             startDate: range.from,
                             endDate: range.to,
@@ -638,6 +673,58 @@ export function TransactionStatisticsPage() {
                                                     </div>
                                                 </div>
                                             </div>
+                                        )
+                                    })}
+                                </div>
+                            </article>
+
+                            <article className="transaction-statistics-page__panel transaction-statistics-page__transactions-panel">
+                                <header className="transaction-statistics-page__transactions-header">
+                                    <div>
+                                        <p className="transaction-statistics-page__panel-eyebrow">Highest individual expenses</p>
+                                        <h2 className="transaction-statistics-page__panel-title">Largest transactions</h2>
+                                    </div>
+                                    <Link className="transaction-statistics-page__transactions-link" to="/transactions">
+                                        View all
+                                    </Link>
+                                </header>
+
+                                <div className="transaction-statistics-page__transactions-list">
+                                    {(statistics?.target.topFive ?? []).slice(0, 5).map((transaction) => {
+                                        const category = transactionCategoriesById.get(transaction.category)
+                                        const categoryName = category?.name ?? 'Unknown'
+                                        const description = transaction.description.trim()
+                                        const transactionDate = formatTransactionDate(transaction.date)
+                                        const backgroundColor = categoryBackgroundColors[
+                                            (transaction.category - 1) % categoryBackgroundColors.length
+                                        ] ?? categoryBackgroundColors[0]
+
+                                        return (
+                                            <article className="transaction-statistics-page__transaction-row" key={transaction.id}>
+                                                <div
+                                                    aria-hidden="true"
+                                                    className="transaction-statistics-page__transaction-icon"
+                                                    style={{ backgroundColor }}
+                                                >
+                                                    {category?.icon ?? '✨'}
+                                                </div>
+                                                <div className="transaction-statistics-page__transaction-copy">
+                                                    <strong>{description || categoryName}</strong>
+                                                    <span>
+                                                        {description ? `${categoryName} · ` : ''}{transactionDate}
+                                                    </span>
+                                                </div>
+                                                <strong
+                                                    className={[
+                                                        'transaction-statistics-page__transaction-amount',
+                                                        transaction.direction === 2
+                                                            ? 'transaction-statistics-page__transaction-amount--income'
+                                                            : 'transaction-statistics-page__transaction-amount--expense',
+                                                    ].join(' ')}
+                                                >
+                                                    {formatTransactionCurrency(transaction.money, transaction.direction)}
+                                                </strong>
+                                            </article>
                                         )
                                     })}
                                 </div>

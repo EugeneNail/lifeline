@@ -16,6 +16,7 @@
 
 .transaction-statistics-page__filters
     display: flex
+    flex-wrap: wrap
     align-items: center
     justify-content: flex-start
     gap: 12px
@@ -250,6 +251,74 @@
     min-width: 4px
     height: 100%
     border-radius: inherit
+
+.transaction-statistics-page__transactions-header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 20px
+
+.transaction-statistics-page__transactions-link
+    flex: 0 0 auto
+    color: var(--primary)
+    font-size: 11px
+    font-weight: 800
+    text-decoration: none
+
+    &:hover
+        text-decoration: underline
+        text-underline-offset: 3px
+
+.transaction-statistics-page__transactions-list
+    margin-top: 19px
+
+.transaction-statistics-page__transaction-row
+    display: grid
+    grid-template-columns: auto minmax(0, 1fr) auto
+    min-height: 68px
+    align-items: center
+    gap: 12px
+
+    &:not(:last-child)
+        border-bottom: 1px solid #edf0eb
+
+.transaction-statistics-page__transaction-icon
+    display: grid
+    width: 38px
+    height: 38px
+    place-items: center
+    border-radius: 10px
+    font-size: 17px
+    line-height: 1
+
+.transaction-statistics-page__transaction-copy
+    min-width: 0
+
+    strong,
+    span
+        display: block
+
+    strong
+        overflow: hidden
+        color: var(--text-primary)
+        font-size: 11px
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    span
+        margin-top: 5px
+        color: var(--text-secondary)
+        font-size: 9px
+
+.transaction-statistics-page__transaction-amount
+    font-size: 11px
+    white-space: nowrap
+
+    &--expense
+        color: var(--error)
+
+    &--income
+        color: var(--success)
 
 .transaction-statistics-page__card-head
     display: flex

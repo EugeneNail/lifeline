@@ -1,0 +1,38 @@
+.transaction-period-selector
+    display: inline-flex
+    min-height: 42px
+    align-items: center
+    gap: 3px
+    border: 1px solid var(--divider)
+    border-radius: 10px
+    padding: 4px
+    background: rgba(255, 255, 255, .78)
+    box-shadow: 0 10px 28px rgba(38, 49, 43, .04)
+
+.transaction-period-selector__button
+    min-height: 32px
+    border: 0
+    border-radius: 7px
+    padding: 0 11px
+    background: transparent
+    color: var(--text-secondary)
+    cursor: pointer
+    font-size: 12px
+    font-weight: 700
+    transition: background 140ms ease, color 140ms ease
+
+    &:hover
+        color: var(--text-primary)
+
+    &[aria-pressed="true"]
+        background: var(--text-primary)
+        box-shadow: 0 4px 12px rgba(23, 32, 28, .14)
+        color: #ffffff
+
+@media (max-width: 560px)
+    .transaction-period-selector
+        width: 100%
+
+    .transaction-period-selector__button
+        min-width: 0
+        flex: 1
