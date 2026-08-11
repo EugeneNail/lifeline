@@ -7,6 +7,8 @@ import { GoogleIcon } from '../../components/icons'
 import { Message } from '../../components/primitives'
 import { Page, PageHeader } from '../../components/layout'
 import { useApiClient } from '../../hooks/useApiClient'
+import { TransactionCategorySelector } from './TransactionCategorySelector'
+import { readStoredTransactionCategories } from './transactionCategories'
 import './TransactionStatisticsPage.sass'
 
 type OverviewResource = {
@@ -18,10 +20,24 @@ type OverviewResource = {
 type TransactionStatisticsResponse = {
     target: {
         overview: OverviewResource
+        categories: CategoryExpenseResource[]
     }
     baseline: {
         overview: OverviewResource
     }
+}
+
+type CategoryExpenseResource = {
+    absolute: number
+    category: number
+    percent: number
+}
+
+type ChartCategory = CategoryExpenseResource & {
+    chartPercent: number
+    color: string
+    name: string
+    startPercent: number
 }
 
 type SummaryCard = {
@@ -42,6 +58,40 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
 const amountFormatter = new Intl.NumberFormat('ru-RU', {
     maximumFractionDigits: 2,
 })
+
+const compactAmountFormatter = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 1,
+})
+
+const transactionCategoryNames: Record<number, string> = {
+    1: 'Bills',
+    2: 'Food',
+    3: 'Transport',
+    4: 'Household',
+    5: 'Entertainment',
+    6: 'Personal items',
+    7: 'Health',
+    8: 'Work',
+    9: 'Debt',
+    10: 'Investments',
+    11: 'Gifts',
+    12: 'Other',
+}
+
+const categoryColors = [
+    '#426858',
+    '#d4a94c',
+    '#d66f51',
+    '#7890a2',
+    '#927fa4',
+    '#5e9997',
+    '#a77b89',
+    '#828aaa',
+    '#779761',
+    '#c78469',
+    '#729089',
+    '#afb6b0',
+]
 
 function startOfDay(date: Date) {
     const nextDate = new Date(date)
@@ -124,6 +174,20 @@ function formatPercentChange(value: number) {
     return `${sign}${amountFormatter.format(Math.abs(rounded))}%`
 }
 
+function formatCompactAmount(value: number) {
+    const absoluteValue = Math.abs(value)
+
+    if (absoluteValue >= 1_000_000 && absoluteValue < 1_000_000_000) {
+        return `${compactAmountFormatter.format(absoluteValue / 1_000_000)}m`
+    }
+
+    if (absoluteValue >= 1_000 && absoluteValue < 1_000_000) {
+        return `${compactAmountFormatter.format(absoluteValue / 1_000)}k`
+    }
+
+    return compactAmountFormatter.format(absoluteValue)
+}
+
 function buildSummaryCards(data: TransactionStatisticsResponse | null): SummaryCard[] {
     if (!data) {
         return [
@@ -197,6 +261,50 @@ function getRangeLabel(fromDate: Date, toDate: Date) {
     return `${dateFormatter.format(fromDate)} – ${dateFormatter.format(toDate)}`
 }
 
+function buildChartCategories(categories: CategoryExpenseResource[]) {
+    const sortedCategories = [...categories]
+        .filter((category) => category.percent > 0)
+        .sort((left, right) => right.percent - left.percent)
+    const totalPercent = sortedCategories.reduce((total, category) => total + category.percent, 0)
+    let startPercent = 0
+
+    return sortedCategories.map((category) => {
+        const chartPercent = (category.percent / totalPercent) * 100
+        const chartCategory = {
+            ...category,
+            chartPercent,
+            color: categoryColors[(category.category - 1) % categoryColors.length] ?? categoryColors[0],
+            name: transactionCategoryNames[category.category] ?? 'Unknown',
+            startPercent,
+        }
+
+        startPercent += chartPercent
+        return chartCategory
+    })
+}
+
+function buildLegendCategories(categories: ChartCategory[]) {
+    if (categories.length <= 6) {
+        return categories
+    }
+
+    const remainingCategories = categories.slice(5)
+    const firstRemainingCategory = remainingCategories[0]
+
+    return [
+        ...categories.slice(0, 5),
+        {
+            absolute: remainingCategories.reduce((total, category) => total + category.absolute, 0),
+            category: 0,
+            chartPercent: remainingCategories.reduce((total, category) => total + category.chartPercent, 0),
+            color: '#afb6b0',
+            name: `${remainingCategories.length} more`,
+            percent: remainingCategories.reduce((total, category) => total + category.percent, 0),
+            startPercent: firstRemainingCategory?.startPercent ?? 0,
+        },
+    ]
+}
+
 // TransactionStatisticsPage renders the transaction statistics overview dashboard.
 export function TransactionStatisticsPage() {
     const apiClient = useApiClient()
@@ -207,8 +315,15 @@ export function TransactionStatisticsPage() {
     const [statistics, setStatistics] = useState<TransactionStatisticsResponse | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
+    const [selectedCategories, setSelectedCategories] = useState<number[]>(readStoredTransactionCategories)
 
     const summaryCards = useMemo(() => buildSummaryCards(statistics), [statistics])
+    const chartCategories = useMemo(
+        () => buildChartCategories(statistics?.target.categories ?? []),
+        [statistics],
+    )
+    const legendCategories = useMemo(() => buildLegendCategories(chartCategories), [chartCategories])
+    const [activeCategory, setActiveCategory] = useState<ChartCategory | null>(null)
 
     function handleRangeChange(nextRange: DateRange) {
         setSearchParams(
@@ -245,8 +360,15 @@ export function TransactionStatisticsPage() {
             setLoadError('')
 
             try {
+                const requestParams = new URLSearchParams({
+                    from: formatDateKey(range.from),
+                    to: formatDateKey(range.to),
+                })
+                selectedCategories.forEach((category) => {
+                    requestParams.append('categories', String(category))
+                })
                 const response = await apiClient.get<TransactionStatisticsResponse>(
-                    `transactions/statistics?from=${formatDateKey(range.from)}&to=${formatDateKey(range.to)}`,
+                    `transactions/statistics?${requestParams.toString()}`,
                 )
 
                 if (!isActive) {
@@ -277,7 +399,7 @@ export function TransactionStatisticsPage() {
         return () => {
             isActive = false
         }
-    }, [apiClient, range.from, range.to])
+    }, [apiClient, range.from, range.to, selectedCategories])
 
     return (
         <Page className="transaction-statistics-page">
@@ -285,91 +407,177 @@ export function TransactionStatisticsPage() {
                 <PageHeader
                     eyebrow="Transactions"
                     title="Transaction statistics"
-                    subtitle={`Overview for ${getRangeLabel(range.from, range.to)}. The first pass focuses on the three overview metrics only.`}
-                    actions={
-                        <DateSelector
-                            className="transaction-statistics-page__date-selector"
-                            mode="range"
-                            value={{
-                                startDate: range.from,
-                                endDate: range.to,
-                            }}
-                            onChange={handleRangeChange}
-                        />
-                    }
+                    subtitle={`Overview and expense breakdown for ${getRangeLabel(range.from, range.to)}.`}
                 />
+
+                <div className="transaction-statistics-page__filters">
+                    <TransactionCategorySelector onChange={setSelectedCategories} />
+                    <DateSelector
+                        className="transaction-statistics-page__date-selector"
+                        mode="range"
+                        value={{
+                            startDate: range.from,
+                            endDate: range.to,
+                        }}
+                        onChange={handleRangeChange}
+                    />
+                </div>
 
                 {isLoading ? (
                     <Message variant="info">Loading transaction statistics...</Message>
                 ) : loadError ? (
                     <Message variant="error">{loadError}</Message>
                 ) : (
-                    <div className="transaction-statistics-page__overview-grid">
-                        {summaryCards.map((card) => {
-                            const percentDifference = calculatePercentDifference(card.value, card.baselineValue)
-                            const percentTone = resolvePercentTone(card.key, percentDifference)
-                            const isNetChange = card.key === 'netChange'
-                            const netChangeIsPositive = card.value >= 0
+                    <>
+                        <div className="transaction-statistics-page__overview-grid">
+                            {summaryCards.map((card) => {
+                                const percentDifference = calculatePercentDifference(card.value, card.baselineValue)
+                                const percentTone = resolvePercentTone(card.key, percentDifference)
+                                const isNetChange = card.key === 'netChange'
+                                const netChangeIsPositive = card.value >= 0
 
-                            return (
-                                <article
-                                    className={`transaction-statistics-page__overview-card transaction-statistics-page__overview-card--${card.accent}`}
-                                    key={card.key}
-                                >
-                                    <div className="transaction-statistics-page__card-head">
-                                        <div className="transaction-statistics-page__icon-shell">
-                                            <GoogleIcon icon={card.icon} size={14} />
+                                return (
+                                    <article
+                                        className={`transaction-statistics-page__overview-card transaction-statistics-page__overview-card--${card.accent}`}
+                                        key={card.key}
+                                    >
+                                        <div className="transaction-statistics-page__card-head">
+                                            <div className="transaction-statistics-page__icon-shell">
+                                                <GoogleIcon icon={card.icon} size={14} />
+                                            </div>
+                                            <span className="transaction-statistics-page__card-title">
+                                                {card.label}
+                                            </span>
                                         </div>
-                                        <span className="transaction-statistics-page__card-title">
-                                            {card.label}
-                                        </span>
-                                    </div>
 
-                                    <strong
-                                        className={[
-                                            'transaction-statistics-page__card-value',
-                                            isNetChange
-                                                ? netChangeIsPositive
-                                                    ? 'transaction-statistics-page__card-value--positive'
-                                                    : 'transaction-statistics-page__card-value--negative'
-                                                : undefined,
-                                        ]
-                                            .filter(Boolean)
-                                            .join(' ')}
-                                    >
-                                        {isNetChange ? formatSignedCurrency(card.value) : formatCurrency(card.value)}
-                                    </strong>
-
-                                    <div
-                                        className={[
-                                            'transaction-statistics-page__card-delta',
-                                        ]
-                                            .filter(Boolean)
-                                            .join(' ')}
-                                    >
-                                        <span
+                                        <strong
                                             className={[
-                                                'transaction-statistics-page__card-delta-value',
-                                                percentTone === 'positive'
-                                                    ? 'transaction-statistics-page__card-delta-value--positive'
-                                                    : undefined,
-                                                percentTone === 'negative'
-                                                    ? 'transaction-statistics-page__card-delta-value--negative'
+                                                'transaction-statistics-page__card-value',
+                                                isNetChange
+                                                    ? netChangeIsPositive
+                                                        ? 'transaction-statistics-page__card-value--positive'
+                                                        : 'transaction-statistics-page__card-value--negative'
                                                     : undefined,
                                             ]
                                                 .filter(Boolean)
                                                 .join(' ')}
                                         >
-                                            {formatPercentChange(percentDifference)}
-                                        </span>
-                                        <span className="transaction-statistics-page__card-delta-label">
-                                            vs. 3-period average
-                                        </span>
+                                            {isNetChange ? formatSignedCurrency(card.value) : formatCurrency(card.value)}
+                                        </strong>
+
+                                        <div
+                                            className={[
+                                                'transaction-statistics-page__card-delta',
+                                            ]
+                                                .filter(Boolean)
+                                                .join(' ')}
+                                        >
+                                            <span
+                                                className={[
+                                                    'transaction-statistics-page__card-delta-value',
+                                                    percentTone === 'positive'
+                                                        ? 'transaction-statistics-page__card-delta-value--positive'
+                                                        : undefined,
+                                                    percentTone === 'negative'
+                                                        ? 'transaction-statistics-page__card-delta-value--negative'
+                                                        : undefined,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(' ')}
+                                            >
+                                                {formatPercentChange(percentDifference)}
+                                            </span>
+                                            <span className="transaction-statistics-page__card-delta-label">
+                                                vs. 3-period average
+                                            </span>
+                                        </div>
+                                    </article>
+                                )
+                            })}
+                        </div>
+
+                        <section className="transaction-statistics-page__primary-grid">
+                            <article
+                                aria-label="Expense dynamics chart placeholder"
+                                className="transaction-statistics-page__panel transaction-statistics-page__chart-placeholder"
+                            />
+
+                            <article className="transaction-statistics-page__panel transaction-statistics-page__category-panel">
+                                <header className="transaction-statistics-page__panel-header">
+                                    <p className="transaction-statistics-page__panel-eyebrow">Share of expenses</p>
+                                    <h2 className="transaction-statistics-page__panel-title">By category</h2>
+                                </header>
+
+                                <div className="transaction-statistics-page__donut-wrap">
+                                    <svg
+                                        aria-label="Expense share by category"
+                                        className="transaction-statistics-page__donut"
+                                        role="img"
+                                        viewBox="0 0 200 200"
+                                    >
+                                        <circle
+                                            className="transaction-statistics-page__donut-track"
+                                            cx="100"
+                                            cy="100"
+                                            r="68"
+                                        />
+                                        {chartCategories.map((category) => (
+                                            <circle
+                                                aria-label={`${category.name}: ${category.percent}%`}
+                                                className="transaction-statistics-page__donut-segment"
+                                                cx="100"
+                                                cy="100"
+                                                key={category.category}
+                                                onBlur={() => setActiveCategory(null)}
+                                                onFocus={() => setActiveCategory(category)}
+                                                onMouseEnter={() => setActiveCategory(category)}
+                                                onMouseLeave={() => setActiveCategory(null)}
+                                                pathLength="100"
+                                                r="68"
+                                                stroke={category.color}
+                                                strokeDasharray={`${category.chartPercent} ${100 - category.chartPercent}`}
+                                                strokeDashoffset={-category.startPercent}
+                                                tabIndex={0}
+                                            />
+                                        ))}
+                                    </svg>
+
+                                    <div className="transaction-statistics-page__donut-total">
+                                        <strong>{formatCompactAmount(statistics?.target.overview.expenses ?? 0)}</strong>
+                                        <span>Total spent</span>
                                     </div>
-                                </article>
-                            )
-                        })}
-                    </div>
+
+                                    {activeCategory ? (
+                                        <div className="transaction-statistics-page__donut-tooltip" role="tooltip">
+                                            <strong>{activeCategory.name}</strong>
+                                            <span>{activeCategory.percent}%</span>
+                                            <span>{formatCurrency(activeCategory.absolute)}</span>
+                                        </div>
+                                    ) : null}
+
+                                    {chartCategories.length === 0 ? (
+                                        <span className="transaction-statistics-page__donut-empty">No expenses</span>
+                                    ) : null}
+                                </div>
+
+                                <div className="transaction-statistics-page__category-list">
+                                    {legendCategories.map((category) => (
+                                        <div className="transaction-statistics-page__category-row" key={category.category}>
+                                            <div className="transaction-statistics-page__category-name">
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="transaction-statistics-page__category-dot"
+                                                    style={{ backgroundColor: category.color }}
+                                                />
+                                                <span>{category.name}</span>
+                                            </div>
+                                            <strong>{category.percent}%</strong>
+                                        </div>
+                                    ))}
+                                </div>
+                            </article>
+                        </section>
+                    </>
                 )}
             </div>
 
