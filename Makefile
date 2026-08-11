@@ -7,8 +7,11 @@ NETWORK_NAME := lifeline
 MIGRATION_COMMAND_TARGET := $(word 2,$(MAKECMDGOALS))
 MIGRATION_NAME := $(wordlist 3,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 SHELL_TARGET := $(word 2,$(MAKECMDGOALS))
-GO_RUN_CONTAINER := docker run --rm -v "$(CURDIR)":/workspace -w /workspace golang:1.26.1
-GO_RUN_NETWORK_CONTAINER := docker run --rm --network "$(NETWORK_NAME)" --env-file "$(ENV_FILE)" -v "$(CURDIR)":/workspace -w /workspace golang:1.26.1
+GO_CACHE_DIR := $(CURDIR)/.cache/go
+GO_MOD_CACHE_DIR := $(GO_CACHE_DIR)/mod
+GO_BUILD_CACHE_DIR := $(GO_CACHE_DIR)/build
+GO_RUN_CONTAINER := docker run --rm -e GOMODCACHE=/go/pkg/mod -e GOCACHE=/root/.cache/go-build -v "$(CURDIR)":/workspace -v "$(GO_MOD_CACHE_DIR)":/go/pkg/mod -v "$(GO_BUILD_CACHE_DIR)":/root/.cache/go-build -w /workspace golang:1.26.1
+GO_RUN_NETWORK_CONTAINER := docker run --rm --network "$(NETWORK_NAME)" --env-file "$(ENV_FILE)" -e GOMODCACHE=/go/pkg/mod -e GOCACHE=/root/.cache/go-build -v "$(CURDIR)":/workspace -v "$(GO_MOD_CACHE_DIR)":/go/pkg/mod -v "$(GO_BUILD_CACHE_DIR)":/root/.cache/go-build -w /workspace golang:1.26.1
 
 .PHONY: help up down shell logs containers envs networks fetch deploy create migrate rollback
 
