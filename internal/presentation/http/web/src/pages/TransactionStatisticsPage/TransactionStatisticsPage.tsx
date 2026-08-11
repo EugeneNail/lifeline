@@ -8,7 +8,7 @@ import { Message } from '../../components/primitives'
 import { Page, PageHeader } from '../../components/layout'
 import { useApiClient } from '../../hooks/useApiClient'
 import { TransactionCategorySelector } from './TransactionCategorySelector'
-import { readStoredTransactionCategories } from './transactionCategories'
+import { readStoredTransactionCategories, transactionCategories } from './transactionCategories'
 import './TransactionStatisticsPage.sass'
 
 type OverviewResource = {
@@ -34,8 +34,10 @@ type CategoryExpenseResource = {
 }
 
 type ChartCategory = CategoryExpenseResource & {
+    backgroundColor: string
     chartPercent: number
     color: string
+    icon: string
     name: string
     startPercent: number
 }
@@ -63,21 +65,6 @@ const compactAmountFormatter = new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 1,
 })
 
-const transactionCategoryNames: Record<number, string> = {
-    1: 'Bills',
-    2: 'Food',
-    3: 'Transport',
-    4: 'Household',
-    5: 'Entertainment',
-    6: 'Personal items',
-    7: 'Health',
-    8: 'Work',
-    9: 'Debt',
-    10: 'Investments',
-    11: 'Gifts',
-    12: 'Other',
-}
-
 const categoryColors = [
     '#426858',
     '#d4a94c',
@@ -92,6 +79,25 @@ const categoryColors = [
     '#729089',
     '#afb6b0',
 ]
+
+const categoryBackgroundColors = [
+    '#e3ece7',
+    '#f4ead1',
+    '#f7e6e0',
+    '#e5ecf0',
+    '#ece7f0',
+    '#e2eeee',
+    '#f1e8eb',
+    '#e9ebf4',
+    '#e7efe2',
+    '#f5e9e4',
+    '#e4eeeb',
+    '#eceeec',
+]
+
+const transactionCategoriesById = new Map(
+    transactionCategories.map((category) => [category.id, category]),
+)
 
 function startOfDay(date: Date) {
     const nextDate = new Date(date)
@@ -270,11 +276,14 @@ function buildChartCategories(categories: CategoryExpenseResource[]) {
 
     return sortedCategories.map((category) => {
         const chartPercent = (category.percent / totalPercent) * 100
+        const categoryMetadata = transactionCategoriesById.get(category.category)
         const chartCategory = {
             ...category,
+            backgroundColor: categoryBackgroundColors[(category.category - 1) % categoryBackgroundColors.length] ?? categoryBackgroundColors[0],
             chartPercent,
             color: categoryColors[(category.category - 1) % categoryColors.length] ?? categoryColors[0],
-            name: transactionCategoryNames[category.category] ?? 'Unknown',
+            icon: categoryMetadata?.icon ?? '✨',
+            name: categoryMetadata?.name ?? 'Unknown',
             startPercent,
         }
 
@@ -295,9 +304,11 @@ function buildLegendCategories(categories: ChartCategory[]) {
         ...categories.slice(0, 5),
         {
             absolute: remainingCategories.reduce((total, category) => total + category.absolute, 0),
+            backgroundColor: '#eceeec',
             category: 0,
             chartPercent: remainingCategories.reduce((total, category) => total + category.chartPercent, 0),
             color: '#afb6b0',
+            icon: '✨',
             name: `${remainingCategories.length} more`,
             percent: remainingCategories.reduce((total, category) => total + category.percent, 0),
             startPercent: firstRemainingCategory?.startPercent ?? 0,
@@ -574,6 +585,61 @@ export function TransactionStatisticsPage() {
                                             <strong>{category.percent}%</strong>
                                         </div>
                                     ))}
+                                </div>
+                            </article>
+                        </section>
+
+                        <section className="transaction-statistics-page__secondary-grid">
+                            <article className="transaction-statistics-page__panel transaction-statistics-page__breakdown-panel">
+                                <header className="transaction-statistics-page__breakdown-header">
+                                    <div>
+                                        <p className="transaction-statistics-page__panel-eyebrow">Ranked by total spent</p>
+                                        <h2 className="transaction-statistics-page__panel-title">Category Breakdown</h2>
+                                    </div>
+                                    <span className="transaction-statistics-page__category-count">
+                                        {chartCategories.length} categories
+                                    </span>
+                                </header>
+
+                                <div className="transaction-statistics-page__breakdown-list">
+                                    {chartCategories.map((category) => {
+                                        const maxPercent = chartCategories[0]?.percent ?? 0
+                                        const width = maxPercent > 0 ? (category.percent / maxPercent) * 100 : 0
+
+                                        return (
+                                            <div className="transaction-statistics-page__breakdown-row" key={category.category}>
+                                                <div
+                                                    aria-hidden="true"
+                                                    className="transaction-statistics-page__breakdown-icon"
+                                                    style={{ backgroundColor: category.backgroundColor }}
+                                                >
+                                                    {category.icon}
+                                                </div>
+                                                <div className="transaction-statistics-page__breakdown-data">
+                                                    <div className="transaction-statistics-page__breakdown-meta">
+                                                        <span>{category.name}</span>
+                                                        <div>
+                                                            <strong>{formatCurrency(category.absolute)}</strong>
+                                                            <small>{category.percent}%</small>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        aria-label={`${category.name}: ${category.percent}% of expenses`}
+                                                        aria-valuemax={maxPercent}
+                                                        aria-valuemin={0}
+                                                        aria-valuenow={category.percent}
+                                                        className="transaction-statistics-page__breakdown-track"
+                                                        role="progressbar"
+                                                    >
+                                                        <div
+                                                            className="transaction-statistics-page__breakdown-fill"
+                                                            style={{ backgroundColor: category.color, width: `${width}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
                                 </div>
                             </article>
                         </section>

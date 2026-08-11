@@ -39,6 +39,11 @@
     grid-template-columns: minmax(0, 1.85fr) minmax(300px, .7fr)
     gap: 18px
 
+.transaction-statistics-page__secondary-grid
+    display: grid
+    grid-template-columns: minmax(0, 1.45fr) minmax(300px, .95fr)
+    gap: 18px
+
 .transaction-statistics-page__panel
     border: 1px solid var(--divider)
     border-radius: 20px
@@ -173,6 +178,79 @@
     flex: 0 0 auto
     border-radius: 50%
 
+.transaction-statistics-page__breakdown-header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 24px
+
+.transaction-statistics-page__category-count
+    flex: 0 0 auto
+    border-radius: 999px
+    padding: 7px 10px
+    background: var(--surface-secondary)
+    color: var(--text-secondary)
+    font-size: 10px
+    font-weight: 700
+
+.transaction-statistics-page__breakdown-list
+    display: grid
+    gap: 14px
+    margin-top: 25px
+
+.transaction-statistics-page__breakdown-row
+    display: grid
+    grid-template-columns: 34px minmax(0, 1fr)
+    align-items: center
+    gap: 12px
+
+.transaction-statistics-page__breakdown-icon
+    display: grid
+    width: 34px
+    height: 34px
+    place-items: center
+    border-radius: 10px
+    font-size: 16px
+    line-height: 1
+
+.transaction-statistics-page__breakdown-data
+    min-width: 0
+
+.transaction-statistics-page__breakdown-meta
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 20px
+    color: var(--text-primary)
+    font-size: 11px
+    font-weight: 700
+
+    div
+        display: flex
+        align-items: baseline
+        gap: 10px
+
+    strong
+        font-size: 11px
+
+    small
+        min-width: 30px
+        color: var(--text-secondary)
+        font-size: 9px
+        text-align: right
+
+.transaction-statistics-page__breakdown-track
+    height: 5px
+    margin-top: 7px
+    overflow: hidden
+    border-radius: 99px
+    background: #edf0eb
+
+.transaction-statistics-page__breakdown-fill
+    min-width: 4px
+    height: 100%
+    border-radius: inherit
+
 .transaction-statistics-page__card-head
     display: flex
     align-items: center
@@ -255,6 +333,9 @@
         grid-template-columns: 1fr
 
     .transaction-statistics-page__primary-grid
+        grid-template-columns: 1fr
+
+    .transaction-statistics-page__secondary-grid
         grid-template-columns: 1fr
 
 @media (max-width: 560px)

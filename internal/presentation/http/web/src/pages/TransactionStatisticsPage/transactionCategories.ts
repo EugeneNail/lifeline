@@ -1,21 +1,22 @@
 export type TransactionCategory = {
     id: number
+    icon: string
     name: string
 }
 
 export const transactionCategories: TransactionCategory[] = [
-    { id: 1, name: 'Bills' },
-    { id: 2, name: 'Food' },
-    { id: 3, name: 'Transport' },
-    { id: 4, name: 'Household' },
-    { id: 5, name: 'Entertainment' },
-    { id: 6, name: 'Personal items' },
-    { id: 7, name: 'Health' },
-    { id: 8, name: 'Work' },
-    { id: 9, name: 'Debt' },
-    { id: 10, name: 'Investments' },
-    { id: 11, name: 'Gifts' },
-    { id: 12, name: 'Other' },
+    { id: 1, icon: '💡', name: 'Bills' },
+    { id: 2, icon: '🍽️', name: 'Food' },
+    { id: 3, icon: '🚕', name: 'Transport' },
+    { id: 4, icon: '🏠', name: 'Household' },
+    { id: 5, icon: '🎬', name: 'Entertainment' },
+    { id: 6, icon: '🎒', name: 'Personal items' },
+    { id: 7, icon: '🩺', name: 'Health' },
+    { id: 8, icon: '💼', name: 'Work' },
+    { id: 9, icon: '💸', name: 'Debt' },
+    { id: 10, icon: '📈', name: 'Investments' },
+    { id: 11, icon: '🎁', name: 'Gifts' },
+    { id: 12, icon: '✨', name: 'Other' },
 ]
 
 const allTransactionCategoryIds = transactionCategories.map((category) => category.id)
