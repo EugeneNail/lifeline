@@ -82,6 +82,8 @@ const compactAmountFormatter = new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 1,
 })
 
+const minimumLoadingDuration = 300
+
 const categoryColors = [
     '#426858',
     '#d4a94c',
@@ -120,6 +122,12 @@ function startOfDay(date: Date) {
     const nextDate = new Date(date)
     nextDate.setHours(0, 0, 0, 0)
     return nextDate
+}
+
+function wait(milliseconds: number) {
+    return new Promise<void>((resolve) => {
+        window.setTimeout(resolve, milliseconds)
+    })
 }
 
 function addDays(date: Date, days: number) {
@@ -399,6 +407,7 @@ export function TransactionStatisticsPage() {
             setLoadError('')
 
             try {
+                const requestStartedAt = performance.now()
                 const requestParams = new URLSearchParams({
                     from: formatDateKey(range.from),
                     to: formatDateKey(range.to),
@@ -409,6 +418,11 @@ export function TransactionStatisticsPage() {
                 const response = await apiClient.get<TransactionStatisticsResponse>(
                     `transactions/statistics?${requestParams.toString()}`,
                 )
+                const remainingLoadingDuration = minimumLoadingDuration - (performance.now() - requestStartedAt)
+                // This delay is intentional: fast responses wait only long enough to keep the loading indicator visible for 300 ms.
+                if (remainingLoadingDuration > 0) {
+                    await wait(remainingLoadingDuration)
+                }
 
                 if (!isActive) {
                     return
@@ -469,9 +483,7 @@ export function TransactionStatisticsPage() {
                     />
                 </div>
 
-                {isLoading ? (
-                    <Message variant="info">Loading transaction statistics...</Message>
-                ) : loadError ? (
+                {loadError ? (
                     <Message variant="error">{loadError}</Message>
                 ) : (
                     <>
@@ -735,6 +747,20 @@ export function TransactionStatisticsPage() {
             </div>
 
             <AppNavigation />
+            {isLoading ? (
+                <div
+                    aria-live="polite"
+                    className="transaction-statistics-page__loading-overlay"
+                    role="status"
+                >
+                    <div className="transaction-statistics-page__loading-box">
+                        <div className="transaction-statistics-page__loading-spinner" aria-hidden="true" />
+                        <p className="transaction-statistics-page__loading-text">
+                            Loading transaction statistics...
+                        </p>
+                    </div>
+                </div>
+            ) : null}
         </Page>
     )
 }

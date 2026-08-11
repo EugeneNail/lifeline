@@ -14,6 +14,37 @@
     gap: 18px
     width: 100%
 
+.transaction-statistics-page__loading-overlay
+    position: fixed
+    inset: 0
+    z-index: 70
+    display: grid
+    place-items: center
+    padding: 24px
+    background: rgba(255, 255, 255, .74)
+    backdrop-filter: blur(2px)
+
+.transaction-statistics-page__loading-box
+    display: grid
+    justify-items: center
+    gap: 14px
+    text-align: center
+
+.transaction-statistics-page__loading-spinner
+    width: 34px
+    height: 34px
+    border: 3px solid rgba(66, 104, 88, .16)
+    border-top-color: var(--primary)
+    border-radius: 50%
+    animation: transaction-statistics-page-spin 800ms linear infinite
+
+.transaction-statistics-page__loading-text
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 14px
+    font-weight: 650
+    letter-spacing: -.01em
+
 .transaction-statistics-page__filters
     display: flex
     flex-wrap: wrap
@@ -419,3 +450,7 @@
     .transaction-statistics-page
         padding-left: 248px
         padding-bottom: 64px
+
+@keyframes transaction-statistics-page-spin
+    to
+        transform: rotate(360deg)
