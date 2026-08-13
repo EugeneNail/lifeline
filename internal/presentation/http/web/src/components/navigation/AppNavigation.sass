@@ -5,9 +5,8 @@
     display: flex
     width: 248px
     flex-direction: column
-    justify-content: space-between
     border-right: 1px solid #e3e7df
-    background: rgba(255, 255, 255, 0.82)
+    background: rgba(255, 255, 255, .82)
     padding: 30px 20px 24px
     backdrop-filter: blur(18px)
 
@@ -19,7 +18,7 @@
     color: #17201c
     font-size: 20px
     font-weight: 760
-    letter-spacing: -0.03em
+    letter-spacing: -.03em
     text-decoration: none
 
 .app-navigation__brand-mark
@@ -33,16 +32,24 @@
     font-family: var(--font-geist-mono), monospace
     font-size: 15px
 
-.app-navigation__brand-label
+.app-navigation__brand-label,
+.app-navigation__label
     white-space: nowrap
 
-.app-navigation__primary-nav
-    display: grid
-    gap: 6px
+.app-navigation__menus
     margin-top: 48px
 
-.app-navigation__item,
-.app-navigation__settings-link
+.app-navigation__primary-nav,
+.app-navigation__secondary-nav
+    display: grid
+    gap: 6px
+
+.app-navigation__secondary-nav
+    margin-top: 14px
+    border-top: 1px solid #e3e7df
+    padding-top: 14px
+
+.app-navigation__item
     display: flex
     min-height: 46px
     align-items: center
@@ -63,30 +70,23 @@
     background: #e5eee9
     color: #2f5948
 
-.app-navigation__icon,
-.app-navigation__settings-icon
+.app-navigation__icon
     display: grid
     width: 24px
     height: 24px
+    flex: 0 0 auto
     place-items: center
     font-size: 18px
     font-weight: 500
     line-height: 1
 
-.app-navigation__label
-    white-space: nowrap
+.app-navigation__burger
+    display: none
 
 .app-navigation__footer
     display: grid
     gap: 18px
-
-.app-navigation__settings-link
-    color: #738078
-    font-size: 14px
-    font-weight: 600
-
-.app-navigation__settings-link:hover
-    color: #17201c
+    margin-top: auto
 
 .app-navigation__profile
     display: grid
@@ -114,55 +114,132 @@
 .app-navigation__profile-text
     display: grid
 
-.app-navigation__profile-text strong,
-.app-navigation__profile-text span
-    display: block
+    strong,
+    span
+        display: block
 
-.app-navigation__profile-text strong
-    font-size: 13px
+    strong
+        font-size: 13px
 
-.app-navigation__profile-text span
-    margin-top: 3px
-    color: #738078
-    font-size: 11px
+    span
+        margin-top: 3px
+        color: #738078
+        font-size: 11px
+
+.app-navigation__mobile-menu
+    display: none
 
 @media (orientation: portrait)
     .app-navigation
         inset: auto 0 0
-        display: grid
+        z-index: 60
+        display: block
         width: auto
-        grid-template-columns: repeat(4, 1fr)
-        gap: 8px
-        padding: 10px 10px calc(10px + env(safe-area-inset-bottom))
         border-top: 1px solid var(--divider)
         border-right: 0
+        padding: 10px 10px calc(10px + env(safe-area-inset-bottom))
         backdrop-filter: blur(10px)
 
     .app-navigation__brand,
+    .app-navigation__secondary-nav,
     .app-navigation__footer
         display: none
 
-    .app-navigation__primary-nav
-        grid-column: 1 / -1
-        grid-template-columns: repeat(4, 1fr)
-        gap: 8px
+    .app-navigation__menus
         margin-top: 0
 
-    .app-navigation__item
+    .app-navigation__primary-nav
+        grid-template-columns: repeat(5, minmax(0, 1fr))
+        gap: 6px
+
+    .app-navigation__item,
+    .app-navigation__burger
         display: grid
+        min-width: 0
+        min-height: 58px
         place-items: center
         gap: 5px
-        min-height: 58px
+        border: 0
         border-radius: 14px
-        padding: 0 10px
-
-    .app-navigation__label
+        padding: 0 4px
+        background: transparent
+        color: #69756e
+        cursor: pointer
+        font-family: inherit
         font-size: 12px
         font-weight: 700
+        text-decoration: none
+
+    .app-navigation__item--active,
+    .app-navigation__burger[aria-expanded="true"]
+        background: #e5eee9
+        color: #2f5948
+
+    .app-navigation__label
+        max-width: 100%
+        overflow: hidden
+        font-size: 10px
+        font-weight: 700
+        text-overflow: ellipsis
+
+    .app-navigation__mobile-menu
+        position: fixed
+        inset: 0
+        z-index: 50
+        display: flex
+        align-items: center
+        padding: 32px 24px calc(110px + env(safe-area-inset-bottom))
+        background: var(--background)
+        animation: app-navigation-mobile-menu-in 240ms cubic-bezier(.22, 1, .36, 1)
+
+    .app-navigation__mobile-menu-content
+        width: min(420px, 100%)
+        margin: 0 auto
+
+    .app-navigation__mobile-menu-eyebrow
+        margin: 0 0 8px
+        color: var(--primary)
+        font-size: 12px
+        font-weight: 800
+        letter-spacing: .1em
+        text-transform: uppercase
+
+    .app-navigation__mobile-menu-title
+        margin: 0 0 28px
+        color: var(--text-primary)
+        font-size: clamp(32px, 10vw, 48px)
+        letter-spacing: -.05em
+
+    .app-navigation__mobile-secondary-nav
+        display: grid
+        border-top: 1px solid var(--divider)
+
+    .app-navigation__mobile-menu-item
+        display: grid
+        grid-template-columns: 32px minmax(0, 1fr)
+        min-height: 66px
+        align-items: center
+        gap: 14px
+        border-bottom: 1px solid var(--divider)
+        color: var(--text-primary)
+        font-size: 16px
+        font-weight: 700
+        text-decoration: none
+
+        .app-navigation__label
+            font-size: 16px
+            overflow: visible
+
+    .app-navigation__mobile-menu-item--active
+        color: var(--primary)
 
 @media (orientation: landscape)
-    .app-navigation__primary-nav
-        margin-top: 48px
+    .app-navigation__mobile-menu
+        display: none
 
-    .app-navigation__footer
-        margin-top: auto
+@keyframes app-navigation-mobile-menu-in
+    from
+        transform: translateX(100%)
+
+    to
+        transform: translateX(0)

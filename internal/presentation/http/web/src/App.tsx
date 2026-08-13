@@ -15,6 +15,7 @@ function App() {
     return (
         <Routes>
             <Route path="/" element={<DayPage date="today" />} />
+            <Route path="/today" element={<DayPage date="today" />} />
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/habits/statistics" element={<HabitStatisticsPage />} />
             <Route path="/habits/new" element={<CreateHabitPage />} />
