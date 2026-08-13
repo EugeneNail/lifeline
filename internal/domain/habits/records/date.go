@@ -6,7 +6,16 @@ import "time"
 // Date represents a calendar day truncated to 00:00.
 type Date time.Time
 
-// NewDate returns a date truncated to a whole day.
+// NewDate returns a calendar date normalized to midnight UTC.
 func NewDate(rawDate time.Time) Date {
-	return Date(rawDate.Truncate(time.Hour * 24))
+	return Date(time.Date(
+		rawDate.Year(),
+		rawDate.Month(),
+		rawDate.Day(),
+		0,
+		0,
+		0,
+		0,
+		time.UTC,
+	))
 }
