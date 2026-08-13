@@ -5,6 +5,7 @@ import { CreateTransactionPage } from './pages/CreateTransactionPage/CreateTrans
 import { EditTransactionPage } from './pages/EditTransactionPage/EditTransactionPage'
 import { JournalsPage } from './pages/JournalsPage/JournalsPage'
 import { HabitsPage } from './pages/HabitsPage/HabitsPage'
+import { HabitStatisticsPage } from './pages/HabitStatisticsPage/HabitStatisticsPage'
 import { EditHabitPage } from './pages/EditHabitPage/EditHabitPage'
 import { LoginPage } from './pages/LoginPage/LoginPage'
 import { SignupPage } from './pages/SignupPage/SignupPage'
@@ -15,6 +16,7 @@ function App() {
         <Routes>
             <Route path="/" element={<DayPage date="today" />} />
             <Route path="/habits" element={<HabitsPage />} />
+            <Route path="/habits/statistics" element={<HabitStatisticsPage />} />
             <Route path="/habits/new" element={<CreateHabitPage />} />
             <Route path="/transactions/new" element={<CreateTransactionPage />} />
             <Route path="/transactions/:id" element={<EditTransactionPage />} />

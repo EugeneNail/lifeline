@@ -1,0 +1,289 @@
+.habit-statistics-page
+    padding-bottom: 100px
+
+    .page-header__title
+        font-size: clamp(26px, 2.4vw, 36px)
+        line-height: 1.02
+
+    .page-header__subtitle
+        max-width: 620px
+        font-size: 14px
+
+.habit-statistics-page__shell
+    display: grid
+    gap: 18px
+    min-width: 0
+    width: 100%
+
+.habit-statistics-page__filters
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    justify-content: flex-start
+    gap: 12px
+
+.habit-statistics-page__heatmap-panel
+    box-sizing: border-box
+    width: 100%
+    max-width: 100%
+    min-width: 0
+    overflow: hidden
+    border: 1px solid var(--divider)
+    border-radius: 20px
+    padding: 24px
+    background: var(--surface)
+    box-shadow: 0 16px 40px rgba(38, 49, 43, .04)
+
+.habit-statistics-page__habit
+    min-width: 0
+
+    &:not(:last-child)
+        margin-bottom: 26px
+        border-bottom: 1px solid var(--divider)
+        padding-bottom: 26px
+
+.habit-statistics-page__habit-header
+    display: flex
+    align-items: center
+    gap: 12px
+    margin-bottom: 16px
+
+.habit-statistics-page__habit-icon
+    display: grid
+    width: 40px
+    height: 40px
+    flex: 0 0 auto
+    place-items: center
+    border-radius: 11px
+    background: var(--surface-secondary)
+
+.habit-statistics-page__habit-copy
+    min-width: 0
+
+    h2,
+    p
+        margin: 0
+
+    h2
+        font-size: 15px
+        font-weight: 750
+        letter-spacing: -.02em
+
+    p
+        margin-top: 3px
+        color: var(--text-secondary)
+        font-size: 11px
+
+.habit-statistics-page__heatmap-scroll
+    box-sizing: border-box
+    width: 100%
+    max-width: 100%
+    min-width: 0
+    overflow-x: auto
+    overflow-y: hidden
+    padding: 24px 2px 22px
+
+.habit-statistics-page__heatmap-frame
+    display: grid
+    width: max-content
+    gap: 7px
+
+    &--weekday-columns
+        grid-template-rows: auto max-content
+
+    &--weekday-rows
+        grid-template-columns: auto max-content
+        grid-template-rows: auto max-content
+
+        .habit-statistics-page__weekday-labels
+            grid-column: 1
+            grid-row: 2
+
+        .habit-statistics-page__heatmap
+            grid-column: 2
+            grid-row: 2
+
+.habit-statistics-page__weekday-labels
+    color: var(--text-secondary)
+    font-size: 9px
+    font-weight: 750
+    line-height: 1
+
+    span
+        display: grid
+        place-items: center
+
+    &--weekday-columns
+        display: grid
+        grid-template-columns: repeat(7, 22px)
+        gap: 2px
+
+    &--weekday-rows
+        display: grid
+        grid-template-rows: repeat(7, 22px)
+        gap: 2px
+
+.habit-statistics-page__heatmap
+    display: grid
+    width: max-content
+    gap: 2px
+
+    &--weekday-columns
+        grid-auto-rows: 22px
+        grid-template-columns: repeat(7, 22px)
+
+    &--weekday-rows
+        grid-auto-columns: 22px
+        grid-template-rows: repeat(7, 22px)
+
+.habit-statistics-page__heatmap-node
+    position: relative
+    display: block
+    width: 22px
+    height: 22px
+    border-radius: 6px
+    outline: none
+
+    &:focus-visible
+        box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary)
+
+    &:hover,
+    &:focus
+        z-index: 2
+
+.habit-statistics-page__month-labels
+    display: grid
+    grid-column: 2
+    grid-row: 1
+    gap: 2px
+    color: var(--text-secondary)
+    font-size: 9px
+    font-weight: 700
+    line-height: 1
+
+    span
+        white-space: nowrap
+
+.habit-statistics-page__heatmap-tooltip
+    position: fixed
+    z-index: 80
+    display: grid
+    gap: 2px
+    min-width: max-content
+    border: 1px solid var(--divider)
+    border-radius: 8px
+    padding: 6px 8px
+    background: var(--surface)
+    box-shadow: 0 8px 22px rgba(23, 32, 28, .14)
+    color: var(--text-primary)
+    font-size: 10px
+    font-weight: 700
+    pointer-events: none
+    transform: translate(-50%, -100%)
+    white-space: nowrap
+
+    strong
+        font-size: 10px
+
+    span
+        color: var(--text-secondary)
+        font-weight: 600
+
+.habit-statistics-page__loading-overlay
+    position: fixed
+    inset: 0
+    z-index: 70
+    display: grid
+    place-items: center
+    padding: 24px
+    background: rgba(255, 255, 255, .74)
+    backdrop-filter: blur(2px)
+
+.habit-statistics-page__loading-box
+    display: grid
+    justify-items: center
+    gap: 14px
+    text-align: center
+
+.habit-statistics-page__loading-spinner
+    width: 34px
+    height: 34px
+    border: 3px solid rgba(66, 104, 88, .16)
+    border-top-color: var(--primary)
+    border-radius: 50%
+    animation: habit-statistics-page-spin 800ms linear infinite
+
+.habit-statistics-page__loading-text
+    margin: 0
+    color: var(--text-secondary)
+    font-size: 14px
+    font-weight: 650
+    letter-spacing: -.01em
+
+@media (max-width: 560px)
+    .habit-statistics-page__filters
+        align-items: stretch
+        flex-direction: column
+
+    .habit-statistics-page__date-selector
+        width: 100%
+
+    .habit-statistics-page__heatmap-panel
+        padding: 18px
+
+@media (orientation: portrait)
+    .habit-statistics-page__habit--weekday-columns .habit-statistics-page__heatmap-scroll
+        overflow-x: hidden
+
+    .habit-statistics-page__heatmap-frame--weekday-columns
+        width: 100%
+
+    .habit-statistics-page__weekday-labels--weekday-columns
+        grid-template-columns: repeat(7, minmax(0, 1fr))
+
+    .habit-statistics-page__heatmap--weekday-columns
+        width: 100%
+        grid-auto-rows: auto
+        grid-template-columns: repeat(7, minmax(0, 1fr))
+
+    .habit-statistics-page__habit--weekday-columns .habit-statistics-page__heatmap-node
+        width: 100%
+        height: auto
+        border-radius: 25%
+        aspect-ratio: 1
+
+@media (orientation: landscape)
+    .habit-statistics-page
+        padding-left: 248px
+        padding-bottom: 64px
+
+    .habit-statistics-page__heatmap-panel
+        display: flex
+        flex-wrap: wrap
+        align-items: start
+        justify-content: space-between
+        gap: 64px 64px
+
+    .habit-statistics-page__habit
+        width: fit-content
+        max-width: min(440px, 100%)
+        min-width: 0
+        flex: 0 1 auto
+
+        &:not(:last-child)
+            margin-bottom: 0
+            border-bottom: 0
+            padding-bottom: 0
+
+        &--weekday-rows
+            width: 100%
+            max-width: 100%
+            flex-basis: 100%
+
+    .habit-statistics-page__heatmap-scroll
+        width: fit-content
+        max-width: 100%
+
+@keyframes habit-statistics-page-spin
+    to
+        transform: rotate(360deg)
