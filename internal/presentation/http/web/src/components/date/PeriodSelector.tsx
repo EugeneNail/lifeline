@@ -1,7 +1,8 @@
-import type { DateRange } from '../../components/date'
-import './TransactionPeriodSelector.sass'
+import type { DateRange } from './DateSelector'
+import './PeriodSelector.sass'
 
-type TransactionPeriodSelectorProps = {
+type PeriodSelectorProps = {
+    ariaLabel?: string
     onChange: (range: DateRange) => void
     onCustomClick: () => void
     today: Date
@@ -45,22 +46,23 @@ function buildPresetRange(days: number, today: Date): DateRange {
     return { startDate, endDate }
 }
 
-// TransactionPeriodSelector renders compact range presets and opens the custom date picker on request.
-export function TransactionPeriodSelector({
+// PeriodSelector renders compact range presets and opens the custom date picker on request.
+export function PeriodSelector({
+    ariaLabel = 'Statistics period',
     onChange,
     onCustomClick,
     today,
     value,
-}: TransactionPeriodSelectorProps) {
+}: PeriodSelectorProps) {
     const rangeLength = getRangeLength(value)
     const activePreset = periodPresets.find((preset) => preset.days === rangeLength)
 
     return (
-        <div aria-label="Transaction statistics period" className="transaction-period-selector">
+        <div aria-label={ariaLabel} className="period-selector">
             {periodPresets.map((preset) => (
                 <button
                     aria-pressed={activePreset?.days === preset.days}
-                    className="transaction-period-selector__button"
+                    className="period-selector__button"
                     key={preset.days}
                     type="button"
                     onClick={() => onChange(buildPresetRange(preset.days, today))}
@@ -70,7 +72,7 @@ export function TransactionPeriodSelector({
             ))}
             <button
                 aria-pressed={activePreset === undefined}
-                className="transaction-period-selector__button"
+                className="period-selector__button"
                 type="button"
                 onClick={onCustomClick}
             >

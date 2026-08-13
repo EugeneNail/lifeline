@@ -1,14 +1,13 @@
 import axios from 'axios'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { DateSelector, type DateRange, type DateSelectorHandle } from '../../components/date'
+import { DateSelector, PeriodSelector, type DateRange, type DateSelectorHandle } from '../../components/date'
 import { AppNavigation } from '../../components/navigation'
 import { GoogleIcon } from '../../components/icons'
 import { Message } from '../../components/primitives'
 import { Page, PageHeader } from '../../components/layout'
 import { useApiClient } from '../../hooks/useApiClient'
 import { TransactionCategorySelector } from './TransactionCategorySelector'
-import { TransactionPeriodSelector } from './TransactionPeriodSelector'
 import { readStoredTransactionCategories, transactionCategories } from './transactionCategories'
 import './TransactionStatisticsPage.sass'
 
@@ -465,7 +464,8 @@ export function TransactionStatisticsPage() {
 
                 <div className="transaction-statistics-page__filters">
                     <TransactionCategorySelector onChange={setSelectedCategories} />
-                    <TransactionPeriodSelector
+                    <PeriodSelector
+                        ariaLabel="Transaction statistics period"
                         today={today}
                         value={{ startDate: range.from, endDate: range.to }}
                         onChange={handleRangeChange}
