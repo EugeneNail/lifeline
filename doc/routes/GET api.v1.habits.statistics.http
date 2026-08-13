@@ -1,0 +1,3 @@
+### Get habit statistics
+GET localhost:30000/api/v1/habits/statistics?from=2000-01-01&to=2000-01-31
+Authorization: Bearer {{loginToken}}

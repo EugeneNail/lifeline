@@ -9,6 +9,7 @@ import (
 	"github.com/EugeneNail/lifeline/internal/application/usecases/habit/create_measurable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/habit/create_time_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/habit/get_completable_habit"
+	"github.com/EugeneNail/lifeline/internal/application/usecases/habit/get_habit_statistics"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/habit/get_measurable_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/habit/get_time_habit"
 	"github.com/EugeneNail/lifeline/internal/application/usecases/habit/list_habit_records"
@@ -36,6 +37,7 @@ import (
 	transportCreate_measurable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/create_measurable_habit"
 	transportCreate_time_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/create_time_habit"
 	transportGet_completable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/get_completable_habit"
+	transportGet_habit_statistics "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/get_habit_statistics"
 	transportGet_measurable_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/get_measurable_habit"
 	transportGet_time_habit "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/get_time_habit"
 	transportList_habit_records "github.com/EugeneNail/lifeline/internal/presentation/http/api/habit/list_habit_records"
@@ -252,6 +254,11 @@ func main() {
 		log.Fatalf("creating a list-habits usecase: %v", err)
 	}
 
+	getHabitStatisticsUsecase, err := get_habit_statistics.NewUsecase(measurableHabitRepository, measurableHabitRecordRepository)
+	if err != nil {
+		log.Fatalf("creating a get-habit-statistics usecase: %v", err)
+	}
+
 	listHabitRecordsUsecase, err := list_habit_records.NewHandler(completableHabitRecordRepository, timeHabitRecordRepository, measurableHabitRecordRepository)
 	if err != nil {
 		log.Fatalf("creating a list-habit-records usecase: %v", err)
@@ -304,6 +311,7 @@ func main() {
 	createCompletableHabitEndpoint := transportCreate_completable_habit.NewHandler(createCompletableHabitUsecase, requestIdentity)
 	createMeasurableHabitEndpoint := transportCreate_measurable_habit.NewHandler(createMeasurableHabitUsecase, requestIdentity)
 	listHabitsEndpoint := transportList_habits.NewHandler(listHabitsUsecase, requestIdentity)
+	getHabitStatisticsEndpoint := transportGet_habit_statistics.NewHandler(getHabitStatisticsUsecase, requestIdentity)
 	listHabitRecordsEndpoint := transportList_habit_records.NewHandler(listHabitRecordsUsecase, requestIdentity)
 	saveCompletableHabitRecordEndpoint := transportSave_completable_habit_record.NewHandler(saveCompletableHabitRecordUsecase, requestIdentity)
 	saveMeasurableHabitRecordEndpoint := transportSave_measurable_habit_record.NewHandler(saveMeasurableHabitRecordUsecase, requestIdentity)
@@ -338,6 +346,7 @@ func main() {
 	server.Handle("GET /api/v1/habits/time/{uuid}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getTimeHabitEndpoint)))
 	server.Handle("GET /api/v1/habits/measurable/{uuid}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getMeasurableHabitEndpoint)))
 	server.Handle("GET /api/v1/habits", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(listHabitsEndpoint)))
+	server.Handle("GET /api/v1/habits/statistics", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(getHabitStatisticsEndpoint)))
 	server.Handle("GET /api/v1/habits/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(listHabitRecordsEndpoint)))
 	server.Handle("POST /api/v1/habits/completable/{uuid}/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(saveCompletableHabitRecordEndpoint)))
 	server.Handle("POST /api/v1/habits/measurable/{uuid}/{date}", middleware.Authenticate(jwtProvider, requestIdentity)(middleware.WriteJSONResponse(saveMeasurableHabitRecordEndpoint)))
