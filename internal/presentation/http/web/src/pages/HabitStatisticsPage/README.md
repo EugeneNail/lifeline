@@ -11,7 +11,7 @@ The page loads two independent resources:
 - `GET /api/v1/habits` supplies habit metadata and is converted into an in-memory registry keyed by habit ID.
 - `GET /api/v1/habits/statistics?from=YYYY-MM-DD&to=YYYY-MM-DD` supplies heatmap values for the selected range.
 
-The registry contains measurable, time, and completable habits. Only measurable habits are rendered at the moment because the current statistics response only contains `measurableHeatmap` data.
+The registry contains measurable, time, and completable habits. Completable and measurable habits are rendered in one list, with completable habits first. Time habits remain in the registry but are not rendered until the statistics API provides their data.
 
 ## Data invariants
 
@@ -19,9 +19,11 @@ The registry contains measurable, time, and completable habits. Only measurable 
 - Every registry entry retains its habit type. Measurable entries additionally retain `step` and `unit`.
 - Heatmaps are matched to registry entries by `habitId`.
 - Habit metadata, including the label, icon, and measurement unit, always comes from the registry rather than the statistics response.
-- A measurable habit remains renderable when its heatmap is missing; in that case it has no nodes and zero non-zero records.
+- Completable habits are rendered before measurable habits in the shared statistics list.
+- A supported habit remains renderable when its heatmap is missing; in that case it has no nodes and zero non-zero records.
 - The displayed record count includes only nodes whose value is not zero.
-- `maxValue` from the statistics response is the upper bound used to calculate node color intensity.
+- `maxValue` from a measurable heatmap is the upper bound used to calculate its node color intensity.
+- Completable heatmaps have two visual states: values `0` (no record) and `1` (incomplete) use the zero color, while `2` (complete) uses the fully saturated accent color.
 - The statistics request is repeated whenever the selected date range changes.
 - The habits request is made once when the page is mounted.
 - Habit-loading and statistics-loading states are tracked separately. The loading overlay remains visible until both requests have settled.
@@ -44,7 +46,7 @@ The registry contains measurable, time, and completable habits. Only measurable 
 - Nodes preserve chronological order from the API response.
 - Monday is weekday index 1 and Sunday is weekday index 7.
 - A partial first week starts in the row or column matching the actual weekday of the first date; it is never shifted to Monday artificially.
-- Node tooltips display the full date, the value rounded to at most one fractional digit, and the measurable habit unit.
+- Node tooltips display the full date and the value rounded to at most one fractional digit. Measurable values additionally display their unit.
 - Tooltips are positioned in a fixed layer outside the scrolling container so they are not clipped.
 - An open tooltip closes on node blur, pointer leave, any scroll event, or window resize.
 - Zero-value nodes use a neutral gray-green color.

@@ -19,8 +19,20 @@ type MeasurableHabitHeatmapResource = {
     maxValue: number
 }
 
+type CompletableHabitHeatmapResource = {
+    habitId: string
+    nodes: HeatmapNodeResource[]
+}
+
+type HabitHeatmapResource = {
+    habitId: string
+    nodes: HeatmapNodeResource[]
+    maxValue: number
+}
+
 type HabitStatisticsResponse = {
     measurableHeatmap: MeasurableHabitHeatmapResource[]
+    completableHeatmap: CompletableHabitHeatmapResource[]
 }
 
 type HabitResource = {
@@ -249,6 +261,18 @@ function interpolateHeatmapColor(value: number, maxValue: number) {
     return `rgb(${channels.join(', ')})`
 }
 
+function getHeatmapNodeColor(
+    value: number,
+    maxValue: number,
+    habitType: HabitRegistryEntry['type'],
+) {
+    if (habitType === 'completable') {
+        return interpolateHeatmapColor(value === 2 ? 2 : 0, 2)
+    }
+
+    return interpolateHeatmapColor(value, maxValue)
+}
+
 // HabitStatisticsPage renders the habit statistics controls and loads data for the selected range.
 export function HabitStatisticsPage() {
     const apiClient = useApiClient()
@@ -267,16 +291,29 @@ export function HabitStatisticsPage() {
     const [habitsLoadError, setHabitsLoadError] = useState('')
     const [heatmapTooltip, setHeatmapTooltip] = useState<HeatmapTooltip | null>(null)
     const dateSelectorRef = useRef<DateSelectorHandle>(null)
-    const measurableHabits = useMemo(
-        () => [...habitRegistry.values()].filter((habit) => habit.type === 'measurable'),
-        [habitRegistry],
-    )
-    const heatmapsByHabitID = useMemo(
-        () => new Map(
-            (statistics?.measurableHeatmap ?? []).map((heatmap) => [heatmap.habitId, heatmap]),
-        ),
-        [statistics],
-    )
+    const statisticsHabits = useMemo(() => {
+        const habits = [...habitRegistry.values()]
+
+        return [
+            ...habits.filter((habit) => habit.type === 'completable'),
+            ...habits.filter((habit) => habit.type === 'measurable'),
+        ]
+    }, [habitRegistry])
+    const heatmapsByHabitID = useMemo(() => {
+        const heatmaps = new Map<string, HabitHeatmapResource>()
+
+        for (const heatmap of statistics?.completableHeatmap ?? []) {
+            heatmaps.set(heatmap.habitId, {
+                ...heatmap,
+                maxValue: 2,
+            })
+        }
+        for (const heatmap of statistics?.measurableHeatmap ?? []) {
+            heatmaps.set(heatmap.habitId, heatmap)
+        }
+
+        return heatmaps
+    }, [statistics])
     const isLoading = isStatisticsLoading || areHabitsLoading
     const loadError = habitsLoadError || statisticsLoadError
 
@@ -452,7 +489,7 @@ export function HabitStatisticsPage() {
 
                 {!loadError && !isLoading ? (
                     <section className="habit-statistics-page__heatmap-panel">
-                        {measurableHabits.map((habit) => {
+                        {statisticsHabits.map((habit) => {
                             const heatmap = heatmapsByHabitID.get(habit.id)
                             const nodes = heatmap?.nodes ?? []
                             const nonZeroRecords = nodes.filter((node) => node.value !== 0).length
@@ -525,9 +562,10 @@ export function HabitStatisticsPage() {
                                                             className="habit-statistics-page__heatmap-node"
                                                             key={node.date}
                                                             style={{
-                                                                backgroundColor: interpolateHeatmapColor(
+                                                                backgroundColor: getHeatmapNodeColor(
                                                                     node.value,
                                                                     heatmap?.maxValue ?? 0,
+                                                                    habit.type,
                                                                 ),
                                                                 gridColumn: position.column,
                                                                 gridRow: position.row,
