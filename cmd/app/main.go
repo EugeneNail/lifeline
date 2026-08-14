@@ -254,7 +254,12 @@ func main() {
 		log.Fatalf("creating a list-habits usecase: %v", err)
 	}
 
-	getHabitStatisticsUsecase, err := get_habit_statistics.NewUsecase(measurableHabitRepository, measurableHabitRecordRepository)
+	getHabitStatisticsUsecase, err := get_habit_statistics.NewUsecase(
+		measurableHabitRepository,
+		measurableHabitRecordRepository,
+		completableHabitRepository,
+		completableHabitRecordRepository,
+	)
 	if err != nil {
 		log.Fatalf("creating a get-habit-statistics usecase: %v", err)
 	}
