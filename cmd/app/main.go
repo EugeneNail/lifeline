@@ -259,6 +259,8 @@ func main() {
 		measurableHabitRecordRepository,
 		completableHabitRepository,
 		completableHabitRecordRepository,
+		timeHabitRepository,
+		timeHabitRecordRepository,
 	)
 	if err != nil {
 		log.Fatalf("creating a get-habit-statistics usecase: %v", err)

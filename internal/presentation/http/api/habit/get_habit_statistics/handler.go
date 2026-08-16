@@ -49,6 +49,7 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 
 	return http.StatusOK, Output{
 		MeasurableHeatmap:  mapMeasurableHeatmaps(result.MeasurableHeatmap),
+		TimeHeatmap:        mapTimeHeatmaps(result.TimeHeatmap),
 		CompletableHeatmap: mapCompletableHeatmaps(result.CompletableHeatmap),
 	}
 }
@@ -58,6 +59,20 @@ func mapMeasurableHeatmaps(heatmaps []application.MeasurableHabitHeatmap) []Meas
 	output := make([]MeasurableHabitHeatmap, 0, len(heatmaps))
 	for _, heatmap := range heatmaps {
 		output = append(output, MeasurableHabitHeatmap{
+			HabitID:  heatmap.HabitID.String(),
+			Nodes:    mapHeatmapNodes(heatmap.Nodes),
+			MaxValue: heatmap.MaxValue,
+		})
+	}
+
+	return output
+}
+
+// mapTimeHeatmaps converts application time heatmaps to transport output.
+func mapTimeHeatmaps(heatmaps []application.TimeHabitHeatmap) []TimeHabitHeatmap {
+	output := make([]TimeHabitHeatmap, 0, len(heatmaps))
+	for _, heatmap := range heatmaps {
+		output = append(output, TimeHabitHeatmap{
 			HabitID:  heatmap.HabitID.String(),
 			Nodes:    mapHeatmapNodes(heatmap.Nodes),
 			MaxValue: heatmap.MaxValue,

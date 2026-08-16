@@ -18,6 +18,13 @@ type MeasurableHabitHeatmap struct {
 	MaxValue float32
 }
 
+// TimeHabitHeatmap represents daily time values and the maximum value for a time habit.
+type TimeHabitHeatmap struct {
+	HabitID  uuid.UUID
+	Nodes    []HeatmapNode
+	MaxValue float32
+}
+
 // CompletableHeatmap represents daily completion states for a completable habit.
 type CompletableHeatmap struct {
 	HabitID uuid.UUID
@@ -27,5 +34,6 @@ type CompletableHeatmap struct {
 // Result carries the habit statistics returned by the use case.
 type Result struct {
 	MeasurableHeatmap  []MeasurableHabitHeatmap
+	TimeHeatmap        []TimeHabitHeatmap
 	CompletableHeatmap []CompletableHeatmap
 }

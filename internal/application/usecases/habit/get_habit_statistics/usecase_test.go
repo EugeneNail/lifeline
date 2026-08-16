@@ -58,6 +58,74 @@ func TestBuildMeasurableHeatmapsMatchesDatesAcrossLocations(t *testing.T) {
 	}
 }
 
+// TestBuildTimeHeatmapsIncludesEveryHabitAndCalculatesMaximum verifies that time heatmaps contain every date and retain the highest minute value.
+func TestBuildTimeHeatmapsIncludesEveryHabitAndCalculatesMaximum(t *testing.T) {
+	firstHabitID := uuid.MustParse("00000000-0000-7000-8000-000000000001")
+	secondHabitID := uuid.MustParse("00000000-0000-7000-8000-000000000002")
+	accountID := uuid.MustParse("00000000-0000-7000-8000-000000000003")
+	firstDate := time.Date(2026, time.August, 11, 0, 0, 0, 0, time.UTC)
+	secondDate := firstDate.AddDate(0, 0, 1)
+	thirdDate := firstDate.AddDate(0, 0, 2)
+
+	firstHabit := habits.RestoreTimeHabit(
+		firstHabitID,
+		"Morning run",
+		1,
+		firstDate,
+		firstDate,
+		nil,
+		nil,
+		accountID,
+	)
+	secondHabit := habits.RestoreTimeHabit(
+		secondHabitID,
+		"Reading",
+		2,
+		firstDate,
+		firstDate,
+		nil,
+		nil,
+		accountID,
+	)
+	firstRecord := records.RestoreTimeHabitRecord(
+		firstHabitID,
+		accountID,
+		records.NewDate(firstDate),
+		records.TimeValue(360),
+	)
+	thirdRecord := records.RestoreTimeHabitRecord(
+		firstHabitID,
+		accountID,
+		records.NewDate(thirdDate),
+		records.TimeValue(900),
+	)
+
+	heatmaps := buildTimeHeatmaps(
+		[]*habits.TimeHabit{secondHabit, firstHabit},
+		[]*records.TimeHabitRecord{firstRecord, thirdRecord},
+		[]time.Time{firstDate, secondDate, thirdDate},
+	)
+
+	if len(heatmaps) != 2 {
+		t.Fatalf("expected two heatmaps, got %d", len(heatmaps))
+	}
+
+	if heatmaps[0].HabitID != firstHabitID {
+		t.Fatalf("expected first heatmap for habit %q, got %q", firstHabitID, heatmaps[0].HabitID)
+	}
+
+	assertHeatmapNodeValues(t, heatmaps[0].Nodes, []float32{360, 0, 900})
+	assertHeatmapNodeValues(t, heatmaps[1].Nodes, []float32{0, 0, 0})
+
+	if heatmaps[0].MaxValue != 900 {
+		t.Fatalf("expected maximum value 900, got %v", heatmaps[0].MaxValue)
+	}
+
+	if heatmaps[1].MaxValue != 0 {
+		t.Fatalf("expected zero maximum for a habit without records, got %v", heatmaps[1].MaxValue)
+	}
+}
+
 // TestBuildCompletableHeatmapsIncludesEveryHabitAndDate verifies that completable heatmaps distinguish missing, incomplete, and complete records.
 func TestBuildCompletableHeatmapsIncludesEveryHabitAndDate(t *testing.T) {
 	firstHabitID := uuid.MustParse("00000000-0000-7000-8000-000000000001")

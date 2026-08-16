@@ -17,6 +17,8 @@ type Usecase struct {
 	completableHabitRecords records.CompletableHabitRecordRepository
 	measurableHabits        habits.MeasurableHabitRepository
 	measurableHabitRecords  records.MeasurableHabitRecordRepository
+	timeHabits              habits.TimeHabitRepository
+	timeHabitRecords        records.TimeHabitRecordRepository
 }
 
 // NewUsecase returns a get-habit-statistics use case configured with the habit and record repositories or an error when a dependency is missing.
@@ -25,6 +27,8 @@ func NewUsecase(
 	measurableHabitRecords records.MeasurableHabitRecordRepository,
 	completableHabits habits.CompletableHabitRepository,
 	completableHabitRecords records.CompletableHabitRecordRepository,
+	timeHabits habits.TimeHabitRepository,
+	timeHabitRecords records.TimeHabitRecordRepository,
 ) (*Usecase, error) {
 	if measurableHabits == nil {
 		return nil, fmt.Errorf("get_habit_statistics usecase requires a measurable habit repository")
@@ -42,21 +46,31 @@ func NewUsecase(
 		return nil, fmt.Errorf("get_habit_statistics usecase requires a completable habit record repository")
 	}
 
+	if timeHabits == nil {
+		return nil, fmt.Errorf("get_habit_statistics usecase requires a time habit repository")
+	}
+
+	if timeHabitRecords == nil {
+		return nil, fmt.Errorf("get_habit_statistics usecase requires a time habit record repository")
+	}
+
 	return &Usecase{
 		completableHabits:       completableHabits,
 		completableHabitRecords: completableHabitRecords,
 		measurableHabits:        measurableHabits,
 		measurableHabitRecords:  measurableHabitRecords,
+		timeHabits:              timeHabits,
+		timeHabitRecords:        timeHabitRecords,
 	}, nil
 }
 
-// Handle returns measurable and completable habit heatmaps for the requested range or an error when the range is invalid or data cannot be loaded.
+// Handle returns measurable, time, and completable habit heatmaps for the requested range or an error when the range is invalid or data cannot be loaded.
 func (usecase *Usecase) Handle(ctx context.Context, query Query) (Result, error) {
 	if query.From.After(query.To) {
 		return Result{}, ErrInvalidDateRange
 	}
 
-	foundHabits, err := usecase.measurableHabits.FindMany(
+	foundMeasurableHabits, err := usecase.measurableHabits.FindMany(
 		ctx,
 		habits.NewMeasurableHabitFilter().
 			WithAccountIds(query.AccountID).
@@ -68,7 +82,7 @@ func (usecase *Usecase) Handle(ctx context.Context, query Query) (Result, error)
 	}
 
 	dates := buildDateRange(query.From, query.To)
-	foundRecords, err := usecase.measurableHabitRecords.FindMany(
+	foundMeasurableRecords, err := usecase.measurableHabitRecords.FindMany(
 		ctx,
 		records.NewMeasurableHabitRecordFilter().
 			WithAccountIds(query.AccountID).
@@ -99,8 +113,30 @@ func (usecase *Usecase) Handle(ctx context.Context, query Query) (Result, error)
 		return Result{}, fmt.Errorf("finding completable habit records for account id %q between %q and %q: %w", query.AccountID, query.From, query.To, err)
 	}
 
+	foundTimeHabits, err := usecase.timeHabits.FindMany(
+		ctx,
+		habits.NewTimeHabitFilter().
+			WithAccountIds(query.AccountID).
+			WithArchived(false).
+			WithDeleted(false),
+	)
+	if err != nil {
+		return Result{}, fmt.Errorf("finding active time habits for account id %q: %w", query.AccountID, err)
+	}
+
+	foundTimeRecords, err := usecase.timeHabitRecords.FindMany(
+		ctx,
+		records.NewTimeHabitRecordFilter().
+			WithAccountIds(query.AccountID).
+			WithDates(dates...),
+	)
+	if err != nil {
+		return Result{}, fmt.Errorf("finding time habit records for account id %q between %q and %q: %w", query.AccountID, query.From, query.To, err)
+	}
+
 	return Result{
-		MeasurableHeatmap:  buildMeasurableHeatmaps(foundHabits, foundRecords, dates),
+		MeasurableHeatmap:  buildMeasurableHeatmaps(foundMeasurableHabits, foundMeasurableRecords, dates),
+		TimeHeatmap:        buildTimeHeatmaps(foundTimeHabits, foundTimeRecords, dates),
 		CompletableHeatmap: buildCompletableHeatmaps(foundCompletableHabits, foundCompletableRecords, dates),
 	}, nil
 }
@@ -172,6 +208,68 @@ func buildMeasurableHeatmaps(
 		}
 
 		heatmaps = append(heatmaps, MeasurableHabitHeatmap{
+			HabitID:  habitID,
+			Nodes:    nodes,
+			MaxValue: maxValues[habitID],
+		})
+	}
+
+	return heatmaps
+}
+
+// buildTimeHeatmaps creates a complete heatmap for every active time habit, fills dates without records with zero, and calculates each maximum value.
+func buildTimeHeatmaps(
+	foundHabits []*habits.TimeHabit,
+	foundRecords []*records.TimeHabitRecord,
+	dates []time.Time,
+) []TimeHabitHeatmap {
+	valuesByHabit := make(map[uuid.UUID]map[records.Date]float32)
+	maxValues := make(map[uuid.UUID]float32)
+	habitIDs := make([]uuid.UUID, 0, len(foundHabits))
+
+	for _, habit := range foundHabits {
+		if habit == nil {
+			continue
+		}
+
+		habitID := habit.ID()
+		valuesByHabit[habitID] = make(map[records.Date]float32)
+		habitIDs = append(habitIDs, habitID)
+	}
+
+	for _, record := range foundRecords {
+		if record == nil {
+			continue
+		}
+
+		habitID := record.TimeHabitId()
+		if _, exists := valuesByHabit[habitID]; !exists {
+			continue
+		}
+
+		value := float32(record.Value().Value())
+		valuesByHabit[habitID][record.Date()] = value
+		if value > maxValues[habitID] {
+			maxValues[habitID] = value
+		}
+	}
+
+	sort.Slice(habitIDs, func(i int, j int) bool {
+		return habitIDs[i].String() < habitIDs[j].String()
+	})
+
+	heatmaps := make([]TimeHabitHeatmap, 0, len(habitIDs))
+	for _, habitID := range habitIDs {
+		nodes := make([]HeatmapNode, 0, len(dates))
+		for _, date := range dates {
+			recordDate := records.NewDate(date)
+			nodes = append(nodes, HeatmapNode{
+				Date:  recordDate,
+				Value: valuesByHabit[habitID][recordDate],
+			})
+		}
+
+		heatmaps = append(heatmaps, TimeHabitHeatmap{
 			HabitID:  habitID,
 			Nodes:    nodes,
 			MaxValue: maxValues[habitID],
