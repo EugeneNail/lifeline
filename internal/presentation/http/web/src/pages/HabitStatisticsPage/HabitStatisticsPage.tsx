@@ -19,6 +19,12 @@ type MeasurableHabitHeatmapResource = {
     maxValue: number
 }
 
+type TimeHabitHeatmapResource = {
+    habitId: string
+    nodes: HeatmapNodeResource[]
+    maxValue: number
+}
+
 type CompletableHabitHeatmapResource = {
     habitId: string
     nodes: HeatmapNodeResource[]
@@ -32,6 +38,7 @@ type HabitHeatmapResource = {
 
 type HabitStatisticsResponse = {
     measurableHeatmap: MeasurableHabitHeatmapResource[]
+    timeHeatmap: TimeHabitHeatmapResource[]
     completableHeatmap: CompletableHabitHeatmapResource[]
 }
 
@@ -273,6 +280,30 @@ function getHeatmapNodeColor(
     return interpolateHeatmapColor(value, maxValue)
 }
 
+function formatTimeValue(value: number) {
+    const normalizedMinutes = Math.min(Math.max(Math.round(value), 0), 1439)
+    const hours = Math.floor(normalizedMinutes / 60)
+    const minutes = normalizedMinutes % 60
+
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+}
+
+function getHeatmapValueLabel(
+    value: number,
+    habitType: HabitRegistryEntry['type'],
+    unit?: string,
+) {
+    if (habitType === 'completable') {
+        return value === 2 ? 'Completed' : 'Not completed'
+    }
+
+    if (habitType === 'time') {
+        return formatTimeValue(value)
+    }
+
+    return `${heatmapValueFormatter.format(value)} ${unit ?? ''}`.trim()
+}
+
 // HabitStatisticsPage renders the habit statistics controls and loads data for the selected range.
 export function HabitStatisticsPage() {
     const apiClient = useApiClient()
@@ -297,6 +328,7 @@ export function HabitStatisticsPage() {
         return [
             ...habits.filter((habit) => habit.type === 'completable'),
             ...habits.filter((habit) => habit.type === 'measurable'),
+            ...habits.filter((habit) => habit.type === 'time'),
         ]
     }, [habitRegistry])
     const heatmapsByHabitID = useMemo(() => {
@@ -309,6 +341,9 @@ export function HabitStatisticsPage() {
             })
         }
         for (const heatmap of statistics?.measurableHeatmap ?? []) {
+            heatmaps.set(heatmap.habitId, heatmap)
+        }
+        for (const heatmap of statistics?.timeHeatmap ?? []) {
             heatmaps.set(heatmap.habitId, heatmap)
         }
 
@@ -554,7 +589,11 @@ export function HabitStatisticsPage() {
                                                         firstDateKey,
                                                         heatmapLayout,
                                                     )
-                                                    const valueLabel = `${heatmapValueFormatter.format(node.value)} ${habit.unit ?? ''}`.trim()
+                                                    const valueLabel = getHeatmapValueLabel(
+                                                        node.value,
+                                                        habit.type,
+                                                        habit.unit,
+                                                    )
 
                                                     return (
                                                         <span
