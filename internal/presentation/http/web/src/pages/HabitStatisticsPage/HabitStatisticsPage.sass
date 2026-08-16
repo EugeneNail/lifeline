@@ -258,17 +258,16 @@
         padding-bottom: 64px
 
     .habit-statistics-page__heatmap-panel
-        display: flex
-        flex-wrap: wrap
+        display: grid
+        grid-template-columns: repeat(auto-fit, 180px)
         align-items: start
         justify-content: space-between
         gap: 64px 64px
 
     .habit-statistics-page__habit
-        width: fit-content
-        max-width: min(440px, 100%)
+        width: 100%
+        max-width: 180px
         min-width: 0
-        flex: 0 1 auto
 
         &:not(:last-child)
             margin-bottom: 0
@@ -276,9 +275,9 @@
             padding-bottom: 0
 
         &--weekday-rows
+            grid-column: 1 / -1
             width: 100%
             max-width: 100%
-            flex-basis: 100%
 
     .habit-statistics-page__heatmap-scroll
         width: fit-content

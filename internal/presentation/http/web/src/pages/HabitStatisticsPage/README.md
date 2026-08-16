@@ -96,9 +96,10 @@ Responsive behavior is determined by orientation rather than viewport width:
 - Nodes retain their fixed size and do not stretch to fill available space.
 - Habits with 30 nodes or fewer use content-sized blocks and may share a row.
 - Short habit blocks wrap onto another row when there is insufficient horizontal space.
+- Complete rows distribute short habit blocks with `space-between`.
+- An incomplete final row occupies the leftmost grid columns, preserving the same column spacing as the rows above.
 - Habits with more than 30 nodes always occupy a full row.
 - Long heatmaps remain horizontally scrollable within their habit block.
-- Multiple short habit blocks are distributed horizontally with `space-between`.
 
 ## Overflow invariants
 
