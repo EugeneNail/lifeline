@@ -19,3 +19,12 @@ func NewDate(rawDate time.Time) Date {
 		time.UTC,
 	))
 }
+
+func truncateRecordDates(dates ...time.Time) []time.Time {
+	truncated := make([]time.Time, 0, len(dates))
+	for _, date := range dates {
+		truncated = append(truncated, date.Truncate(time.Hour*24))
+	}
+
+	return truncated
+}
