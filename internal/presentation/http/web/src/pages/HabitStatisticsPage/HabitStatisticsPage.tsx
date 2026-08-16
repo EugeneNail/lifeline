@@ -8,38 +8,38 @@ import { Message } from '../../components/primitives'
 import { useApiClient } from '../../hooks/useApiClient'
 import './HabitStatisticsPage.sass'
 
-type HeatmapNodeResource = {
+type NodeResource = {
     date: string
     value: number
 }
 
-type MeasurableHabitHeatmapResource = {
+type MeasurableHabitSeriesResource = {
     habitId: string
-    nodes: HeatmapNodeResource[]
+    nodes: NodeResource[]
     maxValue: number
 }
 
-type TimeHabitHeatmapResource = {
+type TimeHabitSeriesResource = {
     habitId: string
-    nodes: HeatmapNodeResource[]
+    nodes: NodeResource[]
     maxValue: number
 }
 
-type CompletableHabitHeatmapResource = {
+type CompletableSeriesResource = {
     habitId: string
-    nodes: HeatmapNodeResource[]
+    nodes: NodeResource[]
 }
 
-type HabitHeatmapResource = {
+type HabitSeriesResource = {
     habitId: string
-    nodes: HeatmapNodeResource[]
+    nodes: NodeResource[]
     maxValue: number
 }
 
 type HabitStatisticsResponse = {
-    measurableHeatmap: MeasurableHabitHeatmapResource[]
-    timeHeatmap: TimeHabitHeatmapResource[]
-    completableHeatmap: CompletableHabitHeatmapResource[]
+    measurableSeries: MeasurableHabitSeriesResource[]
+    timeSeries: TimeHabitSeriesResource[]
+    completableSeries: CompletableSeriesResource[]
 }
 
 type HabitResource = {
@@ -223,7 +223,7 @@ function getHeatmapPosition(
 }
 
 function buildHeatmapMonthLabels(
-    nodes: HeatmapNodeResource[],
+    nodes: NodeResource[],
     firstDateKey: string,
 ) {
     const labels: HeatmapMonthLabel[] = []
@@ -332,18 +332,18 @@ export function HabitStatisticsPage() {
         ]
     }, [habitRegistry])
     const heatmapsByHabitID = useMemo(() => {
-        const heatmaps = new Map<string, HabitHeatmapResource>()
+        const heatmaps = new Map<string, HabitSeriesResource>()
 
-        for (const heatmap of statistics?.completableHeatmap ?? []) {
+        for (const heatmap of statistics?.completableSeries ?? []) {
             heatmaps.set(heatmap.habitId, {
                 ...heatmap,
                 maxValue: 2,
             })
         }
-        for (const heatmap of statistics?.measurableHeatmap ?? []) {
+        for (const heatmap of statistics?.measurableSeries ?? []) {
             heatmaps.set(heatmap.habitId, heatmap)
         }
-        for (const heatmap of statistics?.timeHeatmap ?? []) {
+        for (const heatmap of statistics?.timeSeries ?? []) {
             heatmaps.set(heatmap.habitId, heatmap)
         }
 
