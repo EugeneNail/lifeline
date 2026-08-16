@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// TestBuildMeasurableHeatmapsMatchesDatesAcrossLocations verifies that PostgreSQL dates and query dates resolve to the same heatmap node.
-func TestBuildMeasurableHeatmapsMatchesDatesAcrossLocations(t *testing.T) {
+// TestBuildMeasurableSeriesMatchesDatesAcrossLocations verifies that PostgreSQL dates and query dates resolve to the same series node.
+func TestBuildMeasurableSeriesMatchesDatesAcrossLocations(t *testing.T) {
 	habitID := uuid.MustParse("00000000-0000-7000-8000-000000000001")
 	accountID := uuid.MustParse("00000000-0000-7000-8000-000000000002")
 	queryDate := time.Date(2026, time.August, 13, 0, 0, 0, 0, time.UTC)
@@ -35,7 +35,7 @@ func TestBuildMeasurableHeatmapsMatchesDatesAcrossLocations(t *testing.T) {
 		records.MeasurableValue(2.5),
 	)
 
-	heatmaps := buildMeasurableHeatmaps(
+	heatmaps := buildMeasurableSeries(
 		[]*habits.MeasurableHabit{habit},
 		[]*records.MeasurableHabitRecord{record},
 		[]time.Time{queryDate},
@@ -58,8 +58,8 @@ func TestBuildMeasurableHeatmapsMatchesDatesAcrossLocations(t *testing.T) {
 	}
 }
 
-// TestBuildTimeHeatmapsIncludesEveryHabitAndCalculatesMaximum verifies that time heatmaps contain every date and retain the highest minute value.
-func TestBuildTimeHeatmapsIncludesEveryHabitAndCalculatesMaximum(t *testing.T) {
+// TestBuildTimeSeriesIncludesEveryHabitAndCalculatesMaximum verifies that time series contain every date and retain the highest minute value.
+func TestBuildTimeSeriesIncludesEveryHabitAndCalculatesMaximum(t *testing.T) {
 	firstHabitID := uuid.MustParse("00000000-0000-7000-8000-000000000001")
 	secondHabitID := uuid.MustParse("00000000-0000-7000-8000-000000000002")
 	accountID := uuid.MustParse("00000000-0000-7000-8000-000000000003")
@@ -100,7 +100,7 @@ func TestBuildTimeHeatmapsIncludesEveryHabitAndCalculatesMaximum(t *testing.T) {
 		records.TimeValue(900),
 	)
 
-	heatmaps := buildTimeHeatmaps(
+	heatmaps := buildTimeSeries(
 		[]*habits.TimeHabit{secondHabit, firstHabit},
 		[]*records.TimeHabitRecord{firstRecord, thirdRecord},
 		[]time.Time{firstDate, secondDate, thirdDate},
@@ -114,8 +114,8 @@ func TestBuildTimeHeatmapsIncludesEveryHabitAndCalculatesMaximum(t *testing.T) {
 		t.Fatalf("expected first heatmap for habit %q, got %q", firstHabitID, heatmaps[0].HabitID)
 	}
 
-	assertHeatmapNodeValues(t, heatmaps[0].Nodes, []float32{360, 0, 900})
-	assertHeatmapNodeValues(t, heatmaps[1].Nodes, []float32{0, 0, 0})
+	assertNodeValues(t, heatmaps[0].Nodes, []float32{360, 0, 900})
+	assertNodeValues(t, heatmaps[1].Nodes, []float32{0, 0, 0})
 
 	if heatmaps[0].MaxValue != 900 {
 		t.Fatalf("expected maximum value 900, got %v", heatmaps[0].MaxValue)
@@ -126,8 +126,8 @@ func TestBuildTimeHeatmapsIncludesEveryHabitAndCalculatesMaximum(t *testing.T) {
 	}
 }
 
-// TestBuildCompletableHeatmapsIncludesEveryHabitAndDate verifies that completable heatmaps distinguish missing, incomplete, and complete records.
-func TestBuildCompletableHeatmapsIncludesEveryHabitAndDate(t *testing.T) {
+// TestBuildCompletableSeriesIncludesEveryHabitAndDate verifies that completable series distinguish missing, incomplete, and complete records.
+func TestBuildCompletableSeriesIncludesEveryHabitAndDate(t *testing.T) {
 	firstHabitID := uuid.MustParse("00000000-0000-7000-8000-000000000001")
 	secondHabitID := uuid.MustParse("00000000-0000-7000-8000-000000000002")
 	accountID := uuid.MustParse("00000000-0000-7000-8000-000000000003")
@@ -168,7 +168,7 @@ func TestBuildCompletableHeatmapsIncludesEveryHabitAndDate(t *testing.T) {
 		true,
 	)
 
-	heatmaps := buildCompletableHeatmaps(
+	heatmaps := buildCompletableSeries(
 		[]*habits.CompletableHabit{secondHabit, firstHabit},
 		[]*records.CompletableHabitRecord{incompleteRecord, completeRecord},
 		[]time.Time{firstDate, secondDate, thirdDate},
@@ -182,12 +182,12 @@ func TestBuildCompletableHeatmapsIncludesEveryHabitAndDate(t *testing.T) {
 		t.Fatalf("expected first heatmap for habit %q, got %q", firstHabitID, heatmaps[0].HabitID)
 	}
 
-	assertHeatmapNodeValues(t, heatmaps[0].Nodes, []float32{1, 0, 2})
-	assertHeatmapNodeValues(t, heatmaps[1].Nodes, []float32{0, 0, 0})
+	assertNodeValues(t, heatmaps[0].Nodes, []float32{1, 0, 2})
+	assertNodeValues(t, heatmaps[1].Nodes, []float32{0, 0, 0})
 }
 
-// assertHeatmapNodeValues verifies that heatmap nodes contain the expected values in date order.
-func assertHeatmapNodeValues(t *testing.T, nodes []HeatmapNode, expected []float32) {
+// assertNodeValues verifies that nodes contain the expected values in date order.
+func assertNodeValues(t *testing.T, nodes []Node, expected []float32) {
 	t.Helper()
 
 	if len(nodes) != len(expected) {

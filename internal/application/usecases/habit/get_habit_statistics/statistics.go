@@ -5,35 +5,35 @@ import (
 	"github.com/google/uuid"
 )
 
-// HeatmapNode represents a measurable habit value on a specific date.
-type HeatmapNode struct {
+// Node represents a habit value on a specific date.
+type Node struct {
 	Date  records.Date
 	Value float32
 }
 
-// MeasurableHabitHeatmap represents daily values and the maximum value for a measurable habit.
-type MeasurableHabitHeatmap struct {
+// MeasurableHabitSeries represents daily values and the maximum value for a measurable habit.
+type MeasurableHabitSeries struct {
 	HabitID  uuid.UUID
-	Nodes    []HeatmapNode
+	Nodes    []Node
 	MaxValue float32
 }
 
-// TimeHabitHeatmap represents daily time values and the maximum value for a time habit.
-type TimeHabitHeatmap struct {
+// TimeHabitSeries represents daily time values and the maximum value for a time habit.
+type TimeHabitSeries struct {
 	HabitID  uuid.UUID
-	Nodes    []HeatmapNode
+	Nodes    []Node
 	MaxValue float32
 }
 
-// CompletableHeatmap represents daily completion states for a completable habit.
-type CompletableHeatmap struct {
+// CompletableSeries represents daily completion states for a completable habit.
+type CompletableSeries struct {
 	HabitID uuid.UUID
-	Nodes   []HeatmapNode
+	Nodes   []Node
 }
 
 // Result carries the habit statistics returned by the use case.
 type Result struct {
-	MeasurableHeatmap  []MeasurableHabitHeatmap
-	TimeHeatmap        []TimeHabitHeatmap
-	CompletableHeatmap []CompletableHeatmap
+	MeasurableSeries  []MeasurableHabitSeries
+	TimeSeries        []TimeHabitSeries
+	CompletableSeries []CompletableSeries
 }

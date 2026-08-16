@@ -2,33 +2,33 @@ package get_habit_statistics
 
 // Output represents the JSON response body for habit statistics.
 type Output struct {
-	MeasurableHeatmap  []MeasurableHabitHeatmap `json:"measurableHeatmap"`
-	TimeHeatmap        []TimeHabitHeatmap       `json:"timeHeatmap"`
-	CompletableHeatmap []CompletableHeatmap     `json:"completableHeatmap"`
+	MeasurableSeries  []MeasurableHabitSeries `json:"measurableSeries"`
+	TimeSeries        []TimeHabitSeries       `json:"timeSeries"`
+	CompletableSeries []CompletableSeries     `json:"completableSeries"`
 }
 
-// MeasurableHabitHeatmap represents the public heatmap data for a measurable habit.
-type MeasurableHabitHeatmap struct {
-	HabitID  string        `json:"habitId"`
-	Nodes    []HeatmapNode `json:"nodes"`
-	MaxValue float32       `json:"maxValue"`
+// MeasurableHabitSeries represents the public series data for a measurable habit.
+type MeasurableHabitSeries struct {
+	HabitID  string  `json:"habitId"`
+	Nodes    []Node  `json:"nodes"`
+	MaxValue float32 `json:"maxValue"`
 }
 
-// TimeHabitHeatmap represents the public heatmap data for a time habit.
-type TimeHabitHeatmap struct {
-	HabitID  string        `json:"habitId"`
-	Nodes    []HeatmapNode `json:"nodes"`
-	MaxValue float32       `json:"maxValue"`
+// TimeHabitSeries represents the public series data for a time habit.
+type TimeHabitSeries struct {
+	HabitID  string  `json:"habitId"`
+	Nodes    []Node  `json:"nodes"`
+	MaxValue float32 `json:"maxValue"`
 }
 
-// CompletableHeatmap represents the public heatmap data for a completable habit.
-type CompletableHeatmap struct {
-	HabitID string        `json:"habitId"`
-	Nodes   []HeatmapNode `json:"nodes"`
+// CompletableSeries represents the public series data for a completable habit.
+type CompletableSeries struct {
+	HabitID string `json:"habitId"`
+	Nodes   []Node `json:"nodes"`
 }
 
-// HeatmapNode represents a public habit statistics value for a date.
-type HeatmapNode struct {
+// Node represents a public habit statistics value for a date.
+type Node struct {
 	Date  string  `json:"date"`
 	Value float32 `json:"value"`
 }

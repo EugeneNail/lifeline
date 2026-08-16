@@ -48,58 +48,58 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 	}
 
 	return http.StatusOK, Output{
-		MeasurableHeatmap:  mapMeasurableHeatmaps(result.MeasurableHeatmap),
-		TimeHeatmap:        mapTimeHeatmaps(result.TimeHeatmap),
-		CompletableHeatmap: mapCompletableHeatmaps(result.CompletableHeatmap),
+		MeasurableSeries:  mapMeasurableSeries(result.MeasurableSeries),
+		TimeSeries:        mapTimeSeries(result.TimeSeries),
+		CompletableSeries: mapCompletableSeries(result.CompletableSeries),
 	}
 }
 
-// mapMeasurableHeatmaps converts application heatmaps to transport output.
-func mapMeasurableHeatmaps(heatmaps []application.MeasurableHabitHeatmap) []MeasurableHabitHeatmap {
-	output := make([]MeasurableHabitHeatmap, 0, len(heatmaps))
-	for _, heatmap := range heatmaps {
-		output = append(output, MeasurableHabitHeatmap{
-			HabitID:  heatmap.HabitID.String(),
-			Nodes:    mapHeatmapNodes(heatmap.Nodes),
-			MaxValue: heatmap.MaxValue,
+// mapMeasurableSeries converts application series to transport output.
+func mapMeasurableSeries(series []application.MeasurableHabitSeries) []MeasurableHabitSeries {
+	output := make([]MeasurableHabitSeries, 0, len(series))
+	for _, item := range series {
+		output = append(output, MeasurableHabitSeries{
+			HabitID:  item.HabitID.String(),
+			Nodes:    mapNodes(item.Nodes),
+			MaxValue: item.MaxValue,
 		})
 	}
 
 	return output
 }
 
-// mapTimeHeatmaps converts application time heatmaps to transport output.
-func mapTimeHeatmaps(heatmaps []application.TimeHabitHeatmap) []TimeHabitHeatmap {
-	output := make([]TimeHabitHeatmap, 0, len(heatmaps))
-	for _, heatmap := range heatmaps {
-		output = append(output, TimeHabitHeatmap{
-			HabitID:  heatmap.HabitID.String(),
-			Nodes:    mapHeatmapNodes(heatmap.Nodes),
-			MaxValue: heatmap.MaxValue,
+// mapTimeSeries converts application series to transport output.
+func mapTimeSeries(series []application.TimeHabitSeries) []TimeHabitSeries {
+	output := make([]TimeHabitSeries, 0, len(series))
+	for _, item := range series {
+		output = append(output, TimeHabitSeries{
+			HabitID:  item.HabitID.String(),
+			Nodes:    mapNodes(item.Nodes),
+			MaxValue: item.MaxValue,
 		})
 	}
 
 	return output
 }
 
-// mapCompletableHeatmaps converts application completable heatmaps to transport output.
-func mapCompletableHeatmaps(heatmaps []application.CompletableHeatmap) []CompletableHeatmap {
-	output := make([]CompletableHeatmap, 0, len(heatmaps))
-	for _, heatmap := range heatmaps {
-		output = append(output, CompletableHeatmap{
-			HabitID: heatmap.HabitID.String(),
-			Nodes:   mapHeatmapNodes(heatmap.Nodes),
+// mapCompletableSeries converts application completable series to transport output.
+func mapCompletableSeries(series []application.CompletableSeries) []CompletableSeries {
+	output := make([]CompletableSeries, 0, len(series))
+	for _, item := range series {
+		output = append(output, CompletableSeries{
+			HabitID: item.HabitID.String(),
+			Nodes:   mapNodes(item.Nodes),
 		})
 	}
 
 	return output
 }
 
-// mapHeatmapNodes converts application heatmap nodes to transport output.
-func mapHeatmapNodes(nodes []application.HeatmapNode) []HeatmapNode {
-	output := make([]HeatmapNode, 0, len(nodes))
+// mapNodes converts application nodes to transport output.
+func mapNodes(nodes []application.Node) []Node {
+	output := make([]Node, 0, len(nodes))
 	for _, node := range nodes {
-		output = append(output, HeatmapNode{
+		output = append(output, Node{
 			Date:  time.Time(node.Date).Format(time.DateOnly),
 			Value: node.Value,
 		})

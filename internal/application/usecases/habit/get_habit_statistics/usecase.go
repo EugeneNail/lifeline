@@ -135,9 +135,9 @@ func (usecase *Usecase) Handle(ctx context.Context, query Query) (Result, error)
 	}
 
 	return Result{
-		MeasurableHeatmap:  buildMeasurableHeatmaps(foundMeasurableHabits, foundMeasurableRecords, dates),
-		TimeHeatmap:        buildTimeHeatmaps(foundTimeHabits, foundTimeRecords, dates),
-		CompletableHeatmap: buildCompletableHeatmaps(foundCompletableHabits, foundCompletableRecords, dates),
+		MeasurableSeries:  buildMeasurableSeries(foundMeasurableHabits, foundMeasurableRecords, dates),
+		TimeSeries:        buildTimeSeries(foundTimeHabits, foundTimeRecords, dates),
+		CompletableSeries: buildCompletableSeries(foundCompletableHabits, foundCompletableRecords, dates),
 	}, nil
 }
 
@@ -155,12 +155,12 @@ func buildDateRange(from time.Time, to time.Time) []time.Time {
 	return dates
 }
 
-// buildMeasurableHeatmaps creates a complete heatmap for every active measurable habit and fills dates without records with zero.
-func buildMeasurableHeatmaps(
+// buildMeasurableSeries creates a complete series for every active measurable habit and fills dates without records with zero.
+func buildMeasurableSeries(
 	foundHabits []*habits.MeasurableHabit,
 	foundRecords []*records.MeasurableHabitRecord,
 	dates []time.Time,
-) []MeasurableHabitHeatmap {
+) []MeasurableHabitSeries {
 	valuesByHabit := make(map[uuid.UUID]map[records.Date]float32)
 	maxValues := make(map[uuid.UUID]float32)
 	habitIDs := make([]uuid.UUID, 0, len(foundHabits))
@@ -196,18 +196,18 @@ func buildMeasurableHeatmaps(
 		return habitIDs[i].String() < habitIDs[j].String()
 	})
 
-	heatmaps := make([]MeasurableHabitHeatmap, 0, len(habitIDs))
+	heatmaps := make([]MeasurableHabitSeries, 0, len(habitIDs))
 	for _, habitID := range habitIDs {
-		nodes := make([]HeatmapNode, 0, len(dates))
+		nodes := make([]Node, 0, len(dates))
 		for _, date := range dates {
 			recordDate := records.NewDate(date)
-			nodes = append(nodes, HeatmapNode{
+			nodes = append(nodes, Node{
 				Date:  recordDate,
 				Value: valuesByHabit[habitID][recordDate],
 			})
 		}
 
-		heatmaps = append(heatmaps, MeasurableHabitHeatmap{
+		heatmaps = append(heatmaps, MeasurableHabitSeries{
 			HabitID:  habitID,
 			Nodes:    nodes,
 			MaxValue: maxValues[habitID],
@@ -217,12 +217,12 @@ func buildMeasurableHeatmaps(
 	return heatmaps
 }
 
-// buildTimeHeatmaps creates a complete heatmap for every active time habit, fills dates without records with zero, and calculates each maximum value.
-func buildTimeHeatmaps(
+// buildTimeSeries creates a complete series for every active time habit, fills dates without records with zero, and calculates each maximum value.
+func buildTimeSeries(
 	foundHabits []*habits.TimeHabit,
 	foundRecords []*records.TimeHabitRecord,
 	dates []time.Time,
-) []TimeHabitHeatmap {
+) []TimeHabitSeries {
 	valuesByHabit := make(map[uuid.UUID]map[records.Date]float32)
 	maxValues := make(map[uuid.UUID]float32)
 	habitIDs := make([]uuid.UUID, 0, len(foundHabits))
@@ -258,18 +258,18 @@ func buildTimeHeatmaps(
 		return habitIDs[i].String() < habitIDs[j].String()
 	})
 
-	heatmaps := make([]TimeHabitHeatmap, 0, len(habitIDs))
+	heatmaps := make([]TimeHabitSeries, 0, len(habitIDs))
 	for _, habitID := range habitIDs {
-		nodes := make([]HeatmapNode, 0, len(dates))
+		nodes := make([]Node, 0, len(dates))
 		for _, date := range dates {
 			recordDate := records.NewDate(date)
-			nodes = append(nodes, HeatmapNode{
+			nodes = append(nodes, Node{
 				Date:  recordDate,
 				Value: valuesByHabit[habitID][recordDate],
 			})
 		}
 
-		heatmaps = append(heatmaps, TimeHabitHeatmap{
+		heatmaps = append(heatmaps, TimeHabitSeries{
 			HabitID:  habitID,
 			Nodes:    nodes,
 			MaxValue: maxValues[habitID],
@@ -279,12 +279,12 @@ func buildTimeHeatmaps(
 	return heatmaps
 }
 
-// buildCompletableHeatmaps creates a complete heatmap for every active completable habit using zero for no record, one for incomplete, and two for complete.
-func buildCompletableHeatmaps(
+// buildCompletableSeries creates a complete series for every active completable habit using zero for no record, one for incomplete, and two for complete.
+func buildCompletableSeries(
 	foundHabits []*habits.CompletableHabit,
 	foundRecords []*records.CompletableHabitRecord,
 	dates []time.Time,
-) []CompletableHeatmap {
+) []CompletableSeries {
 	valuesByHabit := make(map[uuid.UUID]map[records.Date]float32)
 	habitIDs := make([]uuid.UUID, 0, len(foundHabits))
 
@@ -319,18 +319,18 @@ func buildCompletableHeatmaps(
 		return habitIDs[i].String() < habitIDs[j].String()
 	})
 
-	heatmaps := make([]CompletableHeatmap, 0, len(habitIDs))
+	heatmaps := make([]CompletableSeries, 0, len(habitIDs))
 	for _, habitID := range habitIDs {
-		nodes := make([]HeatmapNode, 0, len(dates))
+		nodes := make([]Node, 0, len(dates))
 		for _, date := range dates {
 			recordDate := records.NewDate(date)
-			nodes = append(nodes, HeatmapNode{
+			nodes = append(nodes, Node{
 				Date:  recordDate,
 				Value: valuesByHabit[habitID][recordDate],
 			})
 		}
 
-		heatmaps = append(heatmaps, CompletableHeatmap{
+		heatmaps = append(heatmaps, CompletableSeries{
 			HabitID: habitID,
 			Nodes:   nodes,
 		})
