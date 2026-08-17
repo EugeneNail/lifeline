@@ -11,29 +11,17 @@ type Node struct {
 	Value float32
 }
 
-// MeasurableHabitSeries represents daily values and the maximum value for a measurable habit.
-type MeasurableHabitSeries struct {
+// Series represents daily values and range metadata for a habit.
+type Series struct {
 	HabitID  uuid.UUID
 	Nodes    []Node
+	MinValue float32
 	MaxValue float32
-}
-
-// TimeHabitSeries represents daily time values and the maximum value for a time habit.
-type TimeHabitSeries struct {
-	HabitID  uuid.UUID
-	Nodes    []Node
-	MaxValue float32
-}
-
-// CompletableSeries represents daily completion states for a completable habit.
-type CompletableSeries struct {
-	HabitID uuid.UUID
-	Nodes   []Node
 }
 
 // Result carries the habit statistics returned by the use case.
 type Result struct {
-	MeasurableSeries  []MeasurableHabitSeries
-	TimeSeries        []TimeHabitSeries
-	CompletableSeries []CompletableSeries
+	MeasurableSeries  []Series
+	TimeSeries        []Series
+	CompletableSeries []Series
 }

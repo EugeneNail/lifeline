@@ -160,9 +160,8 @@ func buildMeasurableSeries(
 	foundHabits []*habits.MeasurableHabit,
 	foundRecords []*records.MeasurableHabitRecord,
 	dates []time.Time,
-) []MeasurableHabitSeries {
+) []Series {
 	valuesByHabit := make(map[uuid.UUID]map[records.Date]float32)
-	maxValues := make(map[uuid.UUID]float32)
 	habitIDs := make([]uuid.UUID, 0, len(foundHabits))
 
 	for _, habit := range foundHabits {
@@ -187,30 +186,49 @@ func buildMeasurableSeries(
 
 		value := record.Value().Value()
 		valuesByHabit[habitID][record.Date()] = value
-		if value > maxValues[habitID] {
-			maxValues[habitID] = value
-		}
 	}
 
 	sort.Slice(habitIDs, func(i int, j int) bool {
 		return habitIDs[i].String() < habitIDs[j].String()
 	})
 
-	heatmaps := make([]MeasurableHabitSeries, 0, len(habitIDs))
+	heatmaps := make([]Series, 0, len(habitIDs))
 	for _, habitID := range habitIDs {
 		nodes := make([]Node, 0, len(dates))
+		var minValue float32
+		var maxValue float32
+		hasValue := false
 		for _, date := range dates {
 			recordDate := records.NewDate(date)
+			value, exists := valuesByHabit[habitID][recordDate]
+			if !exists {
+				value = 0
+			}
 			nodes = append(nodes, Node{
 				Date:  recordDate,
-				Value: valuesByHabit[habitID][recordDate],
+				Value: value,
 			})
+
+			if !hasValue {
+				minValue = value
+				maxValue = value
+				hasValue = true
+				continue
+			}
+
+			if value < minValue {
+				minValue = value
+			}
+			if value > maxValue {
+				maxValue = value
+			}
 		}
 
-		heatmaps = append(heatmaps, MeasurableHabitSeries{
+		heatmaps = append(heatmaps, Series{
 			HabitID:  habitID,
 			Nodes:    nodes,
-			MaxValue: maxValues[habitID],
+			MinValue: minValue,
+			MaxValue: maxValue,
 		})
 	}
 
@@ -222,9 +240,8 @@ func buildTimeSeries(
 	foundHabits []*habits.TimeHabit,
 	foundRecords []*records.TimeHabitRecord,
 	dates []time.Time,
-) []TimeHabitSeries {
+) []Series {
 	valuesByHabit := make(map[uuid.UUID]map[records.Date]float32)
-	maxValues := make(map[uuid.UUID]float32)
 	habitIDs := make([]uuid.UUID, 0, len(foundHabits))
 
 	for _, habit := range foundHabits {
@@ -249,42 +266,61 @@ func buildTimeSeries(
 
 		value := float32(record.Value().Value())
 		valuesByHabit[habitID][record.Date()] = value
-		if value > maxValues[habitID] {
-			maxValues[habitID] = value
-		}
 	}
 
 	sort.Slice(habitIDs, func(i int, j int) bool {
 		return habitIDs[i].String() < habitIDs[j].String()
 	})
 
-	heatmaps := make([]TimeHabitSeries, 0, len(habitIDs))
+	heatmaps := make([]Series, 0, len(habitIDs))
 	for _, habitID := range habitIDs {
 		nodes := make([]Node, 0, len(dates))
+		var minValue float32
+		var maxValue float32
+		hasValue := false
 		for _, date := range dates {
 			recordDate := records.NewDate(date)
+			value, exists := valuesByHabit[habitID][recordDate]
+			if !exists {
+				value = 0
+			}
 			nodes = append(nodes, Node{
 				Date:  recordDate,
-				Value: valuesByHabit[habitID][recordDate],
+				Value: value,
 			})
+
+			if !hasValue {
+				minValue = value
+				maxValue = value
+				hasValue = true
+				continue
+			}
+
+			if value < minValue {
+				minValue = value
+			}
+			if value > maxValue {
+				maxValue = value
+			}
 		}
 
-		heatmaps = append(heatmaps, TimeHabitSeries{
+		heatmaps = append(heatmaps, Series{
 			HabitID:  habitID,
 			Nodes:    nodes,
-			MaxValue: maxValues[habitID],
+			MinValue: minValue,
+			MaxValue: maxValue,
 		})
 	}
 
 	return heatmaps
 }
 
-// buildCompletableSeries creates a complete series for every active completable habit using zero for no record, one for incomplete, and two for complete.
+// buildCompletableSeries creates a complete series for every active completable habit using zero for no record or false, and one for true.
 func buildCompletableSeries(
 	foundHabits []*habits.CompletableHabit,
 	foundRecords []*records.CompletableHabitRecord,
 	dates []time.Time,
-) []CompletableSeries {
+) []Series {
 	valuesByHabit := make(map[uuid.UUID]map[records.Date]float32)
 	habitIDs := make([]uuid.UUID, 0, len(foundHabits))
 
@@ -308,31 +344,49 @@ func buildCompletableSeries(
 			continue
 		}
 
-		value := float32(1)
 		if record.Value() {
-			value = 2
+			valuesByHabit[habitID][record.Date()] = 1
 		}
-		valuesByHabit[habitID][record.Date()] = value
 	}
 
 	sort.Slice(habitIDs, func(i int, j int) bool {
 		return habitIDs[i].String() < habitIDs[j].String()
 	})
 
-	heatmaps := make([]CompletableSeries, 0, len(habitIDs))
+	heatmaps := make([]Series, 0, len(habitIDs))
 	for _, habitID := range habitIDs {
 		nodes := make([]Node, 0, len(dates))
+		var minValue float32
+		var maxValue float32
+		hasValue := false
 		for _, date := range dates {
 			recordDate := records.NewDate(date)
+			value := valuesByHabit[habitID][recordDate]
 			nodes = append(nodes, Node{
 				Date:  recordDate,
-				Value: valuesByHabit[habitID][recordDate],
+				Value: value,
 			})
+
+			if !hasValue {
+				minValue = value
+				maxValue = value
+				hasValue = true
+				continue
+			}
+
+			if value < minValue {
+				minValue = value
+			}
+			if value > maxValue {
+				maxValue = value
+			}
 		}
 
-		heatmaps = append(heatmaps, CompletableSeries{
-			HabitID: habitID,
-			Nodes:   nodes,
+		heatmaps = append(heatmaps, Series{
+			HabitID:  habitID,
+			Nodes:    nodes,
+			MinValue: minValue,
+			MaxValue: maxValue,
 		})
 	}
 

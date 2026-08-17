@@ -48,47 +48,21 @@ func (handler *Handler) Handle(request *http.Request) (int, any) {
 	}
 
 	return http.StatusOK, Output{
-		MeasurableSeries:  mapMeasurableSeries(result.MeasurableSeries),
-		TimeSeries:        mapTimeSeries(result.TimeSeries),
-		CompletableSeries: mapCompletableSeries(result.CompletableSeries),
+		MeasurableSeries:  mapSeries(result.MeasurableSeries),
+		TimeSeries:        mapSeries(result.TimeSeries),
+		CompletableSeries: mapSeries(result.CompletableSeries),
 	}
 }
 
-// mapMeasurableSeries converts application series to transport output.
-func mapMeasurableSeries(series []application.MeasurableHabitSeries) []MeasurableHabitSeries {
-	output := make([]MeasurableHabitSeries, 0, len(series))
+// mapSeries converts application series to transport output.
+func mapSeries(series []application.Series) []Series {
+	output := make([]Series, 0, len(series))
 	for _, item := range series {
-		output = append(output, MeasurableHabitSeries{
+		output = append(output, Series{
 			HabitID:  item.HabitID.String(),
 			Nodes:    mapNodes(item.Nodes),
+			MinValue: item.MinValue,
 			MaxValue: item.MaxValue,
-		})
-	}
-
-	return output
-}
-
-// mapTimeSeries converts application series to transport output.
-func mapTimeSeries(series []application.TimeHabitSeries) []TimeHabitSeries {
-	output := make([]TimeHabitSeries, 0, len(series))
-	for _, item := range series {
-		output = append(output, TimeHabitSeries{
-			HabitID:  item.HabitID.String(),
-			Nodes:    mapNodes(item.Nodes),
-			MaxValue: item.MaxValue,
-		})
-	}
-
-	return output
-}
-
-// mapCompletableSeries converts application completable series to transport output.
-func mapCompletableSeries(series []application.CompletableSeries) []CompletableSeries {
-	output := make([]CompletableSeries, 0, len(series))
-	for _, item := range series {
-		output = append(output, CompletableSeries{
-			HabitID: item.HabitID.String(),
-			Nodes:   mapNodes(item.Nodes),
 		})
 	}
 

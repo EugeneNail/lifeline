@@ -274,7 +274,7 @@ function getHeatmapNodeColor(
     habitType: HabitRegistryEntry['type'],
 ) {
     if (habitType === 'completable') {
-        return interpolateHeatmapColor(value === 2 ? 2 : 0, 2)
+        return interpolateHeatmapColor(value > 0 ? 1 : 0, 1)
     }
 
     return interpolateHeatmapColor(value, maxValue)
@@ -294,7 +294,7 @@ function getHeatmapValueLabel(
     unit?: string,
 ) {
     if (habitType === 'completable') {
-        return value === 2 ? 'Completed' : 'Not completed'
+        return value > 0 ? 'Completed' : 'Not completed'
     }
 
     if (habitType === 'time') {
@@ -337,7 +337,7 @@ export function HabitStatisticsPage() {
         for (const heatmap of statistics?.completableSeries ?? []) {
             heatmaps.set(heatmap.habitId, {
                 ...heatmap,
-                maxValue: 2,
+                maxValue: 1,
             })
         }
         for (const heatmap of statistics?.measurableSeries ?? []) {

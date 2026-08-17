@@ -56,6 +56,10 @@ func TestBuildMeasurableSeriesMatchesDatesAcrossLocations(t *testing.T) {
 	if heatmaps[0].MaxValue != 2.5 {
 		t.Fatalf("expected maximum value 2.5, got %v", heatmaps[0].MaxValue)
 	}
+
+	if heatmaps[0].MinValue != 2.5 {
+		t.Fatalf("expected minimum value 2.5, got %v", heatmaps[0].MinValue)
+	}
 }
 
 // TestBuildTimeSeriesIncludesEveryHabitAndCalculatesMaximum verifies that time series contain every date and retain the highest minute value.
@@ -121,13 +125,21 @@ func TestBuildTimeSeriesIncludesEveryHabitAndCalculatesMaximum(t *testing.T) {
 		t.Fatalf("expected maximum value 900, got %v", heatmaps[0].MaxValue)
 	}
 
+	if heatmaps[0].MinValue != 0 {
+		t.Fatalf("expected minimum value 0, got %v", heatmaps[0].MinValue)
+	}
+
 	if heatmaps[1].MaxValue != 0 {
 		t.Fatalf("expected zero maximum for a habit without records, got %v", heatmaps[1].MaxValue)
 	}
+
+	if heatmaps[1].MinValue != 0 {
+		t.Fatalf("expected zero minimum for a habit without records, got %v", heatmaps[1].MinValue)
+	}
 }
 
-// TestBuildCompletableSeriesIncludesEveryHabitAndDate verifies that completable series distinguish missing, incomplete, and complete records.
-func TestBuildCompletableSeriesIncludesEveryHabitAndDate(t *testing.T) {
+// TestBuildCompletableSeriesTreatsFalseAsMissingAndTrueAsComplete verifies that completable series use a binary value scale.
+func TestBuildCompletableSeriesTreatsFalseAsMissingAndTrueAsComplete(t *testing.T) {
 	firstHabitID := uuid.MustParse("00000000-0000-7000-8000-000000000001")
 	secondHabitID := uuid.MustParse("00000000-0000-7000-8000-000000000002")
 	accountID := uuid.MustParse("00000000-0000-7000-8000-000000000003")
@@ -182,8 +194,24 @@ func TestBuildCompletableSeriesIncludesEveryHabitAndDate(t *testing.T) {
 		t.Fatalf("expected first heatmap for habit %q, got %q", firstHabitID, heatmaps[0].HabitID)
 	}
 
-	assertNodeValues(t, heatmaps[0].Nodes, []float32{1, 0, 2})
+	assertNodeValues(t, heatmaps[0].Nodes, []float32{0, 0, 1})
 	assertNodeValues(t, heatmaps[1].Nodes, []float32{0, 0, 0})
+
+	if heatmaps[0].MinValue != 0 {
+		t.Fatalf("expected minimum value 0, got %v", heatmaps[0].MinValue)
+	}
+
+	if heatmaps[0].MaxValue != 1 {
+		t.Fatalf("expected maximum value 1, got %v", heatmaps[0].MaxValue)
+	}
+
+	if heatmaps[1].MinValue != 0 {
+		t.Fatalf("expected zero minimum for a habit without records, got %v", heatmaps[1].MinValue)
+	}
+
+	if heatmaps[1].MaxValue != 0 {
+		t.Fatalf("expected zero maximum for a habit without records, got %v", heatmaps[1].MaxValue)
+	}
 }
 
 // assertNodeValues verifies that nodes contain the expected values in date order.
