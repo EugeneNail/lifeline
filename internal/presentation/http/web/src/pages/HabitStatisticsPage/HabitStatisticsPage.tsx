@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { DateSelector, PeriodSelector, type DateRange, type DateSelectorHandle } from '../../components/date'
+import { HabitChart, HabitHeatmap, type HabitChartHabitType } from '../../components/charts'
 import { EmojiIcon, type GoogleIcons } from '../../components/icons'
+import { GoogleIcon } from '../../components/icons'
 import { Page, PageHeader } from '../../components/layout'
 import { AppNavigation } from '../../components/navigation'
 import { Message } from '../../components/primitives'
@@ -16,23 +18,28 @@ type NodeResource = {
 type MeasurableHabitSeriesResource = {
     habitId: string
     nodes: NodeResource[]
+    minValue: number
     maxValue: number
 }
 
 type TimeHabitSeriesResource = {
     habitId: string
     nodes: NodeResource[]
+    minValue: number
     maxValue: number
 }
 
 type CompletableSeriesResource = {
     habitId: string
     nodes: NodeResource[]
+    minValue: number
+    maxValue: number
 }
 
 type HabitSeriesResource = {
     habitId: string
     nodes: NodeResource[]
+    minValue: number
     maxValue: number
 }
 
@@ -73,35 +80,11 @@ type HeatmapTooltip = {
     valueLabel: string
 }
 
-type HeatmapLayout = 'weekday-columns' | 'weekday-rows'
-
-type HeatmapMonthLabel = {
-    column: number
-    key: string
-    label: string
-}
-
 const dateFormatter = new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
 })
-
-const heatmapDateFormatter = new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-})
-
-const heatmapValueFormatter = new Intl.NumberFormat('en-GB', {
-    maximumFractionDigits: 1,
-})
-
-const heatmapMonthFormatter = new Intl.DateTimeFormat('en-GB', {
-    month: 'short',
-})
-
-const weekdayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
 function startOfDay(date: Date) {
     const normalizedDate = new Date(date)
@@ -167,11 +150,6 @@ function getRangeLabel(fromDate: Date, toDate: Date) {
     return `${dateFormatter.format(fromDate)} – ${dateFormatter.format(toDate)}`
 }
 
-function formatHeatmapDate(dateKey: string) {
-    const date = parseDateKey(dateKey)
-    return date ? heatmapDateFormatter.format(date) : dateKey
-}
-
 function buildHabitRegistry(response: HabitsResponse) {
     const registry = new Map<string, HabitRegistryEntry>()
 
@@ -186,122 +164,6 @@ function buildHabitRegistry(response: HabitsResponse) {
     })
 
     return registry
-}
-
-function getHeatmapPosition(
-    dateKey: string,
-    index: number,
-    firstDateKey: string,
-    layout: HeatmapLayout,
-) {
-    const firstDate = parseDateKey(firstDateKey)
-    const date = parseDateKey(dateKey)
-    const fallbackPosition = index
-
-    if (!firstDate || !date) {
-        const week = Math.floor(fallbackPosition / 7) + 1
-        const weekday = (fallbackPosition % 7) + 1
-        return layout === 'weekday-columns'
-            ? { column: weekday, row: week }
-            : { column: week, row: weekday }
-    }
-
-    const firstDayOffset = (firstDate.getDay() + 6) % 7
-    const dayOffset = Math.round(
-        (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) -
-            Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate())) /
-            (24 * 60 * 60 * 1000),
-    )
-    const position = firstDayOffset + dayOffset
-
-    const week = Math.floor(position / 7) + 1
-    const weekday = (position % 7) + 1
-
-    return layout === 'weekday-columns'
-        ? { column: weekday, row: week }
-        : { column: week, row: weekday }
-}
-
-function buildHeatmapMonthLabels(
-    nodes: NodeResource[],
-    firstDateKey: string,
-) {
-    const labels: HeatmapMonthLabel[] = []
-    let previousMonthKey = ''
-
-    nodes.forEach((node, index) => {
-        const date = parseDateKey(node.date)
-        if (!date) {
-            return
-        }
-
-        const monthKey = `${date.getFullYear()}-${date.getMonth()}`
-        if (monthKey === previousMonthKey) {
-            return
-        }
-
-        previousMonthKey = monthKey
-        labels.push({
-            column: getHeatmapPosition(node.date, index, firstDateKey, 'weekday-rows').column,
-            key: monthKey,
-            label: heatmapMonthFormatter.format(date),
-        })
-    })
-
-    return labels
-}
-
-function interpolateHeatmapColor(value: number, maxValue: number) {
-    const emptyColor = [222, 227, 220]
-    const nonZeroBaseColor = [190, 208, 199]
-    const accentColor = [66, 104, 88]
-
-    if (value <= 0 || maxValue <= 0) {
-        return `rgb(${emptyColor.join(', ')})`
-    }
-
-    const intensity = maxValue > 0 ? Math.min(Math.max(value / maxValue, 0), 1) : 0
-    const channels = nonZeroBaseColor.map((channel, index) =>
-        Math.round(channel + (accentColor[index] - channel) * intensity),
-    )
-
-    return `rgb(${channels.join(', ')})`
-}
-
-function getHeatmapNodeColor(
-    value: number,
-    maxValue: number,
-    habitType: HabitRegistryEntry['type'],
-) {
-    if (habitType === 'completable') {
-        return interpolateHeatmapColor(value > 0 ? 1 : 0, 1)
-    }
-
-    return interpolateHeatmapColor(value, maxValue)
-}
-
-function formatTimeValue(value: number) {
-    const normalizedMinutes = Math.min(Math.max(Math.round(value), 0), 1439)
-    const hours = Math.floor(normalizedMinutes / 60)
-    const minutes = normalizedMinutes % 60
-
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
-}
-
-function getHeatmapValueLabel(
-    value: number,
-    habitType: HabitRegistryEntry['type'],
-    unit?: string,
-) {
-    if (habitType === 'completable') {
-        return value > 0 ? 'Completed' : 'Not completed'
-    }
-
-    if (habitType === 'time') {
-        return formatTimeValue(value)
-    }
-
-    return `${heatmapValueFormatter.format(value)} ${unit ?? ''}`.trim()
 }
 
 // HabitStatisticsPage renders the habit statistics controls and loads data for the selected range.
@@ -320,6 +182,8 @@ export function HabitStatisticsPage() {
     const [areHabitsLoading, setAreHabitsLoading] = useState(true)
     const [statisticsLoadError, setStatisticsLoadError] = useState('')
     const [habitsLoadError, setHabitsLoadError] = useState('')
+    const [areHeatmapsExpanded, setAreHeatmapsExpanded] = useState(true)
+    const [areChartsExpanded, setAreChartsExpanded] = useState(true)
     const [heatmapTooltip, setHeatmapTooltip] = useState<HeatmapTooltip | null>(null)
     const dateSelectorRef = useRef<DateSelectorHandle>(null)
     const statisticsHabits = useMemo(() => {
@@ -331,12 +195,14 @@ export function HabitStatisticsPage() {
             ...habits.filter((habit) => habit.type === 'time'),
         ]
     }, [habitRegistry])
+    const chartHabits = statisticsHabits
     const heatmapsByHabitID = useMemo(() => {
         const heatmaps = new Map<string, HabitSeriesResource>()
 
         for (const heatmap of statistics?.completableSeries ?? []) {
             heatmaps.set(heatmap.habitId, {
                 ...heatmap,
+                minValue: 0,
                 maxValue: 1,
             })
         }
@@ -351,6 +217,18 @@ export function HabitStatisticsPage() {
     }, [statistics])
     const isLoading = isStatisticsLoading || areHabitsLoading
     const loadError = habitsLoadError || statisticsLoadError
+
+    function getHabitTypeLabel(type: HabitRegistryEntry['type']) {
+        if (type === 'completable') {
+            return 'Completable habit'
+        }
+
+        if (type === 'measurable') {
+            return 'Measurable habit'
+        }
+
+        return 'Time habit'
+    }
 
     useEffect(() => {
         if (!heatmapTooltip) {
@@ -523,133 +401,93 @@ export function HabitStatisticsPage() {
                 {loadError ? <Message variant="error">{loadError}</Message> : null}
 
                 {!loadError && !isLoading ? (
-                    <section className="habit-statistics-page__heatmap-panel">
-                        {statisticsHabits.map((habit) => {
-                            const heatmap = heatmapsByHabitID.get(habit.id)
-                            const nodes = heatmap?.nodes ?? []
-                            const nonZeroRecords = nodes.filter((node) => node.value !== 0).length
-                            const firstDateKey = nodes[0]?.date ?? ''
-                            const heatmapLayout: HeatmapLayout = nodes.length <= 30
-                                ? 'weekday-columns'
-                                : 'weekday-rows'
-                            const lastNodePosition = nodes.length > 0
-                                ? getHeatmapPosition(
-                                    nodes[nodes.length - 1].date,
-                                    nodes.length - 1,
-                                    firstDateKey,
-                                    heatmapLayout,
+                    <>
+                        <button
+                            aria-expanded={areHeatmapsExpanded}
+                            className="habit-statistics-page__heatmaps-heading"
+                            type="button"
+                            onClick={() => setAreHeatmapsExpanded((expanded) => !expanded)}
+                        >
+                            <div>
+                                <p className="habit-statistics-page__charts-eyebrow">ACTIVITY OVER TIME</p>
+                                <h2>Habit heatmaps</h2>
+                            </div>
+                            <GoogleIcon icon="chevron_right" size={20} />
+                        </button>
+                        {areHeatmapsExpanded ? (
+                            <section className="habit-statistics-page__heatmap-panel">
+                                {statisticsHabits.map((habit) => {
+                                const heatmap = heatmapsByHabitID.get(habit.id)
+                                return (
+                                    <HabitHeatmap
+                                        habit={habit}
+                                        key={habit.id}
+                                        series={{
+                                            nodes: heatmap?.nodes ?? [],
+                                            maxValue: heatmap?.maxValue ?? 0,
+                                        }}
+                                        tooltip={{
+                                            onHide: () => setHeatmapTooltip(null),
+                                            onShow: showHeatmapTooltip,
+                                        }}
+                                    />
                                 )
-                                : null
-                            const heatmapColumnCount = heatmapLayout === 'weekday-columns'
-                                ? 7
-                                : Math.max(lastNodePosition?.column ?? 1, 1)
-                            const monthLabels = heatmapLayout === 'weekday-rows'
-                                ? buildHeatmapMonthLabels(nodes, firstDateKey)
-                                : []
+                                })}
+                            </section>
+                        ) : null}
 
-                            return (
-                                <article
-                                    className={`habit-statistics-page__habit habit-statistics-page__habit--${heatmapLayout}`}
-                                    key={habit.id}
-                                >
-                                    <header className="habit-statistics-page__habit-header">
-                                        <div className="habit-statistics-page__habit-icon">
-                                            <EmojiIcon icon={habit.icon as GoogleIcons} size={22} />
-                                        </div>
-                                        <div className="habit-statistics-page__habit-copy">
-                                            <h2>{habit.label}</h2>
-                                            <p>{nonZeroRecords} non-zero records</p>
-                                        </div>
-                                    </header>
+                        <section className="habit-statistics-page__charts-panel">
+                            <button
+                                aria-expanded={areChartsExpanded}
+                                className="habit-statistics-page__charts-heading"
+                                type="button"
+                                onClick={() => setAreChartsExpanded((expanded) => !expanded)}
+                            >
+                                <div>
+                                    <p className="habit-statistics-page__charts-eyebrow">TRENDS OVER TIME</p>
+                                    <h2>Habit charts</h2>
+                                </div>
+                                <GoogleIcon icon="chevron_right" size={20} />
+                            </button>
 
-                                    <div className="habit-statistics-page__heatmap-scroll">
-                                        <div
-                                            className={`habit-statistics-page__heatmap-frame habit-statistics-page__heatmap-frame--${heatmapLayout}`}
-                                            style={{
-                                                '--heatmap-columns': heatmapColumnCount,
-                                            } as CSSProperties}
-                                        >
-                                            <div
-                                                aria-hidden="true"
-                                                className={`habit-statistics-page__weekday-labels habit-statistics-page__weekday-labels--${heatmapLayout}`}
-                                            >
-                                                {weekdayLetters.map((letter, index) => (
-                                                    <span key={`${letter}-${index}`}>{letter}</span>
-                                                ))}
+                            {areChartsExpanded ? (
+                                <div className="habit-statistics-page__charts-list">
+                                {chartHabits.map((habit) => {
+                                    const series = heatmapsByHabitID.get(habit.id) ?? {
+                                        habitId: habit.id,
+                                        nodes: [],
+                                        minValue: 0,
+                                        maxValue: 0,
+                                    }
+                                    return (
+                                    <div
+                                        className={series.nodes.length <= 90
+                                            ? 'habit-statistics-page__chart-item habit-statistics-page__chart-item--grid'
+                                            : 'habit-statistics-page__chart-item habit-statistics-page__chart-item--wide'}
+                                        key={habit.id}
+                                    >
+                                            <div className="habit-statistics-page__chart-trigger">
+                                                <span className="habit-statistics-page__chart-icon">
+                                                    <EmojiIcon icon={habit.icon as GoogleIcons} size={20} />
+                                                </span>
+                                                <span className="habit-statistics-page__chart-copy">
+                                                    <strong>{habit.label}</strong>
+                                                    <small>{getHabitTypeLabel(habit.type)}</small>
+                                                </span>
                                             </div>
-                                            <div
-                                                aria-label={`${habit.label} heatmap`}
-                                                className={`habit-statistics-page__heatmap habit-statistics-page__heatmap--${heatmapLayout}`}
-                                                role="img"
-                                            >
-                                                {nodes.map((node, index) => {
-                                                    const position = getHeatmapPosition(
-                                                        node.date,
-                                                        index,
-                                                        firstDateKey,
-                                                        heatmapLayout,
-                                                    )
-                                                    const valueLabel = getHeatmapValueLabel(
-                                                        node.value,
-                                                        habit.type,
-                                                        habit.unit,
-                                                    )
-
-                                                    return (
-                                                        <span
-                                                            aria-label={`${node.date}: ${valueLabel}`}
-                                                            className="habit-statistics-page__heatmap-node"
-                                                            key={node.date}
-                                                            style={{
-                                                                backgroundColor: getHeatmapNodeColor(
-                                                                    node.value,
-                                                                    heatmap?.maxValue ?? 0,
-                                                                    habit.type,
-                                                                ),
-                                                                gridColumn: position.column,
-                                                                gridRow: position.row,
-                                                            }}
-                                                            tabIndex={0}
-                                                            onBlur={() => setHeatmapTooltip(null)}
-                                                            onFocus={(event) => showHeatmapTooltip(
-                                                                event.currentTarget,
-                                                                formatHeatmapDate(node.date),
-                                                                valueLabel,
-                                                            )}
-                                                            onMouseEnter={(event) => showHeatmapTooltip(
-                                                                event.currentTarget,
-                                                                formatHeatmapDate(node.date),
-                                                                valueLabel,
-                                                            )}
-                                                            onMouseLeave={() => setHeatmapTooltip(null)}
-                                                        />
-                                                    )
-                                                })}
+                                            <div className="habit-statistics-page__chart-content">
+                                                <HabitChart
+                                                    habitType={habit.type as HabitChartHabitType}
+                                                    series={series}
+                                                />
                                             </div>
-                                            {heatmapLayout === 'weekday-rows' ? (
-                                                <div
-                                                    aria-hidden="true"
-                                                    className="habit-statistics-page__month-labels"
-                                                    style={{
-                                                        gridTemplateColumns: `repeat(${heatmapColumnCount}, 22px)`,
-                                                    }}
-                                                >
-                                                    {monthLabels.map((month) => (
-                                                        <span
-                                                            key={month.key}
-                                                            style={{ gridColumn: month.column }}
-                                                        >
-                                                            {month.label}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            ) : null}
                                         </div>
-                                    </div>
-                                </article>
-                            )
-                        })}
-                    </section>
+                                    )
+                                })}
+                                </div>
+                            ) : null}
+                        </section>
+                    </>
                 ) : null}
             </div>
 

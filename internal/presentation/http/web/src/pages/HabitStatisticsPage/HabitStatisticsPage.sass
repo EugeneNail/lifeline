@@ -27,20 +27,56 @@
     width: 100%
     max-width: 100%
     min-width: 0
-    overflow: hidden
-    border: 1px solid var(--divider)
-    border-radius: 20px
-    padding: 24px
-    background: var(--surface)
-    box-shadow: 0 16px 40px rgba(38, 49, 43, .04)
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))
+    gap: 6px
+    overflow: visible
 
 .habit-statistics-page__habit
+    box-sizing: border-box
     min-width: 0
+    overflow: hidden
+    border: 1px solid var(--divider)
+    border-radius: 18px
+    padding: 18px
+    background: var(--surface)
+    box-shadow: 0 12px 30px rgba(38, 49, 43, .04)
 
-    &:not(:last-child)
-        margin-bottom: 26px
-        border-bottom: 1px solid var(--divider)
-        padding-bottom: 26px
+.habit-statistics-page__habit--weekday-rows
+    grid-column: 1 / -1
+
+.habit-statistics-page__heatmaps-heading
+    display: flex
+    width: 100%
+    align-items: end
+    justify-content: flex-start
+    gap: 16px
+    margin-bottom: -4px
+    border: 0
+    padding: 0
+    background: transparent
+    color: inherit
+    cursor: pointer
+    text-align: left
+
+    h2,
+    p
+        margin: 0
+
+    h2
+        font-size: 20px
+        letter-spacing: -.03em
+
+    > .google-icon
+        margin-left: 0
+        align-self: center
+        background: transparent
+        color: var(--text-secondary)
+        transition: transform 180ms ease
+
+.habit-statistics-page__heatmaps-heading[aria-expanded="true"] > .google-icon,
+.habit-statistics-page__charts-heading[aria-expanded="true"] > .google-icon
+    transform: rotate(90deg)
 
 .habit-statistics-page__habit-header
     display: flex
@@ -164,6 +200,130 @@
     span
         white-space: nowrap
 
+.habit-statistics-page__charts-panel
+    box-sizing: border-box
+    width: 100%
+    min-width: 0
+    padding: 0
+
+.habit-statistics-page__charts-heading
+    display: flex
+    width: 100%
+    align-items: end
+    justify-content: flex-start
+    gap: 6px
+    margin-bottom: 12px
+    border: 0
+    padding: 0
+    background: transparent
+    color: inherit
+    cursor: pointer
+    text-align: left
+
+    h2,
+    p
+        margin: 0
+
+    h2
+        font-size: 20px
+        letter-spacing: -.03em
+
+    > .google-icon
+        margin-left: 0
+        align-self: center
+        background: transparent
+        color: var(--text-secondary)
+        transition: transform 180ms ease
+
+.habit-statistics-page__charts-eyebrow
+    margin-bottom: 5px !important
+    color: var(--primary)
+    font-size: 10px
+    font-weight: 800
+    letter-spacing: .08em
+
+.habit-statistics-page__charts-list
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr))
+    gap: 12px
+
+.habit-statistics-page__chart-item--wide
+    grid-column: 1 / -1
+
+.habit-statistics-page__chart-item
+    box-sizing: border-box
+    width: 100%
+    min-width: 0
+    overflow: hidden
+    border: 1px solid var(--divider)
+    border-radius: 16px
+    padding: 0 16px
+    background: var(--surface)
+    box-shadow: 0 10px 28px rgba(38, 49, 43, .04)
+
+.habit-statistics-page__chart-trigger
+    display: grid
+    width: 100%
+    grid-template-columns: 40px minmax(0, 1fr) 24px
+    align-items: center
+    gap: 12px
+    border: 0
+    padding: 12px 0
+    background: transparent
+    color: inherit
+    cursor: pointer
+    text-align: left
+
+    &:hover
+        .habit-statistics-page__chart-icon
+            background: var(--primary-container)
+
+    &:focus-visible
+        outline: 2px solid var(--primary)
+        outline-offset: -2px
+
+.habit-statistics-page__chart-icon
+    display: grid
+    width: 40px
+    height: 40px
+    place-items: center
+    border-radius: 11px
+    background: var(--surface-secondary)
+    transition: background 160ms ease
+
+.habit-statistics-page__chart-copy
+    display: grid
+    min-width: 0
+    gap: 3px
+
+    strong
+        overflow: hidden
+        color: var(--text-primary)
+        font-size: 14px
+        font-weight: 750
+        letter-spacing: -.015em
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    small
+        color: var(--text-secondary)
+        font-size: 11px
+        font-weight: 600
+
+.habit-statistics-page__chart-chevron
+    justify-self: end
+    color: var(--text-secondary)
+    transition: transform 180ms ease
+
+.habit-statistics-page__chart-trigger[aria-expanded="true"] .habit-statistics-page__chart-chevron
+    transform: rotate(90deg)
+
+.habit-statistics-page__chart-content
+    box-sizing: border-box
+    width: 100%
+    min-width: 0
+    padding: 0 0 12px
+
 .habit-statistics-page__heatmap-tooltip
     position: fixed
     z-index: 80
@@ -229,7 +389,27 @@
         width: 100%
 
     .habit-statistics-page__heatmap-panel
-        padding: 18px
+        grid-template-columns: 1fr
+
+    .habit-statistics-page__heatmaps-heading
+        margin-bottom: -4px
+
+    .habit-statistics-page__charts-panel
+        padding: 0
+
+    .habit-statistics-page__charts-list
+        grid-template-columns: 1fr
+
+    .habit-statistics-page__chart-trigger
+        grid-template-columns: 36px minmax(0, 1fr) 22px
+        gap: 10px
+
+    .habit-statistics-page__chart-item
+        padding: 0 12px
+
+    .habit-statistics-page__chart-icon
+        width: 36px
+        height: 36px
 
 @media (orientation: portrait)
     .habit-statistics-page__habit--weekday-columns .habit-statistics-page__heatmap-scroll
@@ -259,20 +439,14 @@
 
     .habit-statistics-page__heatmap-panel
         display: grid
-        grid-template-columns: repeat(auto-fit, 180px)
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
         align-items: start
-        justify-content: space-between
-        gap: 64px 64px
+        gap: 16px
 
     .habit-statistics-page__habit
         width: 100%
-        max-width: 180px
+        max-width: none
         min-width: 0
-
-        &:not(:last-child)
-            margin-bottom: 0
-            border-bottom: 0
-            padding-bottom: 0
 
         &--weekday-rows
             grid-column: 1 / -1
@@ -282,6 +456,26 @@
     .habit-statistics-page__heatmap-scroll
         width: fit-content
         max-width: 100%
+
+    .habit-statistics-page__habit--weekday-columns .habit-statistics-page__heatmap-scroll
+        width: 100%
+        overflow-x: hidden
+
+    .habit-statistics-page__heatmap-frame--weekday-columns
+        width: 100%
+
+    .habit-statistics-page__weekday-labels--weekday-columns
+        grid-template-columns: repeat(7, minmax(0, 1fr))
+
+    .habit-statistics-page__heatmap--weekday-columns
+        width: 100%
+        grid-auto-rows: auto
+        grid-template-columns: repeat(7, minmax(0, 1fr))
+
+    .habit-statistics-page__habit--weekday-columns .habit-statistics-page__heatmap-node
+        width: 100%
+        height: auto
+        aspect-ratio: 1
 
 @keyframes habit-statistics-page-spin
     to
